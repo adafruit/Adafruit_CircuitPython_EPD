@@ -34,6 +34,9 @@ class Adafruit_IL0376F_base(Adafruit_EPD):
 	def begin(self, reset=True):
 		super(Adafruit_IL0376F_base, self).begin(reset)
 
+		while self._busy.value == True:
+			pass
+
 		self.command(IL0376F_POWER_SETTING, bytearray([0x07, 0x00, 0x0D, 0x00]))
 		self.command(IL0376F_BOOSTER_SOFT_START, bytearray([0x07, 0x07, 0x07]))
 
@@ -65,11 +68,20 @@ class Adafruit_IL0376F_base(Adafruit_EPD):
 	def display(self):
 		self.power_up()
 
+		#TODO: we need to do duplex transfers.
+		c = 0x00
+
+		with self.spi_device as spi:
+			spi.write(bytearray(SRAM_READ, 0x00, 0x00)) #should be duplex
+
 		self.command(IL0376F_DTM1, end=False)
 		self._dc.value = True
 		with self.spi_device as spi:
-			for i in range(10000):
-					spi.write(bytearray([0xff]))#TODO actual data
+			spi.write(bytearray(SRAM_READ, 0x00, 0x00))
+
+			for i in range(int(self.width*self.height / 4)):
+					c = spi.write(bytearray([c])) #should be duplex
+
 		self._cs.value = True
 
 		self.command(IL0376F_DTM2, end=False)

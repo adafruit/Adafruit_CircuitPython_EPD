@@ -45,14 +45,11 @@ class Adafruit_EPD(object):
 			self._rst.value = True
 			time.sleep(.1)
 
-		while self._busy.value == True:
-			pass
-
 	def command(self, c, data=None, end=True):
 		"""Send command byte to display."""
 		self._cs.value = True
 		self._dc.value = False
-		self._cs.value = False	
+		self._cs.value = False
 		with self.spi_device as spi:
 			spi.write(bytearray([c]))
 
