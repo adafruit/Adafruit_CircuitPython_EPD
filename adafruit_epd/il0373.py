@@ -30,8 +30,8 @@ IL0373_VCM_DC_SETTING = const(0x82)
 
 class Adafruit_IL0373(Adafruit_EPD):
     def __init__(self, width, height, rst_pin, dc_pin, busy_pin, srcs_pin, cs_pin, spi):
-        super(Adafruit_IL0373, self).__init__(width, height, rst_pin, dc_pin, busy_pin, \
-            srcs_pin, cs_pin, spi)
+        super(Adafruit_IL0373, self).__init__(width, height, rst_pin, dc_pin, busy_pin,
+                                              srcs_pin, cs_pin, spi)
 
         self.bw_bufsize = int(width * height / 8)
         self.red_bufsize = int(width * height / 8)
