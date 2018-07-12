@@ -76,16 +76,14 @@ class Adafruit_EPD(object):
     def draw_pixel(self, x, y, color):
         pass
 
-    def get_pixel(self, x, y):
-        pass
-
     #framebuf methods
     def fill(self, color):
         self.fill_rect(self, 0, 0, self.width, self.height, color)
 
     def fill_rect(self, x, y, width, height, color):
-        if width < 1 or height < 1 or (x+width) <= 0 or (y+height) <= 0 \
-            or y >= self.height or x >= self.width:
+        if width < 1 or height < 1 or (x+width) <= 0:
+            return
+        if (y+height) <= 0 or y >= self.height or x >= self.width:
             return
         xend = min(self.width, x+width)
         yend = min(self.height, y+height)
@@ -99,8 +97,10 @@ class Adafruit_EPD(object):
     def pixel(self, x, y, color=None):
         if x < 0 or x >= self.width or y < 0 or y >= self.height:
             return None
-        if color is None:
-            return self.get_pixel(self, x, y)
+        #TODO: figure this out when we know what framebuffer we
+        # will actually use
+        #if color is None:
+        #    return self.get_pixel(self, x, y)
 
         self.draw_pixel(self, x, y, color)
         return None

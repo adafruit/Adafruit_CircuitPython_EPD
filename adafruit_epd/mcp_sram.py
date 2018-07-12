@@ -13,14 +13,14 @@ class Adafruit_MCP_SRAM(object):
     def __init__(self, cs_pin, spi):
         # Handle hardware SPI
         self.spi_device = spi
-        self._cs = cs_pin
+        self.cs_pin = cs_pin
 
-        self._cs.direction = digitalio.Direction.OUTPUT
+        self.cs_pin.direction = digitalio.Direction.OUTPUT
         while not self.spi_device.try_lock():
             pass
-        self._cs.value = False
+        self.cs_pin.value = False
         self.spi_device.write(bytearray([Adafruit_MCP_SRAM.SRAM_WRSR, 0x43]))
-        self._cs.value = True
+        self.cs_pin.value = True
         self.spi_device.unlock()
 
     def write(self, addr, buf, reg=SRAM_WRITE):
@@ -28,9 +28,9 @@ class Adafruit_MCP_SRAM(object):
 
         while not self.spi_device.try_lock():
             pass
-        self._cs.value = False
+        self.cs_pin.value = False
         self.spi_device.write(cmd)
-        self._cs.value = True
+        self.cs_pin.value = True
         self.spi_device.unlock()
 
     def read(self, addr, length, reg=SRAM_READ):
@@ -39,10 +39,10 @@ class Adafruit_MCP_SRAM(object):
         buf = bytearray(length)
         while not self.spi_device.try_lock():
             pass
-        self._cs.value = False
+        self.cs_pin.value = False
         self.spi_device.write(cmd)
         self.spi_device.readinto(buf)
-        self._cs.value = True
+        self.cs_pin.value = True
         self.spi_device.unlock()
         return buf
 
@@ -64,9 +64,9 @@ class Adafruit_MCP_SRAM(object):
 
         while not self.spi_device.try_lock():
             pass
-        self._cs.value = False
+        self.cs_pin.value = False
         self.spi_device.write(cmd)
-        for x in range(length):
+        for _ in range(length):
             self.spi_device.write(bytearray([value]))
-        self._cs.value = True
+        self.cs_pin.value = True
         self.spi_device.unlock()

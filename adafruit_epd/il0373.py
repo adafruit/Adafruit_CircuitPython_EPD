@@ -82,7 +82,7 @@ class Adafruit_IL0373(Adafruit_EPD):
 
         while not self.spi_device.try_lock():
             pass
-        self.sram._cs.value = False
+        self.sram.cs_pin.value = False
         #send read command
         self.spi_device.write(bytearray([Adafruit_MCP_SRAM.SRAM_READ]))
         #send start address
@@ -98,15 +98,15 @@ class Adafruit_IL0373(Adafruit_EPD):
         self._dc.value = True
         xfer = bytearray([cmd])
         outbuf = bytearray(1)
-        for i in range(self.bw_bufsize):
+        for _ in range(self.bw_bufsize):
             outbuf[0] = xfer[0]
             self.spi_device.write_readinto(outbuf, xfer)
         self._cs.value = True
-        self.sram._cs.value = True
+        self.sram.cs_pin.value = True
 
         time.sleep(.002)
 
-        self.sram._cs.value = False
+        self.sram.cs_pin.value = False
         #send read command
         self.spi_device.write(bytearray([Adafruit_MCP_SRAM.SRAM_READ]))
         #send start address
@@ -122,11 +122,11 @@ class Adafruit_IL0373(Adafruit_EPD):
         self._dc.value = True
         xfer = bytearray([cmd])
         outbuf = bytearray(1)
-        for i in range(self.bw_bufsize):
+        for _ in range(self.bw_bufsize):
             outbuf[0] = xfer[0]
             self.spi_device.write_readinto(outbuf, xfer)
         self._cs.value = True
-        self.sram._cs.value = True
+        self.sram.cs_pin.value = True
         self.spi_device.unlock()
 
         self.update()
@@ -152,19 +152,6 @@ class Adafruit_IL0373(Adafruit_EPD):
 
         self.sram.write8(addr, current)
         return
-
-    def get_pixel(self, x, y, color):
-        if (x < 0) or (x >= self.width) or (y < 0) or (y >= self.height):
-            return None
-
-        if x == 0:
-            x = 1
-
-        addr = int(((self.width - x) * self.height + y)/8)
-        if color == Adafruit_EPD.RED:
-            addr = addr + self.bw_bufsize
-        current = self.sram.read8(addr)
-        return current
 
     def clear_buffer(self):
         self.sram.erase(0x00, self.bw_bufsize, 0xFF)
