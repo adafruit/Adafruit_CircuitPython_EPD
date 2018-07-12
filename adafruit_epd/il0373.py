@@ -1,7 +1,7 @@
+import time
+from micropython import const
 from Adafruit_EPD.epd import Adafruit_EPD
 from Adafruit_EPD.mcp_sram import Adafruit_MCP_SRAM
-from micropython import const
-import time
 
 IL0373_PANEL_SETTING = const(0x00)
 IL0373_POWER_SETTING = const(0x01)
@@ -29,8 +29,9 @@ IL0373_RESOLUTION = const(0x61)
 IL0373_VCM_DC_SETTING = const(0x82)
 
 class Adafruit_IL0373(Adafruit_EPD):
-    def __init__(self, width, height, rst, dc, busy, srcs, cs, spi):
-        super().__init__(width, height, rst, dc, busy, srcs, cs, spi)
+    def __init__(self, width, height, rst_pin, dc_pin, busy_pin, srcs_pin, cs_pin, spi):
+        super(Adafruit_IL0373, self).__init__(width, height, rst_pin, dc_pin, busy_pin, \
+            srcs_pin, cs_pin, spi)
 
         self.bw_bufsize = int(width * height / 8)
         self.red_bufsize = int(width * height / 8)
@@ -38,19 +39,19 @@ class Adafruit_IL0373(Adafruit_EPD):
         self.begin()
 
     def begin(self, reset=True):
-		super(Adafruit_IL0373, self).begin(reset)
+        super(Adafruit_IL0373, self).begin(reset)
 
-		while self._busy.value == False:
-			pass
+        while self._busy.value is False:
+            pass
 
-		self.command(IL0373_POWER_SETTING, bytearray([0x03, 0x00, 0x2b, 0x2b, 0x09]))
-		self.command(IL0373_BOOSTER_SOFT_START, bytearray([0x17, 0x17, 0x17]))
+        self.command(IL0373_POWER_SETTING, bytearray([0x03, 0x00, 0x2b, 0x2b, 0x09]))
+        self.command(IL0373_BOOSTER_SOFT_START, bytearray([0x17, 0x17, 0x17]))
 
     def update(self):
         self.command(IL0373_DISPLAY_REFRESH)
 
-        while self._busy.value == False:
-			pass
+        while self._busy.value is False:
+            pass
 
         self.command(IL0373_CDI, bytearray([0x17]))
         self.command(IL0373_VCM_DC_SETTING, bytearray([0x00]))
@@ -60,70 +61,72 @@ class Adafruit_IL0373(Adafruit_EPD):
     def power_up(self):
         self.command(IL0373_POWER_ON)
 
-        while self._busy.value == False:
-			pass
+        while self._busy.value is False:
+            pass
 
         time.sleep(.2)
 
         self.command(IL0373_PANEL_SETTING, bytearray([0xCF]))
         self.command(IL0373_CDI, bytearray([0x37]))
         self.command(IL0373_PLL, bytearray([0x29]))
-        b1 = self.height & 0xFF
-        b2 = (self.height >> 8) & 0xFF
-        b3 = self.width & 0xFF
-        b4 = (self.width >> 8) & 0xFF
-        self.command(IL0373_RESOLUTION, bytearray([b1, b2, b3, b4]))
+        _b1 = self.height & 0xFF
+        _b2 = (self.height >> 8) & 0xFF
+        _b3 = self.width & 0xFF
+        _b4 = (self.width >> 8) & 0xFF
+        self.command(IL0373_RESOLUTION, bytearray([_b1, _b2, _b3, _b4]))
         self.command(IL0373_VCM_DC_SETTING, bytearray([0x0A]))
 
-    
+
     def display(self):
         self.power_up()
 
         while not self.spi_device.try_lock():
-			pass
-        self.sram.cs.value = False
+            pass
+        self.sram._cs.value = False
         #send read command
         self.spi_device.write(bytearray([Adafruit_MCP_SRAM.SRAM_READ]))
         #send start address
         self.spi_device.write(bytearray([0x00, 0x00]))
         self.spi_device.unlock()
 
-        #first data byte from SRAM will be transfered in at the same time as the EPD command is transferred out
-        c = self.command(IL0373_DTM1, end=False)
+        #first data byte from SRAM will be transfered in at the
+        #same time as the EPD command is transferred out
+        cmd = self.command(IL0373_DTM1, end=False)
 
         while not self.spi_device.try_lock():
-			pass
+            pass
         self._dc.value = True
-        xfer = bytearray([c])
+        xfer = bytearray([cmd])
         outbuf = bytearray(1)
         for i in range(self.bw_bufsize):
             outbuf[0] = xfer[0]
             self.spi_device.write_readinto(outbuf, xfer)
         self._cs.value = True
-        self.sram.cs.value = True
+        self.sram._cs.value = True
 
         time.sleep(.002)
 
-        self.sram.cs.value = False
+        self.sram._cs.value = False
         #send read command
         self.spi_device.write(bytearray([Adafruit_MCP_SRAM.SRAM_READ]))
         #send start address
         self.spi_device.write(bytearray([(self.bw_bufsize >> 8), (self.bw_bufsize & 0xFF)]))
         self.spi_device.unlock()
 
-        #first data byte from SRAM will be transfered in at the same time as the EPD command is transferred out
-        c = self.command(IL0373_DTM2, end=False)
+        #first data byte from SRAM will be transfered in at the
+        #same time as the EPD command is transferred out
+        cmd = self.command(IL0373_DTM2, end=False)
 
         while not self.spi_device.try_lock():
-			pass
+            pass
         self._dc.value = True
-        xfer = bytearray([c])
+        xfer = bytearray([cmd])
         outbuf = bytearray(1)
         for i in range(self.bw_bufsize):
             outbuf[0] = xfer[0]
             self.spi_device.write_readinto(outbuf, xfer)
         self._cs.value = True
-        self.sram.cs.value = True
+        self.sram._cs.value = True
         self.spi_device.unlock()
 
         self.update()
@@ -131,36 +134,37 @@ class Adafruit_IL0373(Adafruit_EPD):
     def draw_pixel(self, x, y, color):
         if (x < 0) or (x >= self.width) or (y < 0) or (y >= self.height):
             return
-        
+
         if x == 0:
             x = 1
-        
+
         addr = int(((self.width - x) * self.height + y)/8)
         if color == Adafruit_EPD.RED:
             addr = addr + self.bw_bufsize
-        c = self.sram.read8(addr)
+        current = self.sram.read8(addr)
 
         if color == Adafruit_EPD.WHITE:
-            c = c | (1 << (7 - y%8))
+            current = current | (1 << (7 - y%8))
         elif color == Adafruit_EPD.RED or color == Adafruit_EPD.BLACK:
-            c = c & ~(1 << (7 - y%8))
+            current = current & ~(1 << (7 - y%8))
         elif color == Adafruit_EPD.INVERSE:
-            c = c ^ (1 << (7 - y%8))
+            current = current ^ (1 << (7 - y%8))
 
-        self.sram.write8(addr, c)
+        self.sram.write8(addr, current)
+        return
 
     def get_pixel(self, x, y, color):
         if (x < 0) or (x >= self.width) or (y < 0) or (y >= self.height):
-            return
-        
+            return None
+
         if x == 0:
             x = 1
-        
+
         addr = int(((self.width - x) * self.height + y)/8)
         if color == Adafruit_EPD.RED:
             addr = addr + self.bw_bufsize
-        c = self.sram.read8(addr)
-        return c
+        current = self.sram.read8(addr)
+        return current
 
     def clear_buffer(self):
         self.sram.erase(0x00, self.bw_bufsize, 0xFF)
@@ -169,4 +173,3 @@ class Adafruit_IL0373(Adafruit_EPD):
     def clear_display(self):
         self.clear_buffer()
         self.display()
-
