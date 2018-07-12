@@ -1,7 +1,6 @@
 import time
-from Adafruit_EPD import mcp_sram
+from adafruit_epd import mcp_sram
 import digitalio
-from board import *
 
 class Adafruit_EPD(object):
     """Base class for EPD displays

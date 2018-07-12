@@ -1,7 +1,7 @@
 import time
 from micropython import const
-from Adafruit_EPD.epd import Adafruit_EPD
-from Adafruit_EPD.mcp_sram import Adafruit_MCP_SRAM
+from adafruit_epd.epd import Adafruit_EPD
+from adafruit_epd.mcp_sram import Adafruit_MCP_SRAM
 
 IL0373_PANEL_SETTING = const(0x00)
 IL0373_POWER_SETTING = const(0x01)
