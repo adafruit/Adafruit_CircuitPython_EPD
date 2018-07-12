@@ -1,17 +1,21 @@
 import time
-from Adafruit_MCP_SRAM import *
+from Adafruit_EPD import mcp_sram
 import digitalio
 import busio
 from board import *
 
-from adafruit_bus_device.spi_device import SPIDevice
-
 class Adafruit_EPD(object):
 	"""Base class for EPD displays
 	"""
+	BLACK = 0
+	WHITE = 1
+	INVERSE = 2
+	RED = 3
+	DARK = 4
+	LIGHT = 5
 
-	def __init__(self, width, height, rst, dc, busy, srcs=None, cs=None,
-				 spi=None):
+	def __init__(self, width, height, rst, dc, busy, srcs, cs,
+				 spi):
 		self.width = width
 		self.height = height
 
@@ -33,7 +37,7 @@ class Adafruit_EPD(object):
 
 		self.spi_device = spi
 
-		self.sram = Adafruit_MCP_SRAM(cs=srcs, spi=spi)
+		self.sram = mcp_sram.Adafruit_MCP_SRAM(srcs, spi)
 
 	def begin(self, reset=True):
 		self._cs.value = True
@@ -50,8 +54,11 @@ class Adafruit_EPD(object):
 		self._cs.value = True
 		self._dc.value = False
 		self._cs.value = False
-		with self.spi_device as spi:
-			spi.write(bytearray([c]))
+		outbuf = bytearray(1)
+
+		while not self.spi_device.try_lock():
+			pass
+		self.spi_device.write_readinto(bytearray([c]), outbuf)
 
 		if data is not None:
 			self.data(data)
@@ -59,9 +66,12 @@ class Adafruit_EPD(object):
 		elif end:
 			self._cs.value = True
 
+		self.spi_device.unlock()
+		return outbuf[0]
+
 	def data(self, d):
 		"""Send data to display."""
 		self._dc.value = True
-		with self.spi_device as spi:
-			spi.write(d)
+		self.spi_device.write(d)
 		self._cs.value = True
+		self.spi_device.unlock()
