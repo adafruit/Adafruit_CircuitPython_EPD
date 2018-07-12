@@ -149,6 +149,19 @@ class Adafruit_IL0373(Adafruit_EPD):
 
         self.sram.write8(addr, c)
 
+    def get_pixel(self, x, y, color):
+        if (x < 0) or (x >= self.width) or (y < 0) or (y >= self.height):
+            return
+        
+        if x == 0:
+            x = 1
+        
+        addr = int(((self.width - x) * self.height + y)/8)
+        if color == Adafruit_EPD.RED:
+            addr = addr + self.bw_bufsize
+        c = self.sram.read8(addr)
+        return c
+
     def clear_buffer(self):
         self.sram.erase(0x00, self.bw_bufsize, 0xFF)
         self.sram.erase(self.bw_bufsize, self.red_bufsize, 0xFF)
