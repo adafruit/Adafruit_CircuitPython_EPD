@@ -12,7 +12,9 @@ class Adafruit_EPD(object):
     DARK = 4
     LIGHT = 5
 
+    # pylint: disable=too-many-arguments
     def __init__(self, width, height, rst_pin, dc_pin, busy_pin, srcs_pin, cs_pin, spi):
+        # pylint: enable=too-many-arguments
         self.width = width
         self.height = height
 

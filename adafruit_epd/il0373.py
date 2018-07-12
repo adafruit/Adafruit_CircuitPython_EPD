@@ -29,7 +29,9 @@ IL0373_RESOLUTION = const(0x61)
 IL0373_VCM_DC_SETTING = const(0x82)
 
 class Adafruit_IL0373(Adafruit_EPD):
+    # pylint: disable=too-many-arguments
     def __init__(self, width, height, rst_pin, dc_pin, busy_pin, srcs_pin, cs_pin, spi):
+        # pylint: enable=too-many-arguments
         super(Adafruit_IL0373, self).__init__(width, height, rst_pin, dc_pin, busy_pin,
                                               srcs_pin, cs_pin, spi)
 
