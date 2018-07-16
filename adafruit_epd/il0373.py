@@ -1,3 +1,31 @@
+# The MIT License (MIT)
+#
+# Copyright (c) 2018 Dean Miller for Adafruit Industries
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+"""
+`adafruit_epd.il0373` - Adafruit il0373 - ePaper display driver
+====================================================================================
+CircuitPython driver for Adafruit il0373 display breakouts
+* Author(s): Dean Miller
+"""
+
 import time
 from micropython import const
 from adafruit_epd.epd import Adafruit_EPD
@@ -29,6 +57,7 @@ IL0373_RESOLUTION = const(0x61)
 IL0373_VCM_DC_SETTING = const(0x82)
 
 class Adafruit_IL0373(Adafruit_EPD):
+    """driver class for Adafruit IL0373 ePaper display breakouts"""
     # pylint: disable=too-many-arguments
     def __init__(self, width, height, rst_pin, dc_pin, busy_pin, srcs_pin, cs_pin, spi):
         super(Adafruit_IL0373, self).__init__(width, height, rst_pin, dc_pin, busy_pin,
@@ -41,6 +70,7 @@ class Adafruit_IL0373(Adafruit_EPD):
         # pylint: enable=too-many-arguments
 
     def begin(self, reset=True):
+        """Begin communication with the display and set basic settings"""
         super(Adafruit_IL0373, self).begin(reset)
 
         while self._busy.value is False:
@@ -50,6 +80,7 @@ class Adafruit_IL0373(Adafruit_EPD):
         self.command(IL0373_BOOSTER_SOFT_START, bytearray([0x17, 0x17, 0x17]))
 
     def update(self):
+        """update the display"""
         self.command(IL0373_DISPLAY_REFRESH)
 
         while self._busy.value is False:
@@ -61,6 +92,7 @@ class Adafruit_IL0373(Adafruit_EPD):
         time.sleep(2)
 
     def power_up(self):
+        """power up the display"""
         self.command(IL0373_POWER_ON)
 
         while self._busy.value is False:
@@ -80,6 +112,7 @@ class Adafruit_IL0373(Adafruit_EPD):
 
 
     def display(self):
+        """show the contents of the display buffer"""
         self.power_up()
 
         while not self.spi_device.try_lock():
@@ -134,6 +167,7 @@ class Adafruit_IL0373(Adafruit_EPD):
         self.update()
 
     def draw_pixel(self, x, y, color):
+        """draw a single pixel in the display buffer"""
         if (x < 0) or (x >= self.width) or (y < 0) or (y >= self.height):
             return
 
@@ -156,9 +190,11 @@ class Adafruit_IL0373(Adafruit_EPD):
         return
 
     def clear_buffer(self):
+        """clear the display buffer"""
         self.sram.erase(0x00, self.bw_bufsize, 0xFF)
         self.sram.erase(self.bw_bufsize, self.red_bufsize, 0xFF)
 
     def clear_display(self):
+        """clear the entire display"""
         self.clear_buffer()
         self.display()
