@@ -14,7 +14,6 @@ class Adafruit_EPD(object):
 
     # pylint: disable=too-many-arguments
     def __init__(self, width, height, rst_pin, dc_pin, busy_pin, srcs_pin, cs_pin, spi):
-        # pylint: enable=too-many-arguments
         self.width = width
         self.height = height
 
@@ -37,6 +36,7 @@ class Adafruit_EPD(object):
         self.spi_device = spi
 
         self.sram = mcp_sram.Adafruit_MCP_SRAM(srcs_pin, spi)
+        # pylint: enable=too-many-arguments
 
     def begin(self, reset=True):
         self._cs.value = True
