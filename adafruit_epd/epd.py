@@ -103,3 +103,55 @@ class Adafruit_EPD(object):
         self.spi_device.write(dat)
         self._cs.value = True
         self.spi_device.unlock()
+
+    def draw_pixel(self, x, y, color):
+        """This should be overridden in the subclass"""
+        pass
+
+    #framebuf methods
+    def fill(self, color):
+        """fill the screen with the passed color"""
+        self.fill_rect(0, 0, self.width, self.height, color)
+
+    # pylint: disable=too-many-arguments
+    def fill_rect(self, x, y, width, height, color):
+        """fill a rectangle with the passed color"""
+        if width < 1 or height < 1 or (x+width) <= 0:
+            return
+        if (y+height) <= 0 or y >= self.height or x >= self.width:
+            return
+        xend = min(self.width, x+width)
+        yend = min(self.height, y+height)
+        x = max(x, 0)
+        y = max(y, 0)
+        for _x in range(xend - x):
+            for _y in range(yend - y):
+                self.draw_pixel(x + _x, y + _y, color)
+        return
+
+    def pixel(self, x, y, color=None):
+        """draw a pixel"""
+        if x < 0 or x >= self.width or y < 0 or y >= self.height:
+            return None
+        #TODO: figure this out when we know what framebuffer we
+        # will actually use
+        #if color is None:
+        #    return self.get_pixel(self, x, y)
+
+        self.draw_pixel(x, y, color)
+        return None
+
+    def hline(self, x, y, width, color):
+        """draw a horizontal line"""
+        self.fill_rect(x, y, width, 1, color)
+
+    def vline(self, x, y, height, color):
+        """draw a vertical line"""
+        self.fill_rect(x, y, 1, height, color)
+
+    def rect(self, x, y, width, height, color):
+        """draw a rectangle"""
+        self.fill_rect(x, y, width, 1, color)
+        self.fill_rect(x, y+height, width, 1, color)
+        self.fill_rect(x, y, 1, height, color)
+        self.fill_rect(x+width, y, 1, height, color)

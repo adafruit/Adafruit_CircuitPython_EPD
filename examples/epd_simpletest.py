@@ -18,17 +18,16 @@ display = Adafruit_IL0373(152, 152, rst, dc, busy, srcs, ecs, spi)
 # clear the buffer
 display.clear_buffer()
 
-#draw some lines!!
-for i in range(152):
-    display.draw_pixel(i, i, Adafruit_EPD.RED)
-    display.draw_pixel(152-i, i, Adafruit_EPD.RED)
-    display.draw_pixel(10, i, Adafruit_EPD.BLACK)
-    display.draw_pixel(20, i, Adafruit_EPD.BLACK)
-    display.draw_pixel(30, i, Adafruit_EPD.BLACK)
-    display.draw_pixel(40, i, Adafruit_EPD.BLACK)
-    display.draw_pixel(50, i, Adafruit_EPD.BLACK)
-    display.draw_pixel(60, i, Adafruit_EPD.BLACK)
-    display.draw_pixel(70, i, Adafruit_EPD.BLACK)
-    display.draw_pixel(80, i, Adafruit_EPD.BLACK)
+r_width = 5
+r_pos = display.height
+
+color = Adafruit_EPD.BLACK
+while r_pos > display.height/2:
+    if r_pos < display.height - 50:
+        color = Adafruit_EPD.RED
+    display.rect(display.width - r_pos, display.height - r_pos,
+                 display.width - 2*(display.width - r_pos),
+                 display.height - 2*(display.height - r_pos), color)
+    r_pos = r_pos - r_width
 
 display.display()
