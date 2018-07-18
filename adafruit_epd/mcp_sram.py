@@ -31,7 +31,7 @@ import digitalio
 
 SRAM_SEQUENTIAL_MODE = const(1 << 6)
 
-class Adafruit_MCP_SRAM(object):
+class Adafruit_MCP_SRAM:
     """supporting class for communicating with
     Microchip SRAM chips"""
     SRAM_READ = 0x03

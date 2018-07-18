@@ -30,7 +30,7 @@ import time
 from adafruit_epd import mcp_sram
 import digitalio
 
-class Adafruit_EPD(object):
+class Adafruit_EPD:
     """Base class for EPD displays
     """
     BLACK = 0

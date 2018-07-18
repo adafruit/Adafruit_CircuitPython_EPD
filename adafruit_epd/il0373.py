@@ -181,7 +181,7 @@ class Adafruit_IL0373(Adafruit_EPD):
 
         if color == Adafruit_EPD.WHITE:
             current = current | (1 << (7 - y%8))
-        elif color == Adafruit_EPD.RED or color == Adafruit_EPD.BLACK:
+        elif color in (Adafruit_EPD.RED, Adafruit_EPD.BLACK):
             current = current & ~(1 << (7 - y%8))
         elif color == Adafruit_EPD.INVERSE:
             current = current ^ (1 << (7 - y%8))
