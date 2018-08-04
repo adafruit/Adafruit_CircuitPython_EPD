@@ -27,8 +27,8 @@ CircuitPython driver for Adafruit ePaper display breakouts
 """
 
 import time
-from adafruit_epd import mcp_sram
 import digitalio
+from adafruit_epd import mcp_sram
 
 class Adafruit_EPD:
     """Base class for EPD displays
