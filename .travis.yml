@@ -1,32 +1,33 @@
-# This is a common .travis.yml for generating library release zip files for
-# CircuitPython library releases using circuitpython-build-tools.
-# See https://github.com/adafruit/circuitpython-build-tools for detailed setup
-# instructions.
-
 dist: trusty
 sudo: false
 language: python
 python:
-    - "3.6"
-
+- '3.6'
 cache:
-    pip: true
-
+  pip: true
 deploy:
-  provider: releases
-  api_key: $GITHUB_TOKEN
+- provider: releases
+  api_key: "$GITHUB_TOKEN"
   file_glob: true
-  file: $TRAVIS_BUILD_DIR/bundles/*
+  file: "$TRAVIS_BUILD_DIR/bundles/*"
   skip_cleanup: true
   overwrite: true
   on:
     tags: true
-
+- provider: pypi
+  user: adafruit-travis
+  on:
+    tags: true
+  password:
+    secure: qcc4jJ7uVD270sLdbvyiBdsVS7JOLDO02XsWXsSL4HPuiIlAddBD1/NWUBC7e9APPFojQZnK6lHx6HFIduRG3clZRYawePPsclCQ7KxgDaXDRUKW2CcpvdrBBvHpoaCsbzdB9QDFH3JIrZPksKRiCMRSxdbFmdzucoBIdQ1ERgcRSB1ncnBywVqzSj1kiMXUtGLFqN6wo5x4kF2z8/bZ7FACyzzOGTpqq3wQLb/CropSpZ8bmoW0Q8fJmoaUR39kRfEHu1g3KW8Nvd6Sv0RbUbe5SkW2fdrHoRT2/FN00HElL7Lc3ShiD+aHujvzdmm4FAic2iMrrAKI74fr5b6dlNcLHwEtOiq6zxtkedydk1dN3NWMdyKCaYYKRwxSXEa9DkCC2w+DCx1ExJWO8r3oz+AaLUNhCrzww9GR8JBUP+siAtus3GaBB3B8njymM59NkOfd8rdKaN4E7x0eOqRV/gDjAoz1JqBNXR/BKM/np5UJ5UMRbY7sy8mB6hdF+wvnEOJfjYX4C3Ao/ZT8IVieNAYRojHHmKi4bh6aqK9noJ33belGgPewyeg3NXZE7uprL1XGnC9lCi0P4lWTskdPlhtysXOKOos3vuIpRHxZC6uiP/zE3Y7PO9WPs9fSMdQKBCExqu9OwZEFMKiJiOyM3quInQuxKSBYrlh3bXe69lA=
 install:
-  - pip install pylint circuitpython-build-tools Sphinx sphinx-rtd-theme
-
+- pip install -r requirements.txt
+- pip install pylint circuitpython-build-tools Sphinx sphinx-rtd-theme
+- pip install --force-reinstall pylint==1.9.2
 script:
-  - pylint adafruit_epd
-  - ([[ ! -d "examples" ]] || pylint --disable=missing-docstring,invalid-name,bad-whitespace examples/*.py)
-  - circuitpython-build-bundles --filename_prefix adafruit-circuitpython-epd --library_location .
-  - cd docs && sphinx-build -E -W -b html . _build/html
+- pylint adafruit_epd
+- ([[ ! -d "examples" ]] || pylint --disable=missing-docstring,invalid-name,bad-whitespace
+  examples/*.py)
+- circuitpython-build-bundles --filename_prefix adafruit-circuitpython-epd --library_location
+  .
+- cd docs && sphinx-build -E -W -b html . _build/html && cd ..
