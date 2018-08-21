@@ -183,15 +183,15 @@ class Adafruit_IL0373(Adafruit_EPD):
             for x in iter(range(image.size[0])):
                 if x == 0:
                     x = 1
-                p = pix[x, y]
+                pixel = pix[x, y]
 
                 addr = int(((self.width - x) * self.height + y)/8)
 
-                if p == (0xFF, 0, 0):
+                if pixel == (0xFF, 0, 0):
                     addr = addr + self.bw_bufsize
                 current = self.sram.read8(addr)
 
-                if p in ((0xFF, 0, 0), (0, 0, 0)):
+                if pixel in ((0xFF, 0, 0), (0, 0, 0)):
                     current = current & ~(1 << (7 - y%8))
                 else:
                     current = current | (1 << (7 - y%8))

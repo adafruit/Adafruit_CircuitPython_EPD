@@ -1,10 +1,10 @@
-from PIL import Image
-from PIL import ImageDraw
-from PIL import ImageFont
-
 import digitalio
 import busio
 import board
+
+from PIL import Image
+from PIL import ImageDraw
+from PIL import ImageFont
 from adafruit_epd.epd import Adafruit_EPD
 from adafruit_epd.il0373 import Adafruit_IL0373
 
@@ -58,7 +58,8 @@ x += shape_width+padding
 draw.rectangle((x, top, x+shape_width, bottom), outline=RED, fill=BLACK)
 x += shape_width+padding
 # Draw a triangle.
-draw.polygon([(x, bottom), (x+shape_width/2, top), (x+shape_width, bottom)], outline=BLACK, fill=RED)
+draw.polygon([(x, bottom), (x+shape_width/2, top), (x+shape_width, bottom)], 
+            outline=BLACK, fill=RED)
 x += shape_width+padding
 # Draw an X.
 draw.line((x, bottom, x+shape_width, top), fill=RED)
@@ -68,7 +69,8 @@ x += shape_width+padding
 # Load default font.
 font = ImageFont.load_default()
 
-# Alternatively load a TTF font.  Make sure the .ttf font file is in the same directory as the python script!
+# Alternatively load a TTF font.  Make sure the .ttf font 
+# file is in the same directory as the python script!
 # Some other nice fonts to try: http://www.dafont.com/bitmap.php
 #font = ImageFont.truetype('Minecraftia.ttf', 8)
 
