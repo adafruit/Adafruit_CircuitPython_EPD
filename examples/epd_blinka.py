@@ -57,7 +57,7 @@ x += shape_width+padding
 draw.rectangle((x, top, x+shape_width, bottom), outline=RED, fill=BLACK)
 x += shape_width+padding
 # Draw a triangle.
-draw.polygon([(x, bottom), (x+shape_width/2, top), (x+shape_width, bottom)], 
+draw.polygon([(x, bottom), (x+shape_width/2, top), (x+shape_width, bottom)],
              outline=BLACK, fill=RED)
 x += shape_width+padding
 # Draw an X.
@@ -68,7 +68,7 @@ x += shape_width+padding
 # Load default font.
 font = ImageFont.load_default()
 
-# Alternatively load a TTF font.  Make sure the .ttf font 
+# Alternatively load a TTF font.  Make sure the .ttf font
 # file is in the same directory as the python script!
 # Some other nice fonts to try: http://www.dafont.com/bitmap.php
 #font = ImageFont.truetype('Minecraftia.ttf', 8)
