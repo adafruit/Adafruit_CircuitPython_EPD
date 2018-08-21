@@ -95,7 +95,7 @@ class Adafruit_EPD:
 
         if end:
             self._cs.value = True
-        
+
         return outbuf[0]
 
     def data(self, dat):
