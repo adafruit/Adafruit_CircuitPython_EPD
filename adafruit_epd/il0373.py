@@ -166,6 +166,37 @@ class Adafruit_IL0373(Adafruit_EPD):
 
         self.update()
 
+    def image(self, image):
+        """Set buffer to value of Python Imaging Library image.  The image should
+        be in RGB mode and a size equal to the display size.
+        """
+        if image.mode != 'RGB':
+            raise ValueError('Image must be in mode RGB.')
+        imwidth, imheight = image.size
+        if imwidth != self.width or imheight != self.height:
+            raise ValueError('Image must be same dimensions as display ({0}x{1}).' \
+                .format(self.width, self.height))
+        # Grab all the pixels from the image, faster than getpixel.
+        pix = image.load()
+
+        for y in xrange(image.size[1]):
+            for x in xrange(image.size[0]):
+                if x == 0:
+                    x = 1
+                p = pix[x, y]
+
+                addr = int(((self.width - x) * self.height + y)/8)
+                if color == Adafruit_EPD.RED:
+                    addr = addr + self.bw_bufsize
+                current = self.sram.read8(addr)
+
+                if p in ((0xFF, 0, 0), (0, 0, 0)):
+                    current = current & ~(1 << (7 - y%8))
+                else:
+                    current = current | (1 << (7 - y%8))
+
+                self.sram.write8(addr, current)
+
     def draw_pixel(self, x, y, color):
         """draw a single pixel in the display buffer"""
         if (x < 0) or (x >= self.width) or (y < 0) or (y >= self.height):
