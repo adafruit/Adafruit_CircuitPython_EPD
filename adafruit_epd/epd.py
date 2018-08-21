@@ -90,11 +90,12 @@ class Adafruit_EPD:
 
         if data is not None:
             self.data(data)
+        else:
+            self.spi_device.unlock()
 
-        elif end:
+        if end:
             self._cs.value = True
-
-        self.spi_device.unlock()
+        
         return outbuf[0]
 
     def data(self, dat):

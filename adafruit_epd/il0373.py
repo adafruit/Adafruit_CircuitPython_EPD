@@ -179,14 +179,15 @@ class Adafruit_IL0373(Adafruit_EPD):
         # Grab all the pixels from the image, faster than getpixel.
         pix = image.load()
 
-        for y in xrange(image.size[1]):
-            for x in xrange(image.size[0]):
+        for y in iter(range(image.size[1])):
+            for x in iter(range(image.size[0])):
                 if x == 0:
                     x = 1
                 p = pix[x, y]
 
                 addr = int(((self.width - x) * self.height + y)/8)
-                if color == Adafruit_EPD.RED:
+
+                if p == (0xFF, 0, 0):
                     addr = addr + self.bw_bufsize
                 current = self.sram.read8(addr)
 

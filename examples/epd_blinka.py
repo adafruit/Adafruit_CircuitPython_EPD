@@ -10,9 +10,14 @@ from adafruit_epd.il0373 import Adafruit_IL0373
 
 # create the spi device and pins we will need
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
+while not spi.try_lock():
+    pass
+spi.configure(baudrate=16000000)
+spi.unlock()
+
 ecs = digitalio.DigitalInOut(board.D22)
 dc = digitalio.DigitalInOut(board.D13)
-srcs = digitalio.DigitalInOut(board.D8)
+srcs = digitalio.DigitalInOut(board.D6)
 rst = digitalio.DigitalInOut(board.D19)
 busy = digitalio.DigitalInOut(board.D26)
 
@@ -20,8 +25,8 @@ busy = digitalio.DigitalInOut(board.D26)
 display = Adafruit_IL0373(152, 152, rst, dc, busy, srcs, ecs, spi)
 # Create blank image for drawing.
 # Make sure to create image with mode '1' for 1-bit color.
-width = disp.width
-height = disp.height
+width = display.width
+height = display.height
 image = Image.new('RGB', (width, height))
 
 WHITE = (0xFF, 0xFF, 0xFF)
