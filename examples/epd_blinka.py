@@ -31,7 +31,6 @@ image = Image.new('RGB', (width, height))
 WHITE = (0xFF, 0xFF, 0xFF)
 RED = (0xFF, 0x00, 0x00)
 BLACK = (0x00, 0x00, 0x00)
-GRAY = (0x7F, 0x7F, 0x7F)
 
 # clear the buffer
 display.clear_buffer()
@@ -51,7 +50,7 @@ bottom = height-padding
 # Move left to right keeping track of the current x position for drawing shapes.
 x = padding
 # Draw an ellipse.
-draw.ellipse((x, top , x+shape_width, bottom), outline=RED, fill=GRAY)
+draw.ellipse((x, top , x+shape_width, bottom), outline=RED, fill=WHITE)
 x += shape_width+padding
 # Draw a rectangle.
 draw.rectangle((x, top, x+shape_width, bottom), outline=RED, fill=BLACK)
