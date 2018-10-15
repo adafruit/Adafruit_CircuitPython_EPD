@@ -206,7 +206,7 @@ class Adafruit_IL0373(Adafruit_EPD):
         if x == 0:
             x = 1
 
-        addr = int(((self.width - x) * self.height + y)/8)
+        addr = ((self.width - x) * self.height + y) // 8
         if color == Adafruit_EPD.RED:
             addr = addr + self.bw_bufsize
         current = self.sram.read8(addr)
