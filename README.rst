@@ -9,8 +9,8 @@ Introduction
     :target: https://discord.gg/nBQh6qu
     :alt: Discord
 
-.. image:: https://travis-ci.org/adafruit/Adafruit_CircuitPython_EPD.svg?branch=master
-    :target: https://travis-ci.org/adafruit/Adafruit_CircuitPython_EPD
+.. image:: https://travis-ci.com/adafruit/Adafruit_CircuitPython_EPD.svg?branch=master
+    :target: https://travis-ci.com/adafruit/Adafruit_CircuitPython_EPD
     :alt: Build Status
 
 This library is for using CircuitPython with e-ink displays with built in SRAM.
