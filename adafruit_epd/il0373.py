@@ -65,8 +65,6 @@ class Adafruit_IL0373(Adafruit_EPD):
 
         self.bw_bufsize = int(width * height / 8)
         self.red_bufsize = int(width * height / 8)
-
-        self.begin()
         # pylint: enable=too-many-arguments
 
     def begin(self, reset=True):
@@ -221,12 +219,14 @@ class Adafruit_IL0373(Adafruit_EPD):
         self.sram.write8(addr, current)
         return
 
-    def clear_buffer(self):
-        """clear the display buffer"""
-        self.sram.erase(0x00, self.bw_bufsize, 0xFF)
-        self.sram.erase(self.bw_bufsize, self.red_bufsize, 0xFF)
-
-    def clear_display(self):
-        """clear the entire display"""
-        self.clear_buffer()
-        self.display()
+    def fill(self, color):
+        """fill the screen with the passed color"""
+        print("ffffil")
+        red_fill = 0xFF
+        black_fill = 0xFF
+        if color == Adafruit_EPD.BLACK:
+            black_fill = 0x00
+        if color == Adafruit_EPD.RED:
+            red_fill = 0x00
+        self.sram.erase(0x00, self.bw_bufsize, black_fill)
+        self.sram.erase(self.bw_bufsize, self.red_bufsize, red_fill)

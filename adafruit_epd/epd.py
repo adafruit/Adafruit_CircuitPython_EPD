@@ -42,6 +42,7 @@ class Adafruit_EPD:
 
     # pylint: disable=too-many-arguments
     def __init__(self, width, height, rst_pin, dc_pin, busy_pin, srcs_pin, cs_pin, spi):
+        # pylint: enable=too-many-arguments
         self.width = width
         self.height = height
 
@@ -56,22 +57,18 @@ class Adafruit_EPD:
         # Setup dc pin.
         self._dc = dc_pin
         self._dc.direction = digitalio.Direction.OUTPUT
+        self._dc.value = False
 
         # Setup cs pin.
         self._cs = cs_pin
         self._cs.direction = digitalio.Direction.OUTPUT
+        self._cs.value = True
 
         self.spi_device = spi
 
         self.sram = mcp_sram.Adafruit_MCP_SRAM(srcs_pin, spi)
-        # pylint: enable=too-many-arguments
 
-    def begin(self, reset=True):
-        """Begin display and reset if desired."""
-        self._cs.value = True
-        self._dc.value = False
-
-        if reset:
+        if self._rst:
             self._rst.value = False
             time.sleep(.1)
             self._rst.value = True
