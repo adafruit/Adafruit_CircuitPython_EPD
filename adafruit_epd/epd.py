@@ -41,18 +41,20 @@ class Adafruit_EPD:
     LIGHT = 5
 
     # pylint: disable=too-many-arguments
-    def __init__(self, width, height, rst_pin, dc_pin, busy_pin, srcs_pin, cs_pin, spi):
+    def __init__(self, width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin):
         # pylint: enable=too-many-arguments
         self.width = width
         self.height = height
 
-         # Setup reset pin.
+        # Setup reset pin.
         self._rst = rst_pin
-        self._rst.direction = digitalio.Direction.OUTPUT
+        if rst_pin:
+            self._rst.direction = digitalio.Direction.OUTPUT
 
-         # Setup busy pin.
+        # Setup busy pin.
         self._busy = busy_pin
-        self._busy.direction = digitalio.Direction.INPUT
+        if busy_pin:
+            self._busy.direction = digitalio.Direction.INPUT
 
         # Setup dc pin.
         self._dc = dc_pin
@@ -66,7 +68,7 @@ class Adafruit_EPD:
 
         self.spi_device = spi
 
-        self.sram = mcp_sram.Adafruit_MCP_SRAM(srcs_pin, spi)
+        self.sram = mcp_sram.Adafruit_MCP_SRAM(sramcs_pin, spi)
 
         if self._rst:
             self._rst.value = False

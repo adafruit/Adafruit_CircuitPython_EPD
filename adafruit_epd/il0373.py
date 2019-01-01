@@ -31,8 +31,8 @@ from micropython import const
 from adafruit_epd.epd import Adafruit_EPD
 from adafruit_epd.mcp_sram import Adafruit_MCP_SRAM
 
-IL0373_PANEL_SETTING = const(0x00)
 IL0373_POWER_SETTING = const(0x01)
+IL0373_PANEL_SETTING = const(0x00)
 IL0373_POWER_OFF = const(0x02)
 IL0373_POWER_OFF_SEQUENCE = const(0x03)
 IL0373_POWER_ON = const(0x04)
@@ -59,9 +59,9 @@ IL0373_VCM_DC_SETTING = const(0x82)
 class Adafruit_IL0373(Adafruit_EPD):
     """driver class for Adafruit IL0373 ePaper display breakouts"""
     # pylint: disable=too-many-arguments
-    def __init__(self, width, height, rst_pin, dc_pin, busy_pin, srcs_pin, cs_pin, spi):
-        super(Adafruit_IL0373, self).__init__(width, height, rst_pin, dc_pin, busy_pin,
-                                              srcs_pin, cs_pin, spi)
+    def __init__(self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin):
+        super(Adafruit_IL0373, self).__init__(width, height, spi, cs_pin, dc_pin,
+                                              sramcs_pin, rst_pin, busy_pin)
 
         self.bw_bufsize = int(width * height / 8)
         self.red_bufsize = int(width * height / 8)
@@ -81,8 +81,11 @@ class Adafruit_IL0373(Adafruit_EPD):
         """update the display"""
         self.command(IL0373_DISPLAY_REFRESH)
 
-        while self._busy.value is False:
-            pass
+        if self._busy:
+            while self._busy.value is False:
+                pass
+        else:
+            time.sleep(15)   # wait 15 seconds
 
         self.command(IL0373_CDI, bytearray([0x17]))
         self.command(IL0373_VCM_DC_SETTING, bytearray([0x00]))
@@ -93,9 +96,11 @@ class Adafruit_IL0373(Adafruit_EPD):
         """power up the display"""
         self.command(IL0373_POWER_ON)
 
-        while self._busy.value is False:
-            pass
-
+        if self._busy:
+            while self._busy.value is False:
+                pass
+        else:
+            time.sleep(3)   # wait a bit
         time.sleep(.2)
 
         self.command(IL0373_PANEL_SETTING, bytearray([0xCF]))
@@ -221,7 +226,6 @@ class Adafruit_IL0373(Adafruit_EPD):
 
     def fill(self, color):
         """fill the screen with the passed color"""
-        print("ffffil")
         red_fill = 0xFF
         black_fill = 0xFF
         if color == Adafruit_EPD.BLACK:

@@ -16,7 +16,7 @@ busy = digitalio.DigitalInOut(board.D6)
 display = Adafruit_IL0373(152, 152, rst, dc, busy, srcs, ecs, spi)
 
 # clear the buffer
-display.clear_buffer()
+display.fill(Adafruit_EPD.WHITE)
 
 r_width = 5
 r_pos = display.height
@@ -25,9 +25,10 @@ color = Adafruit_EPD.BLACK
 while r_pos > display.height/2:
     if r_pos < display.height - 50:
         color = Adafruit_EPD.RED
-    display.rect(display.width - r_pos, display.height - r_pos,
+    display.rect(display.width - r_pos,
+                 display.height - r_pos,
                  display.width - 2*(display.width - r_pos),
-                 display.height - 2*(display.height - r_pos), color)
+                 display.height - 2*(display.height - r_pos),
+                 color)
     r_pos = r_pos - r_width
-
 display.display()
