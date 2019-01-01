@@ -13,12 +13,14 @@ rst = digitalio.DigitalInOut(board.D7)
 busy = digitalio.DigitalInOut(board.D6)
 
 # give them all to our driver
-display = Adafruit_IL0373(152, 152, rst, dc, busy, srcs, ecs, spi)
+display = Adafruit_IL0373(152, 152, spi,
+                          cs_pin=ecs, dc_pin=dc, sramcs_pin=srcs,
+                          rst_pin=rst, busy_pin=busy)
 
 FILENAME = "blinka.bmp"
 
 # clear the buffer
-display.clear_buffer()
+display.fill(Adafruit_EPD.WHITE)
 
 def read_le(s):
     # as of this writting, int.from_bytes does not have LE support, DIY!
