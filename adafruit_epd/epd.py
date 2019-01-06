@@ -44,8 +44,8 @@ class Adafruit_EPD:
     # pylint: disable=too-many-arguments
     def __init__(self, width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin):
         # pylint: enable=too-many-arguments
-        self.width = width
-        self.height = height
+        self._width = width
+        self._height = height
 
         # Setup reset pin, if we have one
         self._rst = rst_pin
@@ -144,6 +144,18 @@ class Adafruit_EPD:
     def text(self, string, x, y, color, *, font_name="font5x8.bin"):
         self._bw_framebuf.text(string, x, y, (color == Adafruit_EPD.BLACK) != self.black_invert, font_name=font_name)
         self._red_framebuf.text(string, x, y, (color == Adafruit_EPD.RED) != self.red_invert, font_name=font_name)
+
+    @property
+    def width(self):
+        if self.rotation in (0, 2):
+            return self._width
+        return self._height
+
+    @property
+    def height(self):
+        if self.rotation in (0, 2):
+            return self._height
+        return self._width
 
     @property
     def rotation(self):

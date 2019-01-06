@@ -109,10 +109,10 @@ class Adafruit_IL0373(Adafruit_EPD):
         self.command(_IL0373_PANEL_SETTING, bytearray([0xCF]))
         self.command(_IL0373_CDI, bytearray([0x37]))
         self.command(_IL0373_PLL, bytearray([0x29]))
-        _b1 = self.width & 0xFF
-        _b2 = (self.width >> 8) & 0xFF
-        _b3 = self.height & 0xFF
-        _b4 = (self.height >> 8) & 0xFF
+        _b1 = self._width & 0xFF
+        _b2 = (self._width >> 8) & 0xFF
+        _b3 = self._height & 0xFF
+        _b4 = (self._height >> 8) & 0xFF
         self.command(_IL0373_RESOLUTION, bytearray([_b1, _b2, _b3, _b4]))
         self.command(_IL0373_VCM_DC_SETTING, bytearray([0x0A]))
 
@@ -210,7 +210,7 @@ class Adafruit_IL0373(Adafruit_EPD):
                     x = 1
                 pixel = pix[x, y]
 
-                addr = int(((self.width - x) * self.height + y)/8)
+                addr = int(((self._width - x) * self._height + y)/8)
 
                 if pixel == (0xFF, 0, 0):
                     addr = addr + self.bw_bufsize
@@ -226,11 +226,11 @@ class Adafruit_IL0373(Adafruit_EPD):
     def pixel(self, x, y, color):
         """draw a single pixel in the display buffer"""
         if self.sram:
-            if (x < 0) or (x >= self.width) or (y < 0) or (y >= self.height):
+            if (x < 0) or (x >= self._width) or (y < 0) or (y >= self._height):
                 return
             if x == 0:
                 x = 1
-            addr = ((self.width - x) * self.height + y) // 8
+            addr = ((self._width - x) * self._height + y) // 8
             if color == Adafruit_EPD.RED:
                 current = self.sram.read8(addr + self.bw_bufsize)
             else:
