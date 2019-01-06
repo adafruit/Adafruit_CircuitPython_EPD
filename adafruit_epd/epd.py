@@ -142,8 +142,17 @@ class Adafruit_EPD:
         self._red_framebuf.line(x_0, y_0, x_1, y_1, (color == Adafruit_EPD.RED) != self.red_invert)
 
     def text(self, string, x, y, color, *, font_name="font5x8.bin"):
-        self._bw_framebuf.text(string, x, y, (color == Adafruit_EPD.BLACK) != self.black_invert, font_name)
-        self._red_framebuf.text(string, x, y, (color == Adafruit_EPD.RED) != self.red_invert, font_name)
+        self._bw_framebuf.text(string, x, y, (color == Adafruit_EPD.BLACK) != self.black_invert, font_name=font_name)
+        self._red_framebuf.text(string, x, y, (color == Adafruit_EPD.RED) != self.red_invert, font_name=font_name)
+
+    @property
+    def rotation(self):
+        return self._bw_framebuf._rotation
+
+    @rotation.setter
+    def rotation(self, val):
+        self._bw_framebuf.rotation = val
+        self._red_framebuf.rotation = val
 
     def hline(self, x, y, width, color):
         """draw a horizontal line"""
