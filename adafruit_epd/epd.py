@@ -74,8 +74,8 @@ class Adafruit_EPD:
             self.sram = mcp_sram.Adafruit_MCP_SRAM(sramcs_pin, spi)
         else:
             self.sram = None
-            self._bw_buffer = bytearray((width // 8) * height)
-            self._red_buffer = bytearray((width // 8) * height)
+            self._bw_buffer = bytearray((width * height) // 8)
+            self._red_buffer = bytearray((width * height) // 8)
             # since we have *two* framebuffers - one for red and one for black, we dont subclass but manage manually
             self._red_framebuf = adafruit_framebuf.FrameBuffer(self._red_buffer, width, height, buf_format=adafruit_framebuf.MHMSB)
             self._bw_framebuf = adafruit_framebuf.FrameBuffer(self._bw_buffer, width, height, buf_format=adafruit_framebuf.MHMSB)
