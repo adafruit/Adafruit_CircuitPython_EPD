@@ -118,54 +118,73 @@ class Adafruit_IL0373(Adafruit_EPD):
         """show the contents of the display buffer"""
         self.power_up()
 
-        while not self.spi_device.try_lock():
-            pass
-        self.sram.cs_pin.value = False
-        #send read command
-        self.spi_device.write(bytearray([Adafruit_MCP_SRAM.SRAM_READ]))
-        #send start address
-        self.spi_device.write(bytearray([0x00, 0x00]))
-        self.spi_device.unlock()
+        if self.sram:
+            while not self.spi_device.try_lock():
+                pass
+            self.sram.cs_pin.value = False
+            #send read command
+            self.spi_device.write(bytearray([Adafruit_MCP_SRAM.SRAM_READ]))
+            #send start address
+            self.spi_device.write(bytearray([0x00, 0x00]))
+            self.spi_device.unlock()
 
-        #first data byte from SRAM will be transfered in at the
-        #same time as the EPD command is transferred out
-        cmd = self.command(IL0373_DTM1, end=False)
+            #first data byte from SRAM will be transfered in at the
+            #same time as the EPD command is transferred out
+            cmd = self.command(IL0373_DTM1, end=False)
 
-        while not self.spi_device.try_lock():
-            pass
-        self._dc.value = True
-        xfer = bytearray([cmd])
-        outbuf = bytearray(1)
-        for _ in range(self.bw_bufsize):
-            outbuf[0] = xfer[0]
-            self.spi_device.write_readinto(outbuf, xfer)
-        self._cs.value = True
-        self.sram.cs_pin.value = True
+            while not self.spi_device.try_lock():
+                pass
+            self._dc.value = True
+            xfer = bytearray([cmd])
+            outbuf = bytearray(1)
+            for _ in range(self.bw_bufsize):
+                outbuf[0] = xfer[0]
+                self.spi_device.write_readinto(outbuf, xfer)
+            self._cs.value = True
+            self.sram.cs_pin.value = True
 
-        time.sleep(.002)
+            time.sleep(.002)
 
-        self.sram.cs_pin.value = False
-        #send read command
-        self.spi_device.write(bytearray([Adafruit_MCP_SRAM.SRAM_READ]))
-        #send start address
-        self.spi_device.write(bytearray([(self.bw_bufsize >> 8), (self.bw_bufsize & 0xFF)]))
-        self.spi_device.unlock()
+            self.sram.cs_pin.value = False
+            #send read command
+            self.spi_device.write(bytearray([Adafruit_MCP_SRAM.SRAM_READ]))
+            #send start address
+            self.spi_device.write(bytearray([(self.bw_bufsize >> 8), (self.bw_bufsize & 0xFF)]))
+            self.spi_device.unlock()
 
-        #first data byte from SRAM will be transfered in at the
-        #same time as the EPD command is transferred out
-        cmd = self.command(IL0373_DTM2, end=False)
+            #first data byte from SRAM will be transfered in at the
+            #same time as the EPD command is transferred out
+            cmd = self.command(IL0373_DTM2, end=False)
 
-        while not self.spi_device.try_lock():
-            pass
-        self._dc.value = True
-        xfer = bytearray([cmd])
-        outbuf = bytearray(1)
-        for _ in range(self.bw_bufsize):
-            outbuf[0] = xfer[0]
-            self.spi_device.write_readinto(outbuf, xfer)
-        self._cs.value = True
-        self.sram.cs_pin.value = True
-        self.spi_device.unlock()
+            while not self.spi_device.try_lock():
+                pass
+            self._dc.value = True
+            xfer = bytearray([cmd])
+            outbuf = bytearray(1)
+            for _ in range(self.bw_bufsize):
+                outbuf[0] = xfer[0]
+                self.spi_device.write_readinto(outbuf, xfer)
+            self._cs.value = True
+            self.sram.cs_pin.value = True
+            self.spi_device.unlock()
+        else:
+            cmd = self.command(IL0373_DTM1, end=False)
+            while not self.spi_device.try_lock():
+                pass
+            self._dc.value = True
+            self.spi_device.write(self.bw_buffer)
+            self._cs.value = True
+            self.spi_device.unlock()
+
+            time.sleep(.02)
+
+            cmd = self.command(IL0373_DTM2, end=False)
+            while not self.spi_device.try_lock():
+                pass
+            self._dc.value = True
+            self.spi_device.write(self.red_buffer)
+            self._cs.value = True
+            self.spi_device.unlock()
 
         self.update()
 
@@ -210,9 +229,17 @@ class Adafruit_IL0373(Adafruit_EPD):
             x = 1
 
         addr = ((self.width - x) * self.height + y) // 8
-        if color == Adafruit_EPD.RED:
-            addr = addr + self.bw_bufsize
-        current = self.sram.read8(addr)
+
+        if self.sram:
+            if color == Adafruit_EPD.RED:
+                current = self.sram.read8(addr + self.bw_bufsize)
+            else:
+                current = self.sram.read8(addr)
+        else:
+            if color == Adafruit_EPD.RED:
+                current = self.red_buffer[addr]
+            else:
+                current = self.bw_buffer[addr]
 
         if color == Adafruit_EPD.WHITE:
             current = current | (1 << (7 - y%8))
@@ -221,7 +248,16 @@ class Adafruit_IL0373(Adafruit_EPD):
         elif color == Adafruit_EPD.INVERSE:
             current = current ^ (1 << (7 - y%8))
 
-        self.sram.write8(addr, current)
+        if self.sram:
+            if color == Adafruit_EPD.RED:
+                current = self.sram.write8(addr + self.bw_bufsize, current)
+            else:
+                current = self.sram.write8(addr, current)
+        else:
+            if color == Adafruit_EPD.RED:
+                self.red_buffer[addr] = current
+            else:
+                self.bw_buffer[addr] = current
         return
 
     def fill(self, color):
@@ -232,5 +268,10 @@ class Adafruit_IL0373(Adafruit_EPD):
             black_fill = 0x00
         if color == Adafruit_EPD.RED:
             red_fill = 0x00
-        self.sram.erase(0x00, self.bw_bufsize, black_fill)
-        self.sram.erase(self.bw_bufsize, self.red_bufsize, red_fill)
+        if self.sram:
+            self.sram.erase(0x00, self.bw_bufsize, black_fill)
+            self.sram.erase(self.bw_bufsize, self.red_bufsize, red_fill)
+        else:
+            for i in range(len(self.bw_buffer)):
+                self.bw_buffer[i] = black_fill
+                self.red_buffer[i] = red_fill

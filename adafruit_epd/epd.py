@@ -68,7 +68,12 @@ class Adafruit_EPD:
 
         self.spi_device = spi
 
-        self.sram = mcp_sram.Adafruit_MCP_SRAM(sramcs_pin, spi)
+        if sramcs_pin:
+            self.sram = mcp_sram.Adafruit_MCP_SRAM(sramcs_pin, spi)
+        else:
+            self.sram = None
+            self.bw_buffer = bytearray((width // 8) * height)
+            self.red_buffer = bytearray((width // 8) * height)
 
         if self._rst:
             self._rst.value = False
