@@ -28,6 +28,7 @@ CircuitPython driver for Adafruit il0373 display breakouts
 
 import time
 from micropython import const
+import adafruit_framebuf
 from adafruit_epd.epd import Adafruit_EPD
 from adafruit_epd.mcp_sram import Adafruit_MCP_SRAM
 
@@ -65,6 +66,8 @@ class Adafruit_IL0373(Adafruit_EPD):
 
         self.bw_bufsize = int(width * height / 8)
         self.red_bufsize = int(width * height / 8)
+        self.black_invert = True
+        self.red_invert = True
         # pylint: enable=too-many-arguments
 
     def begin(self, reset=True):
@@ -172,7 +175,7 @@ class Adafruit_IL0373(Adafruit_EPD):
             while not self.spi_device.try_lock():
                 pass
             self._dc.value = True
-            self.spi_device.write(self.bw_buffer)
+            self.spi_device.write(self._bw_buffer)
             self._cs.value = True
             self.spi_device.unlock()
 
@@ -182,7 +185,7 @@ class Adafruit_IL0373(Adafruit_EPD):
             while not self.spi_device.try_lock():
                 pass
             self._dc.value = True
-            self.spi_device.write(self.red_buffer)
+            self.spi_device.write(self._red_buffer)
             self._cs.value = True
             self.spi_device.unlock()
 
@@ -220,45 +223,32 @@ class Adafruit_IL0373(Adafruit_EPD):
 
                 self.sram.write8(addr, current)
 
-    def draw_pixel(self, x, y, color):
+    def pixel(self, x, y, color):
         """draw a single pixel in the display buffer"""
-        if (x < 0) or (x >= self.width) or (y < 0) or (y >= self.height):
-            return
-
-        if x == 0:
-            x = 1
-
-        addr = ((self.width - x) * self.height + y) // 8
-
         if self.sram:
+            if (x < 0) or (x >= self.width) or (y < 0) or (y >= self.height):
+                return
+            if x == 0:
+                x = 1
+            addr = ((self.width - x) * self.height + y) // 8
             if color == Adafruit_EPD.RED:
                 current = self.sram.read8(addr + self.bw_bufsize)
             else:
                 current = self.sram.read8(addr)
-        else:
-            if color == Adafruit_EPD.RED:
-                current = self.red_buffer[addr]
-            else:
-                current = self.bw_buffer[addr]
 
-        if color == Adafruit_EPD.WHITE:
-            current = current | (1 << (7 - y%8))
-        elif color in (Adafruit_EPD.RED, Adafruit_EPD.BLACK):
-            current = current & ~(1 << (7 - y%8))
-        elif color == Adafruit_EPD.INVERSE:
-            current = current ^ (1 << (7 - y%8))
+            if color == Adafruit_EPD.WHITE:
+                current = current | (1 << (7 - y%8))
+            elif color in (Adafruit_EPD.RED, Adafruit_EPD.BLACK):
+                current = current & ~(1 << (7 - y%8))
+            elif color == Adafruit_EPD.INVERSE:
+                current = current ^ (1 << (7 - y%8))
 
-        if self.sram:
             if color == Adafruit_EPD.RED:
-                current = self.sram.write8(addr + self.bw_bufsize, current)
+                self.sram.write8(addr + self.bw_bufsize, current)
             else:
-                current = self.sram.write8(addr, current)
+                self.sram.write8(addr, current)
         else:
-            if color == Adafruit_EPD.RED:
-                self.red_buffer[addr] = current
-            else:
-                self.bw_buffer[addr] = current
-        return
+            super().pixel(x, y, color)
 
     def fill(self, color):
         """fill the screen with the passed color"""
@@ -272,6 +262,4 @@ class Adafruit_IL0373(Adafruit_EPD):
             self.sram.erase(0x00, self.bw_bufsize, black_fill)
             self.sram.erase(self.bw_bufsize, self.red_bufsize, red_fill)
         else:
-            for i in range(len(self.bw_buffer)):
-                self.bw_buffer[i] = black_fill
-                self.red_buffer[i] = red_fill
+            super().fill(color)

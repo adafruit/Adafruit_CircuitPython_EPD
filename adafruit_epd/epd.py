@@ -28,6 +28,7 @@ CircuitPython driver for Adafruit ePaper display breakouts
 
 import time
 import digitalio
+import adafruit_framebuf
 from adafruit_epd import mcp_sram
 
 class Adafruit_EPD:
@@ -46,40 +47,46 @@ class Adafruit_EPD:
         self.width = width
         self.height = height
 
-        # Setup reset pin.
+        # Setup reset pin, if we have one
         self._rst = rst_pin
         if rst_pin:
             self._rst.direction = digitalio.Direction.OUTPUT
 
-        # Setup busy pin.
+        # Setup busy pin, if we have one
         self._busy = busy_pin
         if busy_pin:
             self._busy.direction = digitalio.Direction.INPUT
 
-        # Setup dc pin.
+        # Setup dc pin (required)
         self._dc = dc_pin
         self._dc.direction = digitalio.Direction.OUTPUT
         self._dc.value = False
 
-        # Setup cs pin.
+        # Setup cs pin (required)
         self._cs = cs_pin
         self._cs.direction = digitalio.Direction.OUTPUT
         self._cs.value = True
 
+        # SPI interface (required)
         self.spi_device = spi
 
         if sramcs_pin:
             self.sram = mcp_sram.Adafruit_MCP_SRAM(sramcs_pin, spi)
         else:
             self.sram = None
-            self.bw_buffer = bytearray((width // 8) * height)
-            self.red_buffer = bytearray((width // 8) * height)
+            self._bw_buffer = bytearray((width // 8) * height)
+            self._red_buffer = bytearray((width // 8) * height)
+            # since we have *two* framebuffers - one for red and one for black, we dont subclass but manage manually
+            self._red_framebuf = adafruit_framebuf.FrameBuffer(self._red_buffer, width, height, buf_format=adafruit_framebuf.MHMSB)
+            self._bw_framebuf = adafruit_framebuf.FrameBuffer(self._bw_buffer, width, height, buf_format=adafruit_framebuf.MHMSB)
 
+        # if we hav ea reset pin, do a hardware reset
         if self._rst:
             self._rst.value = False
             time.sleep(.1)
             self._rst.value = True
             time.sleep(.1)
+
 
     def command(self, cmd, data=None, end=True):
         """Send command byte to display."""
@@ -109,42 +116,34 @@ class Adafruit_EPD:
         self._cs.value = True
         self.spi_device.unlock()
 
-    def draw_pixel(self, x, y, color):
-        """This should be overridden in the subclass"""
-        pass
-
-    #framebuf methods
     def fill(self, color):
-        """fill the screen with the passed color"""
-        self.fill_rect(0, 0, self.width, self.height, color)
+        #This should be overridden in the subclass
+        self._bw_framebuf.fill((color == Adafruit_EPD.BLACK) != self.black_invert)
+        self._red_framebuf.fill((color == Adafruit_EPD.RED) != self.red_invert)
+
+    def pixel(self, x, y, color=None):
+        """This should be overridden in the subclass"""
+        self._bw_framebuf.pixel(x, y, (color == Adafruit_EPD.BLACK) != self.black_invert)
+        self._red_framebuf.pixel(x, y, (color == Adafruit_EPD.RED) != self.red_invert)
+
+    def rect(self, x, y, width, height, color):
+        """draw a rectangle"""
+        self._bw_framebuf.rect(x, y, width, height, (color == Adafruit_EPD.BLACK) != self.black_invert)
+        self._red_framebuf.rect(x, y, width, height, (color == Adafruit_EPD.RED) != self.red_invert)
 
     # pylint: disable=too-many-arguments
     def fill_rect(self, x, y, width, height, color):
         """fill a rectangle with the passed color"""
-        if width < 1 or height < 1 or (x+width) <= 0:
-            return
-        if (y+height) <= 0 or y >= self.height or x >= self.width:
-            return
-        xend = min(self.width, x+width)
-        yend = min(self.height, y+height)
-        x = max(x, 0)
-        y = max(y, 0)
-        for _x in range(xend - x):
-            for _y in range(yend - y):
-                self.draw_pixel(x + _x, y + _y, color)
-        return
+        self._bw_framebuf.fill_rect(x, y, width, height, (color == Adafruit_EPD.BLACK) != self.black_invert)
+        self._red_framebuf.fill_rect(x, y, width, height, (color == Adafruit_EPD.RED) != self.red_invert)
 
-    def pixel(self, x, y, color=None):
-        """draw a pixel"""
-        if x < 0 or x >= self.width or y < 0 or y >= self.height:
-            return None
-        #TODO: figure this out when we know what framebuffer we
-        # will actually use
-        #if color is None:
-        #    return self.get_pixel(self, x, y)
+    def line(self, x_0, y_0, x_1, y_1, color):
+        self._bw_framebuf.line(x_0, y_0, x_1, y_1, (color == Adafruit_EPD.BLACK) != self.black_invert)
+        self._red_framebuf.line(x_0, y_0, x_1, y_1, (color == Adafruit_EPD.RED) != self.red_invert)
 
-        self.draw_pixel(x, y, color)
-        return None
+    def text(self, string, x, y, color, *, font_name="font5x8.bin"):
+        self._bw_framebuf.text(string, x, y, (color == Adafruit_EPD.BLACK) != self.black_invert, font_name)
+        self._red_framebuf.text(string, x, y, (color == Adafruit_EPD.RED) != self.red_invert, font_name)
 
     def hline(self, x, y, width, color):
         """draw a horizontal line"""
@@ -153,10 +152,3 @@ class Adafruit_EPD:
     def vline(self, x, y, height, color):
         """draw a vertical line"""
         self.fill_rect(x, y, 1, height, color)
-
-    def rect(self, x, y, width, height, color):
-        """draw a rectangle"""
-        self.fill_rect(x, y, width, 1, color)
-        self.fill_rect(x, y+height, width, 1, color)
-        self.fill_rect(x, y, 1, height, color)
-        self.fill_rect(x+width, y, 1, height, color)
