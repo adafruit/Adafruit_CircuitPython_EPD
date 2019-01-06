@@ -109,10 +109,10 @@ class Adafruit_IL0373(Adafruit_EPD):
         self.command(_IL0373_PANEL_SETTING, bytearray([0xCF]))
         self.command(_IL0373_CDI, bytearray([0x37]))
         self.command(_IL0373_PLL, bytearray([0x29]))
-        _b1 = self.height & 0xFF
-        _b2 = (self.height >> 8) & 0xFF
-        _b3 = self.width & 0xFF
-        _b4 = (self.width >> 8) & 0xFF
+        _b1 = self.width & 0xFF
+        _b2 = (self.width >> 8) & 0xFF
+        _b3 = self.height & 0xFF
+        _b4 = (self.height >> 8) & 0xFF
         self.command(_IL0373_RESOLUTION, bytearray([_b1, _b2, _b3, _b4]))
         self.command(_IL0373_VCM_DC_SETTING, bytearray([0x0A]))
 
