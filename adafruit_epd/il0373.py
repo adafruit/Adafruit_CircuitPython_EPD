@@ -55,6 +55,7 @@ IL0373_PLL = const(0x30)
 IL0373_CDI = const(0x50)
 IL0373_RESOLUTION = const(0x61)
 IL0373_VCM_DC_SETTING = const(0x82)
+BUSY_WAIT = const(500)
 
 class Adafruit_IL0373(Adafruit_EPD):
     """driver class for Adafruit IL0373 ePaper display breakouts"""
@@ -73,8 +74,11 @@ class Adafruit_IL0373(Adafruit_EPD):
         """Begin communication with the display and set basic settings"""
         super(Adafruit_IL0373, self).begin(reset)
 
-        while self._busy.value is False:
-            pass
+        if self._busy:
+            while self._busy.value is False:
+                pass
+        else:
+            time.sleep(BUSY_WAIT/ 1000)
 
         self.command(IL0373_POWER_SETTING, bytearray([0x03, 0x00, 0x2b, 0x2b, 0x09]))
         self.command(IL0373_BOOSTER_SOFT_START, bytearray([0x17, 0x17, 0x17]))
@@ -83,8 +87,11 @@ class Adafruit_IL0373(Adafruit_EPD):
         """update the display"""
         self.command(IL0373_DISPLAY_REFRESH)
 
-        while self._busy.value is False:
-            pass
+        if self._busy:
+            while self._busy.value is False:
+                pass
+        else:
+            time.sleep(BUSY_WAIT/ 1000)
 
         self.command(IL0373_CDI, bytearray([0x17]))
         self.command(IL0373_VCM_DC_SETTING, bytearray([0x00]))
@@ -95,8 +102,11 @@ class Adafruit_IL0373(Adafruit_EPD):
         """power up the display"""
         self.command(IL0373_POWER_ON)
 
-        while self._busy.value is False:
-            pass
+        if self._busy:
+            while self._busy.value is False:
+                pass
+        else:
+            time.sleep(BUSY_WAIT/ 1000)
 
         time.sleep(.2)
 

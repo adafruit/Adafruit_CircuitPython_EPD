@@ -45,13 +45,15 @@ class Adafruit_EPD:
         self.width = width
         self.height = height
 
-         # Setup reset pin.
+        # Setup reset pin.
         self._rst = rst_pin
-        self._rst.direction = digitalio.Direction.OUTPUT
+        if rst_pin != None:
+            self._rst.direction = digitalio.Direction.OUTPUT
 
-         # Setup busy pin.
+        # Setup busy pin.
         self._busy = busy_pin
-        self._busy.direction = digitalio.Direction.INPUT
+        if busy_pin != None:
+            self._busy.direction = digitalio.Direction.INPUT
 
         # Setup dc pin.
         self._dc = dc_pin
@@ -71,7 +73,7 @@ class Adafruit_EPD:
         self._cs.value = True
         self._dc.value = False
 
-        if reset:
+        if reset and self._rst:            
             self._rst.value = False
             time.sleep(.1)
             self._rst.value = True
