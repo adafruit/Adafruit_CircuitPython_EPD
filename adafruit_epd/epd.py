@@ -73,7 +73,7 @@ class Adafruit_EPD:
         self._cs.value = True
         self._dc.value = False
 
-        if reset and self._rst:            
+        if reset and self._rst:
             self._rst.value = False
             time.sleep(.1)
             self._rst.value = True
