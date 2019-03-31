@@ -79,7 +79,8 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes
         self._buffer1_size = self._buffer2_size = 0
         self._buffer1 = self._buffer2 = None
         self._framebuf1 = self._framebuf2 = None
-        self.black_invert = self.red_invert = True
+        self._colorframebuf = self._blackframebuf = None
+        self._black_inverted = self._color_inverted = True
         self.hardware_reset()
 
     def display(self):  # pylint: disable=too-many-branches
@@ -214,56 +215,73 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes
         """Set the RAM address location, must be implemented in subclass"""
         raise NotImplementedError()
 
+    def set_black_buffer(self, index, inverted):
+        """Set the index for the black buffer data (0 or 1) and whether its inverted"""
+        if index == 0:
+            self._blackframebuf = self._framebuf1
+        elif index == 1:
+            self._blackframebuf = self._framebuf2
+        else:
+            raise RuntimeError("Buffer index must be 0 or 1")
+        self._black_inverted = inverted
+
+    def set_color_buffer(self, index, inverted):
+        """Set the index for the color buffer data (0 or 1) and whether its inverted"""
+        if index == 0:
+            self._colorframebuf = self._framebuf1
+        elif index == 1:
+            self._colorframebuf = self._framebuf2
+        else:
+            raise RuntimeError("Buffer index must be 0 or 1")
+        self._color_inverted = inverted
+
+    def _color_dup(self, func, args, color):
+        black = getattr(self._blackframebuf, func)
+        red = getattr(self._colorframebuf, func)
+        if self._blackframebuf is self._colorframebuf:   # monochrome
+            black(*args, color=(color != Adafruit_EPD.WHITE) != self._black_inverted)
+        else:
+            black(*args, color=(color == Adafruit_EPD.BLACK) != self._black_inverted)
+            red(*args, color=(color == Adafruit_EPD.RED) != self._color_inverted)
+
     def pixel(self, x, y, color):
         """draw a single pixel in the display buffer"""
-        self._framebuf1.pixel(x, y, (color == Adafruit_EPD.BLACK) != self.black_invert)
-        self._framebuf2.pixel(x, y, (color == Adafruit_EPD.RED) != self.red_invert)
+        self._color_dup('pixel', (x, y), color)
 
     def fill(self, color):
         """fill the screen with the passed color"""
-        red_fill = (color == Adafruit_EPD.RED) != self.red_invert
-        black_fill = (color == Adafruit_EPD.BLACK) != self.black_invert
-        if red_fill:
-            red_fill = 0xFF
-        if black_fill:
-            black_fill = 0xFF
+        red_fill = ((color == Adafruit_EPD.RED) != self._color_inverted) * 0xFF
+        black_fill = ((color == Adafruit_EPD.BLACK) != self._black_inverted) * 0xFF
 
         if self.sram:
             self.sram.erase(0x00, self._buffer1_size, black_fill)
             self.sram.erase(self._buffer1_size, self._buffer2_size, red_fill)
         else:
-            self._framebuf1.fill(black_fill)
-            self._framebuf2.fill(red_fill)
+            self._blackframebuf.fill(black_fill)
+            self._colorframebuf.fill(red_fill)
 
     def rect(self, x, y, width, height, color):     # pylint: disable=too-many-arguments
         """draw a rectangle"""
-        self._framebuf1.rect(x, y, width, height,
-                             (color == Adafruit_EPD.BLACK) != self.black_invert)
-        self._framebuf2.rect(x, y, width, height,
-                             (color == Adafruit_EPD.RED) != self.red_invert)
+        self._color_dup('rect', (x, y, width, height), color)
 
     def fill_rect(self, x, y, width, height, color):     # pylint: disable=too-many-arguments
         """fill a rectangle with the passed color"""
-        self._framebuf1.fill_rect(x, y, width, height,
-                                  (color == Adafruit_EPD.BLACK) != self.black_invert)
-        self._framebuf2.fill_rect(x, y, width, height,
-                                  (color == Adafruit_EPD.RED) != self.red_invert)
+        self._color_dup('fill_rect', (x, y, width, height), color)
 
     def line(self, x_0, y_0, x_1, y_1, color):     # pylint: disable=too-many-arguments
         """Draw a line from (x_0, y_0) to (x_1, y_1) in passed color"""
-        self._framebuf1.line(x_0, y_0, x_1, y_1,
-                             (color == Adafruit_EPD.BLACK) != self.black_invert)
-        self._framebuf2.line(x_0, y_0, x_1, y_1,
-                             (color == Adafruit_EPD.RED) != self.red_invert)
+        self._color_dup('line', (x_0, y_0, x_1, y_1), color)
 
     def text(self, string, x, y, color, *, font_name="font5x8.bin"):
         """Write text string at location (x, y) in given color, using font file"""
-        self._framebuf1.text(string, x, y,
-                             (color == Adafruit_EPD.BLACK) != self.black_invert,
-                             font_name=font_name)
-        self._framebuf2.text(string, x, y,
-                             (color == Adafruit_EPD.RED) != self.red_invert,
-                             font_name=font_name)
+        if self._blackframebuf is self._colorframebuf:   # monochrome
+            self._blackframebuf.text(string, x, y, font_name=font_name,
+                                     color=(color != Adafruit_EPD.WHITE) != self._black_inverted)
+        else:
+            self._blackframebuf.text(string, x, y, font_name=font_name,
+                                     color=(color == Adafruit_EPD.BLACK) != self._black_inverted)
+            self._colorframebuf.text(string, x, y, font_name=font_name,
+                                    color=(color == Adafruit_EPD.RED) != self._color_inverted)
 
     @property
     def width(self):
