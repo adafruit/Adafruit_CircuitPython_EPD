@@ -13,12 +13,14 @@ rst = digitalio.DigitalInOut(board.D7)
 busy = digitalio.DigitalInOut(board.D6)
 
 # give them all to our driver
-display = Adafruit_IL0373(152, 152, rst, dc, busy, srcs, ecs, spi)
+display = Adafruit_IL0373(152, 152, spi,
+                          cs_pin=ecs, dc_pin=dc, sramcs_pin=srcs,
+                          rst_pin=rst, busy_pin=busy)
 
 FILENAME = "blinka.bmp"
 
 # clear the buffer
-display.clear_buffer()
+display.fill(Adafruit_EPD.WHITE)
 
 def read_le(s):
     # as of this writting, int.from_bytes does not have LE support, DIY!
@@ -76,11 +78,11 @@ try:
             for col in range(bmpWidth):
                 b, g, r = bytearray(f.read(3))  # BMP files store RGB in BGR
                 if r < 0x80 and g < 0x80 and b < 0x80:
-                    display.draw_pixel(row, col, Adafruit_EPD.BLACK)
+                    display.pixel(row, col, Adafruit_EPD.BLACK)
                 elif r >= 0x80 and g >= 0x80 and b >= 0x80:
-                    display.draw_pixel(row, col, Adafruit_EPD.WHITE)
+                    display.pixel(row, col, Adafruit_EPD.WHITE)
                 elif r >= 0x80:
-                    display.draw_pixel(row, col, Adafruit_EPD.RED)
+                    display.pixel(row, col, Adafruit_EPD.RED)
 
 except OSError as e:
     if e.args[0] == 28:
