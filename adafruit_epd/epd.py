@@ -82,7 +82,7 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes
         self.black_invert = self.red_invert = True
         self.hardware_reset()
 
-    def display(self):
+    def display(self):  # pylint: disable=too-many-branches
         """show the contents of the display buffer"""
         self.power_up()
 
@@ -119,7 +119,6 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes
         self._cs.value = True
         self.spi_device.unlock()
         time.sleep(.002)
-
 
         if self.sram:
             while not self.spi_device.try_lock():

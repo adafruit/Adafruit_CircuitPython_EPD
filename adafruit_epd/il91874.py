@@ -56,11 +56,13 @@ _IL91874_CDI = const(0x50)
 _IL91874_RESOLUTION = const(0x61)
 _IL91874_VCM_DC_SETTING = const(0x82)
 
+# pylint: disable=line-too-long
 _LUT_VCOMDC = b'\x00\x00\x00\x1a\x1a\x00\x00\x01\x00\n\n\x00\x00\x08\x00\x0e\x01\x0e\x01\x10\x00\n\n\x00\x00\x08\x00\x04\x10\x00\x00\x05\x00\x03\x0e\x00\x00\n\x00#\x00\x00\x00\x01'
 _LUT_WW = b'\x90\x1a\x1a\x00\x00\x01@\n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x80\n\n\x00\x00\x08\x00\x04\x10\x00\x00\x05\x00\x03\x0e\x00\x00\n\x00#\x00\x00\x00\x01'
 _LUT_BW = b'\xa0\x1a\x1a\x00\x00\x01\x00\n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x90\n\n\x00\x00\x08\xb0\x04\x10\x00\x00\x05\xb0\x03\x0e\x00\x00\n\xc0#\x00\x00\x00\x01'
 _LUT_BB = b'\x90\x1a\x1a\x00\x00\x01@\n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x80\n\n\x00\x00\x08\x00\x04\x10\x00\x00\x05\x00\x03\x0e\x00\x00\n\x00#\x00\x00\x00\x01'
 _LUT_WB = b'\x90\x1a\x1a\x00\x00\x01 \n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x10\n\n\x00\x00\x08\x00\x04\x10\x00\x00\x05\x00\x03\x0e\x00\x00\n\x00#\x00\x00\x00\x01'
+# pylint: enable=line-too-long
 
 class Adafruit_IL91874(Adafruit_EPD):
     """driver class for Adafruit IL91874 ePaper display breakouts"""
@@ -126,11 +128,11 @@ class Adafruit_IL91874(Adafruit_EPD):
         self.command(_IL91874_CDI, bytearray([0x87]))
 
         # Look Up Tables
-        self.command(_IL91874_LUT1, _LUT_VCOMDC);
-        self.command(_IL91874_LUTWW, _LUT_WW);
-        self.command(_IL91874_LUTBW, _LUT_BW);
-        self.command(_IL91874_LUTWB, _LUT_WB);
-        self.command(_IL91874_LUTBB, _LUT_BB);
+        self.command(_IL91874_LUT1, _LUT_VCOMDC)
+        self.command(_IL91874_LUTWW, _LUT_WW)
+        self.command(_IL91874_LUTBW, _LUT_BW)
+        self.command(_IL91874_LUTWB, _LUT_WB)
+        self.command(_IL91874_LUTBB, _LUT_BB)
 
         _b0 = (self._width >> 8) & 0xFF
         _b1 = self._width & 0xFF
