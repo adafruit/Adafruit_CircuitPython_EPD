@@ -86,8 +86,8 @@ class Adafruit_IL91874(Adafruit_EPD):
                                                         buf_format=adafruit_framebuf.MHMSB)
         self._framebuf2 = adafruit_framebuf.FrameBuffer(self._buffer2, width, height,
                                                         buf_format=adafruit_framebuf.MHMSB)
-        self.black_invert = True
-        self.red_invert = False
+        self.set_black_buffer(0, True)
+        self.set_color_buffer(1, False)
         self._single_byte_tx = True
 
     def begin(self, reset=True):
