@@ -70,14 +70,14 @@ class Adafruit_IL0373(Adafruit_EPD):
         if sramcs_pin:
             self._buffer1_addr = 0
             self._buffer2_addr = self._buffer1_size
-            self._framebuf1 = adafruit_framebuf.FrameBuffer(self.sram.get_view(0), height, width, buf_format=adafruit_framebuf.MHMSB)
-            self._framebuf2 = adafruit_framebuf.FrameBuffer(self.sram.get_view(self._buffer1_size), height, width, buf_format=adafruit_framebuf.MHMSB)
+            self._framebuf1 = adafruit_framebuf.FrameBuffer(self.sram.get_view(0), width, height, buf_format=adafruit_framebuf.MHMSB)
+            self._framebuf2 = adafruit_framebuf.FrameBuffer(self.sram.get_view(self._buffer1_size), width, height, buf_format=adafruit_framebuf.MHMSB)
         else:
             self._buffer1 = bytearray((width * height) // 8)
             self._buffer2 = bytearray((width * height) // 8)
             # since we have *two* framebuffers - one for red and one for black, we dont subclass but manage manually
-            self._framebuf1 = adafruit_framebuf.FrameBuffer(self._buffer1, height, width, buf_format=adafruit_framebuf.MHMSB)
-            self._framebuf2 = adafruit_framebuf.FrameBuffer(self._buffer2, height, width, buf_format=adafruit_framebuf.MHMSB)
+            self._framebuf1 = adafruit_framebuf.FrameBuffer(self._buffer1, width, height, buf_format=adafruit_framebuf.MHMSB)
+            self._framebuf2 = adafruit_framebuf.FrameBuffer(self._buffer2, width, height, buf_format=adafruit_framebuf.MHMSB)
         self.black_invert = True
         self.red_invert = True
         # pylint: enable=too-many-arguments
@@ -110,9 +110,9 @@ class Adafruit_IL0373(Adafruit_EPD):
         self.command(_IL0373_PANEL_SETTING, bytearray([0xCF]))
         self.command(_IL0373_CDI, bytearray([0x37]))
         self.command(_IL0373_PLL, bytearray([0x29]))
-        _b1 = self._height & 0xFF
-        _b2 = (self._width >> 8) & 0xFF
-        _b3 = self._width & 0xFF
+        _b1 = self._width & 0xFF
+        _b2 = (self._height >> 8) & 0xFF
+        _b3 = self._height & 0xFF
         self.command(_IL0373_RESOLUTION, bytearray([_b1, _b2, _b3]))
         self.command(_IL0373_VCM_DC_SETTING, bytearray([0x0A]))
         time.sleep(0.05)
