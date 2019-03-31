@@ -1,8 +1,8 @@
 # EInk Shield test
+import time
 import digitalio
 import busio
 import board
-import time
 from analogio import AnalogIn
 from adafruit_epd.epd import Adafruit_EPD
 from adafruit_epd.il91874 import Adafruit_IL91874
@@ -16,8 +16,8 @@ srcs = digitalio.DigitalInOut(board.D8)    # can be None to use internal memory
 # give them all to our driver
 print("Creating display")
 display = Adafruit_IL91874(176, 264, spi,         # 2.7" Tri-color display
-                          cs_pin=ecs, dc_pin=dc, sramcs_pin=srcs,
-                          rst_pin=None, busy_pin=None)
+                           cs_pin=ecs, dc_pin=dc, sramcs_pin=srcs,
+                           rst_pin=None, busy_pin=None)
 
 display.rotation = 1
 
