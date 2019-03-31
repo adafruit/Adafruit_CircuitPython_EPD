@@ -84,7 +84,6 @@ def display_bitmap(epd, filename):
         rowSize = (bmpWidth * 3 + 3) & ~3  # 32-bit line boundary
 
         for row in range(bmpHeight):  # For each scanline...
-            print(row)
             if flip:  # Bitmap is stored bottom-to-top order (normal BMP)
                 pos = bmpImageoffset + (bmpHeight - 1 - row) * rowSize
             else:  # Bitmap is stored top-to-bottom
