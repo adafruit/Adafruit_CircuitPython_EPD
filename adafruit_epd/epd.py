@@ -68,6 +68,8 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes
 
         # SPI interface (required)
         self.spi_device = spi
+        self._spibuf = bytearray(1)
+        self._single_byte_tx = False
 
         self.sram = None
         if sramcs_pin:
@@ -100,21 +102,19 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes
 
         #first data byte from SRAM will be transfered in at the
         #same time as the EPD command is transferred out
-        cmd = self.write_ram(0)
+        databyte = self.write_ram(0)
 
         while not self.spi_device.try_lock():
             pass
         self._dc.value = True
 
         if self.sram:
-            xfer = bytearray([cmd])
-            outbuf = bytearray(1)
             for _ in range(self._buffer1_size):
-                outbuf[0] = xfer[0]
-                self.spi_device.write_readinto(outbuf, xfer)
+                databyte = self._spi_transfer(databyte)
             self.sram.cs_pin.value = True
         else:
-            self.spi_device.write(self._buffer1)
+            for databyte in self._buffer1:
+                self._spi_transfer(databyte)
 
         self._cs.value = True
         self.spi_device.unlock()
@@ -135,21 +135,19 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes
 
         #first data byte from SRAM will be transfered in at the
         #same time as the EPD command is transferred out
-        cmd = self.write_ram(1)
+        databyte = self.write_ram(1)
 
         while not self.spi_device.try_lock():
             pass
         self._dc.value = True
 
         if self.sram:
-            xfer = bytearray([cmd])
-            outbuf = bytearray(1)
-            for _ in range(self._buffer1_size):
-                outbuf[0] = xfer[0]
-                self.spi_device.write_readinto(outbuf, xfer)
+            for _ in range(self._buffer2_size):
+                databyte = self._spi_transfer(databyte)
             self.sram.cs_pin.value = True
         else:
-            self.spi_device.write(self._buffer2)
+            for databyte in self._buffer2:
+                self._spi_transfer(databyte)
 
         self._cs.value = True
         self.spi_device.unlock()
@@ -169,20 +167,30 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes
         self._cs.value = True
         self._dc.value = False
         self._cs.value = False
-        outbuf = bytearray(1)
 
         while not self.spi_device.try_lock():
             pass
-        self.spi_device.write_readinto(bytearray([cmd]), outbuf)
+        ret = self._spi_transfer(cmd)
 
         if data is not None:
             self._dc.value = True
-            self.spi_device.write(data)
+            for b in data:
+                self._spi_transfer(b)
         if end:
             self._cs.value = True
         self.spi_device.unlock()
 
-        return outbuf[0]
+        return ret
+
+    def _spi_transfer(self, databyte):
+        """Transfer one byte, toggling the cs pin if required by the EPD chipset"""
+        self._spibuf[0] = databyte
+        if self._single_byte_tx:
+            self._cs.value = False
+        self.spi_device.write_readinto(self._spibuf, self._spibuf)
+        if self._single_byte_tx:
+            self._cs.value = True
+        return self._spibuf[0]
 
     def power_up(self):
         """Power up the display in preparation for writing RAM and updating.
