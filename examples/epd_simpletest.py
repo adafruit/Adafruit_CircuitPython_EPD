@@ -10,7 +10,7 @@ from adafruit_epd.il0398 import Adafruit_IL0398
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
 ecs = digitalio.DigitalInOut(board.D10)
 dc = digitalio.DigitalInOut(board.D9)
-srcs = None #digitalio.DigitalInOut(board.D7)    # can be None to use internal memory
+srcs = digitalio.DigitalInOut(board.D7)    # can be None to use internal memory
 rst = digitalio.DigitalInOut(board.D11)    # can be None to not use this pin
 busy = digitalio.DigitalInOut(board.D12)   # can be None to not use this pin
 
