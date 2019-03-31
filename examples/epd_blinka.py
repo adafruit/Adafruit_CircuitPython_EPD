@@ -35,7 +35,7 @@ RED = (0xFF, 0x00, 0x00)
 BLACK = (0x00, 0x00, 0x00)
 
 # clear the buffer
-display.clear_buffer()
+display.fill(Adafruit_EPD.WHITE)
 
 # Get drawing object to draw on image.
 draw = ImageDraw.Draw(image)
