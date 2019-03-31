@@ -3,24 +3,34 @@ import busio
 import board
 from adafruit_epd.epd import Adafruit_EPD
 from adafruit_epd.il0373 import Adafruit_IL0373
+from adafruit_epd.il91874 import Adafruit_IL91874
+from adafruit_epd.il0398 import Adafruit_IL0398
 
 # create the spi device and pins we will need
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
 ecs = digitalio.DigitalInOut(board.D10)
 dc = digitalio.DigitalInOut(board.D9)
-srcs = digitalio.DigitalInOut(board.D8)
-rst = digitalio.DigitalInOut(board.D7)
-busy = digitalio.DigitalInOut(board.D6)
+srcs = digitalio.DigitalInOut(board.D7)    # can be None to use internal memory
+rst = digitalio.DigitalInOut(board.D11)    # can be None to not use this pin
+busy = digitalio.DigitalInOut(board.D12)   # can be None to not use this pin
 
 # give them all to our driver
-display = Adafruit_IL0373(152, 152, spi,
+print("Creating display")
+#display = Adafruit_IL91874(176, 264, spi,         # 2.7" Tri-color display
+#display = Adafruit_IL0373(152, 152, spi,         # 1.54" Tri-color display
+#display = Adafruit_IL0373(128, 296, spi,          # 2.9" Tri-color display
+#display = Adafruit_IL0398(400, 300, spi,          # 4.2" Tri-color display
+display = Adafruit_IL0373(104, 212, spi,         # 2.13" Tri-color display
                           cs_pin=ecs, dc_pin=dc, sramcs_pin=srcs,
                           rst_pin=rst, busy_pin=busy)
 
-FILENAME = "blinka.bmp"
+# IF YOU HAVE A FLEXIBLE DISPLAY (2.13" or 2.9") uncomment these lines!
+#display.set_black_buffer(1, False)
+#display.set_color_buffer(1, False)
 
-# clear the buffer
-display.fill(Adafruit_EPD.WHITE)
+display.rotation = 3
+
+FILENAME = "blinka.bmp"
 
 def read_le(s):
     # as of this writting, int.from_bytes does not have LE support, DIY!
@@ -35,9 +45,15 @@ class BMPError(Exception):
     pass
 
 
-try:
-    with open("/" + FILENAME, "rb") as f:
-        print("File opened")
+def display_bitmap(epd, filename):
+    try:
+        f = open("/" + filename, "rb")
+    except OSError:
+        print("Couldn't open file")
+        return
+
+    print("File opened")
+    try:
         if f.read(2) != b'BM':  # check signature
             raise BMPError("Not BitMap file")
 
@@ -68,6 +84,7 @@ try:
         rowSize = (bmpWidth * 3 + 3) & ~3  # 32-bit line boundary
 
         for row in range(bmpHeight):  # For each scanline...
+            print(row)
             if flip:  # Bitmap is stored bottom-to-top order (normal BMP)
                 pos = bmpImageoffset + (bmpHeight - 1 - row) * rowSize
             else:  # Bitmap is stored top-to-bottom
@@ -75,22 +92,24 @@ try:
 
             # print ("seek to %d" % pos)
             f.seek(pos)
+            rowdata = f.read(3*bmpWidth)
             for col in range(bmpWidth):
-                b, g, r = bytearray(f.read(3))  # BMP files store RGB in BGR
+                b, g, r = rowdata[3*col:3*col+3]  # BMP files store RGB in BGR
                 if r < 0x80 and g < 0x80 and b < 0x80:
-                    display.pixel(row, col, Adafruit_EPD.BLACK)
+                    epd.pixel(col, row, Adafruit_EPD.BLACK)
                 elif r >= 0x80 and g >= 0x80 and b >= 0x80:
-                    display.pixel(row, col, Adafruit_EPD.WHITE)
+                    pass #epd.pixel(row, col, Adafruit_EPD.WHITE)
                 elif r >= 0x80:
-                    display.pixel(row, col, Adafruit_EPD.RED)
+                    epd.pixel(col, row, Adafruit_EPD.RED)
+    except OSError:
+        print("Couldn't read file")
+    except BMPError as e:
+        print("Failed to parse BMP: " + e.args[0])
+    finally:
+        f.close()
+    print("Finished drawing")
 
-except OSError as e:
-    if e.args[0] == 28:
-        raise OSError("OS Error 28 0.25")
-    else:
-        raise OSError("OS Error 0.5")
-except BMPError as e:
-    print("Failed to parse BMP: " + e.args[0])
-
-
+# clear the buffer
+display.fill(Adafruit_EPD.WHITE)
+display_bitmap(display, FILENAME)
 display.display()
