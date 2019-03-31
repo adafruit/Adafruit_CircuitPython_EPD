@@ -31,8 +31,8 @@ from micropython import const
 import adafruit_framebuf
 from adafruit_epd.epd import Adafruit_EPD
 
-_IL0373_POWER_SETTING = const(0x01)
 _IL0373_PANEL_SETTING = const(0x00)
+_IL0373_POWER_SETTING = const(0x01)
 _IL0373_POWER_OFF = const(0x02)
 _IL0373_POWER_OFF_SEQUENCE = const(0x03)
 _IL0373_POWER_ON = const(0x04)

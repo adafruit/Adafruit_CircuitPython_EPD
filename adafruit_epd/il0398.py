@@ -122,7 +122,7 @@ class Adafruit_IL0398(Adafruit_EPD):
         """Power down the display - required when not actively displaying!"""
         self.command(_IL0398_CDI, bytearray([0xF7]))
         self.command(_IL0398_POWER_OFF)
-        self.busy_wait();
+        self.busy_wait()
         self.command(_IL0398_DEEP_SLEEP, bytearray([0xA5]))
 
     def update(self):

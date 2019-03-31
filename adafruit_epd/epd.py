@@ -31,7 +31,7 @@ from micropython import const
 from digitalio import Direction
 from adafruit_epd import mcp_sram
 
-class Adafruit_EPD: # pylint: disable=too-many-instance-attributes
+class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-public-methods
     """Base class for EPD displays
     """
     BLACK = const(0)
@@ -281,7 +281,7 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes
             self._blackframebuf.text(string, x, y, font_name=font_name,
                                      color=(color == Adafruit_EPD.BLACK) != self._black_inverted)
             self._colorframebuf.text(string, x, y, font_name=font_name,
-                                    color=(color == Adafruit_EPD.RED) != self._color_inverted)
+                                     color=(color == Adafruit_EPD.RED) != self._color_inverted)
 
     @property
     def width(self):
