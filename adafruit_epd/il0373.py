@@ -30,7 +30,6 @@ import time
 from micropython import const
 import adafruit_framebuf
 from adafruit_epd.epd import Adafruit_EPD
-from adafruit_epd.mcp_sram import Adafruit_MCP_SRAM
 
 _IL0373_POWER_SETTING = const(0x01)
 _IL0373_PANEL_SETTING = const(0x00)
@@ -68,26 +67,30 @@ class Adafruit_IL0373(Adafruit_EPD):
         self._buffer2_size = int(width * height / 8)
 
         if sramcs_pin:
-            self._buffer1_addr = 0
-            self._buffer2_addr = self._buffer1_size
-            self._framebuf1 = adafruit_framebuf.FrameBuffer(self.sram.get_view(0), width, height, buf_format=adafruit_framebuf.MHMSB)
-            self._framebuf2 = adafruit_framebuf.FrameBuffer(self.sram.get_view(self._buffer1_size), width, height, buf_format=adafruit_framebuf.MHMSB)
+            self._buffer1 = self.sram.get_view(0)
+            self._buffer2 = self.sram.get_view(self._buffer1_size)
         else:
             self._buffer1 = bytearray((width * height) // 8)
             self._buffer2 = bytearray((width * height) // 8)
-            # since we have *two* framebuffers - one for red and one for black, we dont subclass but manage manually
-            self._framebuf1 = adafruit_framebuf.FrameBuffer(self._buffer1, width, height, buf_format=adafruit_framebuf.MHMSB)
-            self._framebuf2 = adafruit_framebuf.FrameBuffer(self._buffer2, width, height, buf_format=adafruit_framebuf.MHMSB)
+        # since we have *two* framebuffers - one for red and one for black
+        # we dont subclass but manage manually
+        self._framebuf1 = adafruit_framebuf.FrameBuffer(self._buffer1, width, height,
+                                                        buf_format=adafruit_framebuf.MHMSB)
+        self._framebuf2 = adafruit_framebuf.FrameBuffer(self._buffer2, width, height,
+                                                        buf_format=adafruit_framebuf.MHMSB)
         self.black_invert = True
         self.red_invert = True
         # pylint: enable=too-many-arguments
 
     def begin(self, reset=True):
         """Begin communication with the display and set basic settings"""
-        super(Adafruit_IL0373, self).begin(reset)
+        if reset:
+            self.hardware_reset()
         self.power_down()
 
     def busy_wait(self):
+        """Wait for display to be done with current task, either by polling the
+        busy pin, or pausing"""
         if self._busy:
             while not self._busy.value:
                 pass
@@ -95,8 +98,7 @@ class Adafruit_IL0373(Adafruit_EPD):
             time.sleep(0.5)
 
     def power_up(self):
-        """power up the display"""
-
+        """Power up the display in preparation for writing RAM and updating"""
         self.hardware_reset()
         self.busy_wait()
 
@@ -117,13 +119,14 @@ class Adafruit_IL0373(Adafruit_EPD):
         self.command(_IL0373_VCM_DC_SETTING, bytearray([0x0A]))
         time.sleep(0.05)
 
-    def power_down():
+    def power_down(self):
+        """Power down the display - required when not actively displaying!"""
         self.command(_IL0373_CDI, bytearray([0x17]))
         self.command(_IL0373_VCM_DC_SETTING, bytearray([0x00]))
         self.command(_IL0373_POWER_OFF)
 
     def update(self):
-        """update the display"""
+        """Update the display from internal memory"""
         self.command(_IL0373_DISPLAY_REFRESH)
         time.sleep(0.1)
         self.busy_wait()
@@ -131,11 +134,16 @@ class Adafruit_IL0373(Adafruit_EPD):
             time.sleep(15)   # wait 15 seconds
 
     def write_ram(self, index):
+        """Send the one byte command for starting the RAM write process. Returns
+        the byte read at the same time over SPI. index is the RAM buffer, can be
+        0 or 1 for tri-color displays."""
         if index == 0:
             return self.command(_IL0373_DTM1, end=False)
         if index == 1:
             return self.command(_IL0373_DTM2, end=False)
         raise RuntimeError("RAM index must be 0 or 1")
 
-    def set_ram_address(self, x, y):
+    def set_ram_address(self, x, y): # pylint: disable=unused-argument, no-self-use
+        """Set the RAM address location, not used on this chipset but required by
+        the superclass"""
         return # on this chip it does nothing

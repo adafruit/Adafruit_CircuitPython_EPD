@@ -27,12 +27,12 @@ CircuitPython driver for Microchip SRAM chips
 """
 
 from micropython import const
-import digitalio
-import adafruit_bus_device.spi_device as spi_device
+from adafruit_bus_device import spi_device
 
 SRAM_SEQUENTIAL_MODE = const(1 << 6)
 
 class Adafruit_MCP_SRAM_View:
+    """A interface class that turns an SRAM chip into something like a memoryview"""
     def __init__(self, sram, offset):
         self._sram = sram
         self._offset = offset
@@ -55,16 +55,17 @@ class Adafruit_MCP_SRAM:
 
     def __init__(self, cs_pin, spi):
         # Handle hardware SPI
-        self._spi = spi_device.SPIDevice(spi,cs_pin, baudrate=8000000)
+        self._spi = spi_device.SPIDevice(spi, cs_pin, baudrate=8000000)
         self.spi_device = spi
         self.cs_pin = cs_pin
         self._buf = bytearray(3)
         self._buf[0] = Adafruit_MCP_SRAM.SRAM_WRSR
         self._buf[1] = 0x43
-        with self._spi as spi:
-            spi.write(self._buf, end=2)
+        with self._spi as spidev:
+            spidev.write(self._buf, end=2)
 
     def get_view(self, offset):
+        """Create an object that can be used as a memoryview, with a given offset"""
         return Adafruit_MCP_SRAM_View(self, offset)
 
     def write(self, addr, buf, reg=SRAM_WRITE):
