@@ -28,8 +28,22 @@ CircuitPython driver for Microchip SRAM chips
 
 from micropython import const
 import digitalio
+import adafruit_bus_device.spi_device as spi_device
 
 SRAM_SEQUENTIAL_MODE = const(1 << 6)
+
+class Adafruit_MCP_SRAM_View:
+    def __init__(self, sram, offset):
+        self._sram = sram
+        self._offset = offset
+        self._buf = [0]
+
+    def __getitem__(self, i):
+        return self._sram.read(self._offset+i, 1)[0]
+
+    def __setitem__(self, i, val):
+        self._buf[0] = val
+        self._sram.write(self._offset+i, self._buf)
 
 class Adafruit_MCP_SRAM:
     """supporting class for communicating with
@@ -41,40 +55,38 @@ class Adafruit_MCP_SRAM:
 
     def __init__(self, cs_pin, spi):
         # Handle hardware SPI
+        self._spi = spi_device.SPIDevice(spi,cs_pin, baudrate=8000000)
         self.spi_device = spi
         self.cs_pin = cs_pin
+        self._buf = bytearray(3)
+        self._buf[0] = Adafruit_MCP_SRAM.SRAM_WRSR
+        self._buf[1] = 0x43
+        with self._spi as spi:
+            spi.write(self._buf, end=2)
 
-        self.cs_pin.direction = digitalio.Direction.OUTPUT
-        while not self.spi_device.try_lock():
-            pass
-        self.cs_pin.value = False
-        self.spi_device.write(bytearray([Adafruit_MCP_SRAM.SRAM_WRSR, 0x43]))
-        self.cs_pin.value = True
-        self.spi_device.unlock()
+    def get_view(self, offset):
+        return Adafruit_MCP_SRAM_View(self, offset)
 
     def write(self, addr, buf, reg=SRAM_WRITE):
         """write the passed buffer to the passed address"""
-        cmd = bytearray([reg, (addr >> 8) & 0xFF, addr & 0xFF] + buf)
+        self._buf[0] = reg
+        self._buf[1] = addr >> 8
+        self._buf[2] = addr
 
-        while not self.spi_device.try_lock():
-            pass
-        self.cs_pin.value = False
-        self.spi_device.write(cmd)
-        self.cs_pin.value = True
-        self.spi_device.unlock()
+        with self._spi as spi:
+            spi.write(self._buf, end=3)
+            spi.write(bytearray(buf))
 
     def read(self, addr, length, reg=SRAM_READ):
         """read passed number of bytes at the passed address"""
-        cmd = bytearray([reg, (addr >> 8) & 0xFF, addr & 0xFF])
+        self._buf[0] = reg
+        self._buf[1] = addr >> 8
+        self._buf[2] = addr
 
         buf = bytearray(length)
-        while not self.spi_device.try_lock():
-            pass
-        self.cs_pin.value = False
-        self.spi_device.write(cmd)
-        self.spi_device.readinto(buf)
-        self.cs_pin.value = True
-        self.spi_device.unlock()
+        with self._spi as spi:
+            spi.write(self._buf, end=3)
+            spi.readinto(buf)
         return buf
 
     def read8(self, addr, reg=SRAM_READ):
@@ -96,13 +108,11 @@ class Adafruit_MCP_SRAM:
 
     def erase(self, addr, length, value):
         """erase the passed number of bytes starting at the passed address"""
-        cmd = bytearray([Adafruit_MCP_SRAM.SRAM_WRITE, (addr >> 8) & 0xFF, addr & 0xFF])
-
-        while not self.spi_device.try_lock():
-            pass
-        self.cs_pin.value = False
-        self.spi_device.write(cmd)
-        for _ in range(length):
-            self.spi_device.write(bytearray([value]))
-        self.cs_pin.value = True
-        self.spi_device.unlock()
+        self._buf[0] = Adafruit_MCP_SRAM.SRAM_WRITE
+        self._buf[1] = addr >> 8
+        self._buf[2] = addr
+        fill = bytearray([value])
+        with self._spi as spi:
+            spi.write(self._buf, end=3)
+            for _ in range(length):
+                self.spi_device.write(fill)

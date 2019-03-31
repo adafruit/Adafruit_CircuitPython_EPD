@@ -27,7 +27,7 @@ CircuitPython driver for Adafruit ePaper display breakouts
 """
 
 import time
-import digitalio
+from digitalio import Direction
 import adafruit_framebuf
 from adafruit_epd import mcp_sram
 
@@ -50,43 +50,113 @@ class Adafruit_EPD:
         # Setup reset pin, if we have one
         self._rst = rst_pin
         if rst_pin:
-            self._rst.direction = digitalio.Direction.OUTPUT
+            self._rst.direction = Direction.OUTPUT
 
         # Setup busy pin, if we have one
         self._busy = busy_pin
         if busy_pin:
-            self._busy.direction = digitalio.Direction.INPUT
+            self._busy.direction = Direction.INPUT
 
         # Setup dc pin (required)
         self._dc = dc_pin
-        self._dc.direction = digitalio.Direction.OUTPUT
+        self._dc.direction = Direction.OUTPUT
         self._dc.value = False
 
         # Setup cs pin (required)
         self._cs = cs_pin
-        self._cs.direction = digitalio.Direction.OUTPUT
+        self._cs.direction = Direction.OUTPUT
         self._cs.value = True
 
         # SPI interface (required)
         self.spi_device = spi
 
+        self.sram = None
         if sramcs_pin:
             self.sram = mcp_sram.Adafruit_MCP_SRAM(sramcs_pin, spi)
-        else:
-            self.sram = None
-            self._bw_buffer = bytearray((width * height) // 8)
-            self._red_buffer = bytearray((width * height) // 8)
-            # since we have *two* framebuffers - one for red and one for black, we dont subclass but manage manually
-            self._red_framebuf = adafruit_framebuf.FrameBuffer(self._red_buffer, width, height, buf_format=adafruit_framebuf.MHMSB)
-            self._bw_framebuf = adafruit_framebuf.FrameBuffer(self._bw_buffer, width, height, buf_format=adafruit_framebuf.MHMSB)
 
-        # if we hav ea reset pin, do a hardware reset
+        self._buffer1_size = self._buffer2_size = 0
+        self._buffer1 = self._buffer2 = None
+        self.hardware_reset()
+
+    def display(self):
+        """show the contents of the display buffer"""
+        self.power_up()
+
+        self.set_ram_address(0, 0)
+
+        if self.sram:
+            while not self.spi_device.try_lock():
+                pass
+            self.sram.cs_pin.value = False
+            #send read command
+            self.spi_device.write(bytearray([mcp_sram.Adafruit_MCP_SRAM.SRAM_READ]))
+            #send start address
+            self.spi_device.write(bytearray([0x00, 0x00]))
+            self.spi_device.unlock()
+
+        #first data byte from SRAM will be transfered in at the
+        #same time as the EPD command is transferred out
+        cmd = self.write_ram(0)
+
+        while not self.spi_device.try_lock():
+            pass
+        self._dc.value = True
+
+        if self.sram:
+            xfer = bytearray([cmd])
+            outbuf = bytearray(1)
+            for _ in range(self._buffer1_size):
+                outbuf[0] = xfer[0]
+                self.spi_device.write_readinto(outbuf, xfer)
+            self.sram.cs_pin.value = True
+        else:
+            self.spi_device.write(self._buffer1)
+
+        self._cs.value = True
+        self.spi_device.unlock()
+        time.sleep(.002)
+
+
+        if self.sram:
+            while not self.spi_device.try_lock():
+                pass
+            self.sram.cs_pin.value = False
+            #send read command
+            self.spi_device.write(bytearray([mcp_sram.Adafruit_MCP_SRAM.SRAM_READ]))
+            #send start address
+            self.spi_device.write(bytearray([(self._buffer1_size >> 8), (self._buffer1_size & 0xFF)]))
+            self.spi_device.unlock()
+
+        #first data byte from SRAM will be transfered in at the
+        #same time as the EPD command is transferred out
+        cmd = self.write_ram(1)
+
+        while not self.spi_device.try_lock():
+            pass
+        self._dc.value = True
+
+        if self.sram:
+            xfer = bytearray([cmd])
+            outbuf = bytearray(1)
+            for _ in range(self._buffer1_size):
+                outbuf[0] = xfer[0]
+                self.spi_device.write_readinto(outbuf, xfer)
+            self.sram.cs_pin.value = True
+        else:
+            self.spi_device.write(self._buffer2)
+
+        self._cs.value = True
+        self.spi_device.unlock()
+        self.update()
+
+
+    def hardware_reset(self):
+        # if we have a reset pin, do a hardware reset
         if self._rst:
             self._rst.value = False
-            time.sleep(.1)
+            time.sleep(0.1)
             self._rst.value = True
-            time.sleep(.1)
-
+            time.sleep(0.1)
 
     def command(self, cmd, data=None, end=True):
         """Send command byte to display."""
@@ -100,50 +170,54 @@ class Adafruit_EPD:
         self.spi_device.write_readinto(bytearray([cmd]), outbuf)
 
         if data is not None:
-            self.data(data)
-        else:
-            self.spi_device.unlock()
-
+            self._dc.value = True
+            self.spi_device.write(data)
         if end:
             self._cs.value = True
+        self.spi_device.unlock()
 
         return outbuf[0]
 
-    def data(self, dat):
-        """Send data to display."""
-        self._dc.value = True
-        self.spi_device.write(dat)
-        self._cs.value = True
-        self.spi_device.unlock()
+
+    def pixel(self, x, y, color):
+        """draw a single pixel in the display buffer"""
+        self._framebuf1.pixel(x, y, (color == Adafruit_EPD.BLACK) != self.black_invert)
+        self._framebuf2.pixel(x, y, (color == Adafruit_EPD.RED) != self.red_invert)
 
     def fill(self, color):
-        #This should be overridden in the subclass
-        self._bw_framebuf.fill((color == Adafruit_EPD.BLACK) != self.black_invert)
-        self._red_framebuf.fill((color == Adafruit_EPD.RED) != self.red_invert)
+        """fill the screen with the passed color"""
+        red_fill = (color == Adafruit_EPD.RED) != self.red_invert
+        black_fill = (color == Adafruit_EPD.BLACK) != self.black_invert
+        if red_fill:
+            red_fill = 0xFF
+        if black_fill:
+            black_fill = 0xFF
 
-    def pixel(self, x, y, color=None):
-        """This should be overridden in the subclass"""
-        self._bw_framebuf.pixel(x, y, (color == Adafruit_EPD.BLACK) != self.black_invert)
-        self._red_framebuf.pixel(x, y, (color == Adafruit_EPD.RED) != self.red_invert)
+        if self.sram:
+            self.sram.erase(0x00, self._buffer1_size, black_fill)
+            self.sram.erase(self._buffer1_size, self._buffer2_size, red_fill)
+        else:
+            self._framebuf1.fill(black_fill)
+            self._framebuf2.fill(red_fill)
 
     def rect(self, x, y, width, height, color):
         """draw a rectangle"""
-        self._bw_framebuf.rect(x, y, width, height, (color == Adafruit_EPD.BLACK) != self.black_invert)
-        self._red_framebuf.rect(x, y, width, height, (color == Adafruit_EPD.RED) != self.red_invert)
+        self._framebuf1.rect(x, y, width, height, (color == Adafruit_EPD.BLACK) != self.black_invert)
+        self._framebuf2.rect(x, y, width, height, (color == Adafruit_EPD.RED) != self.red_invert)
 
     # pylint: disable=too-many-arguments
     def fill_rect(self, x, y, width, height, color):
         """fill a rectangle with the passed color"""
-        self._bw_framebuf.fill_rect(x, y, width, height, (color == Adafruit_EPD.BLACK) != self.black_invert)
-        self._red_framebuf.fill_rect(x, y, width, height, (color == Adafruit_EPD.RED) != self.red_invert)
+        self._framebuf1.fill_rect(x, y, width, height, (color == Adafruit_EPD.BLACK) != self.black_invert)
+        self._framebuf2.fill_rect(x, y, width, height, (color == Adafruit_EPD.RED) != self.red_invert)
 
     def line(self, x_0, y_0, x_1, y_1, color):
-        self._bw_framebuf.line(x_0, y_0, x_1, y_1, (color == Adafruit_EPD.BLACK) != self.black_invert)
-        self._red_framebuf.line(x_0, y_0, x_1, y_1, (color == Adafruit_EPD.RED) != self.red_invert)
+        self._framebuf1.line(x_0, y_0, x_1, y_1, (color == Adafruit_EPD.BLACK) != self.black_invert)
+        self._framebuf2.line(x_0, y_0, x_1, y_1, (color == Adafruit_EPD.RED) != self.red_invert)
 
     def text(self, string, x, y, color, *, font_name="font5x8.bin"):
-        self._bw_framebuf.text(string, x, y, (color == Adafruit_EPD.BLACK) != self.black_invert, font_name=font_name)
-        self._red_framebuf.text(string, x, y, (color == Adafruit_EPD.RED) != self.red_invert, font_name=font_name)
+        self._framebuf1.text(string, x, y, (color == Adafruit_EPD.BLACK) != self.black_invert, font_name=font_name)
+        self._framebuf2.text(string, x, y, (color == Adafruit_EPD.RED) != self.red_invert, font_name=font_name)
 
     @property
     def width(self):
@@ -159,12 +233,12 @@ class Adafruit_EPD:
 
     @property
     def rotation(self):
-        return self._bw_framebuf._rotation
+        return self._framebuf1._rotation
 
     @rotation.setter
     def rotation(self, val):
-        self._bw_framebuf.rotation = val
-        self._red_framebuf.rotation = val
+        self._framebuf1.rotation = val
+        self._framebuf2.rotation = val
 
     def hline(self, x, y, width, color):
         """draw a horizontal line"""
@@ -173,3 +247,36 @@ class Adafruit_EPD:
     def vline(self, x, y, height, color):
         """draw a vertical line"""
         self.fill_rect(x, y, 1, height, color)
+
+
+    def image(self, image):
+        """Set buffer to value of Python Imaging Library image.  The image should
+        be in RGB mode and a size equal to the display size.
+        """
+        if image.mode != 'RGB':
+            raise ValueError('Image must be in mode RGB.')
+        imwidth, imheight = image.size
+        if imwidth != self.width or imheight != self.height:
+            raise ValueError('Image must be same dimensions as display ({0}x{1}).' \
+                .format(self.width, self.height))
+        # Grab all the pixels from the image, faster than getpixel.
+        pix = image.load()
+
+        for y in iter(range(image.size[1])):
+            for x in iter(range(image.size[0])):
+                if x == 0:
+                    x = 1
+                pixel = pix[x, y]
+
+                addr = int(((self._width - x) * self._height + y)/8)
+
+                if pixel == (0xFF, 0, 0):
+                    addr = addr + self.bw_bufsize
+                current = self.sram.read8(addr)
+
+                if pixel in ((0xFF, 0, 0), (0, 0, 0)):
+                    current = current & ~(1 << (7 - y%8))
+                else:
+                    current = current | (1 << (7 - y%8))
+
+                self.sram.write8(addr, current)

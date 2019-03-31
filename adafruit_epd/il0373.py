@@ -64,8 +64,20 @@ class Adafruit_IL0373(Adafruit_EPD):
         super(Adafruit_IL0373, self).__init__(width, height, spi, cs_pin, dc_pin,
                                               sramcs_pin, rst_pin, busy_pin)
 
-        self.bw_bufsize = int(width * height / 8)
-        self.red_bufsize = int(width * height / 8)
+        self._buffer1_size = int(width * height / 8)
+        self._buffer2_size = int(width * height / 8)
+
+        if sramcs_pin:
+            self._buffer1_addr = 0
+            self._buffer2_addr = self._buffer1_size
+            self._framebuf1 = adafruit_framebuf.FrameBuffer(self.sram.get_view(0), height, width, buf_format=adafruit_framebuf.MHMSB)
+            self._framebuf2 = adafruit_framebuf.FrameBuffer(self.sram.get_view(self._buffer1_size), height, width, buf_format=adafruit_framebuf.MHMSB)
+        else:
+            self._buffer1 = bytearray((width * height) // 8)
+            self._buffer2 = bytearray((width * height) // 8)
+            # since we have *two* framebuffers - one for red and one for black, we dont subclass but manage manually
+            self._framebuf1 = adafruit_framebuf.FrameBuffer(self._buffer1, height, width, buf_format=adafruit_framebuf.MHMSB)
+            self._framebuf2 = adafruit_framebuf.FrameBuffer(self._buffer2, height, width, buf_format=adafruit_framebuf.MHMSB)
         self.black_invert = True
         self.red_invert = True
         # pylint: enable=too-many-arguments
@@ -73,192 +85,57 @@ class Adafruit_IL0373(Adafruit_EPD):
     def begin(self, reset=True):
         """Begin communication with the display and set basic settings"""
         super(Adafruit_IL0373, self).begin(reset)
+        self.power_down()
 
-        while self._busy.value is False:
-            pass
-
-        self.command(_IL0373_POWER_SETTING, bytearray([0x03, 0x00, 0x2b, 0x2b, 0x09]))
-        self.command(_IL0373_BOOSTER_SOFT_START, bytearray([0x17, 0x17, 0x17]))
-
-    def update(self):
-        """update the display"""
-        self.command(_IL0373_DISPLAY_REFRESH)
-
+    def busy_wait(self):
         if self._busy:
-            while self._busy.value is False:
+            while not self._busy.value:
                 pass
         else:
-            time.sleep(15)   # wait 15 seconds
-
-        self.command(_IL0373_CDI, bytearray([0x17]))
-        self.command(_IL0373_VCM_DC_SETTING, bytearray([0x00]))
-        self.command(_IL0373_POWER_OFF)
-        time.sleep(2)
+            time.sleep(0.5)
 
     def power_up(self):
         """power up the display"""
+
+        self.hardware_reset()
+        self.busy_wait()
+
+        self.command(_IL0373_POWER_SETTING, bytearray([0x03, 0x00, 0x2b, 0x2b, 0x09]))
+        self.command(_IL0373_BOOSTER_SOFT_START, bytearray([0x17, 0x17, 0x17]))
         self.command(_IL0373_POWER_ON)
 
-        if self._busy:
-            while self._busy.value is False:
-                pass
-        else:
-            time.sleep(3)   # wait a bit
-        time.sleep(.2)
+        self.busy_wait()
+        time.sleep(0.2)
 
         self.command(_IL0373_PANEL_SETTING, bytearray([0xCF]))
         self.command(_IL0373_CDI, bytearray([0x37]))
         self.command(_IL0373_PLL, bytearray([0x29]))
-        _b1 = self._width & 0xFF
-        _b2 = (self._height >> 8) & 0xFF
-        _b3 = self._height & 0xFF
+        _b1 = self._height & 0xFF
+        _b2 = (self._width >> 8) & 0xFF
+        _b3 = self._width & 0xFF
         self.command(_IL0373_RESOLUTION, bytearray([_b1, _b2, _b3]))
         self.command(_IL0373_VCM_DC_SETTING, bytearray([0x0A]))
+        time.sleep(0.05)
 
+    def power_down():
+        self.command(_IL0373_CDI, bytearray([0x17]))
+        self.command(_IL0373_VCM_DC_SETTING, bytearray([0x00]))
+        self.command(_IL0373_POWER_OFF)
 
-    def display(self):
-        """show the contents of the display buffer"""
-        self.power_up()
+    def update(self):
+        """update the display"""
+        self.command(_IL0373_DISPLAY_REFRESH)
+        time.sleep(0.1)
+        self.busy_wait()
+        if not self._busy:
+            time.sleep(15)   # wait 15 seconds
 
-        if self.sram:
-            while not self.spi_device.try_lock():
-                pass
-            self.sram.cs_pin.value = False
-            #send read command
-            self.spi_device.write(bytearray([Adafruit_MCP_SRAM.SRAM_READ]))
-            #send start address
-            self.spi_device.write(bytearray([0x00, 0x00]))
-            self.spi_device.unlock()
+    def write_ram(self, index):
+        if index == 0:
+            return self.command(_IL0373_DTM1, end=False)
+        if index == 1:
+            return self.command(_IL0373_DTM2, end=False)
+        raise RuntimeError("RAM index must be 0 or 1")
 
-            #first data byte from SRAM will be transfered in at the
-            #same time as the EPD command is transferred out
-            cmd = self.command(_IL0373_DTM1, end=False)
-
-            while not self.spi_device.try_lock():
-                pass
-            self._dc.value = True
-            xfer = bytearray([cmd])
-            outbuf = bytearray(1)
-            for _ in range(self.bw_bufsize):
-                outbuf[0] = xfer[0]
-                self.spi_device.write_readinto(outbuf, xfer)
-            self._cs.value = True
-            self.sram.cs_pin.value = True
-
-            time.sleep(.002)
-
-            self.sram.cs_pin.value = False
-            #send read command
-            self.spi_device.write(bytearray([Adafruit_MCP_SRAM.SRAM_READ]))
-            #send start address
-            self.spi_device.write(bytearray([(self.bw_bufsize >> 8), (self.bw_bufsize & 0xFF)]))
-            self.spi_device.unlock()
-
-            #first data byte from SRAM will be transfered in at the
-            #same time as the EPD command is transferred out
-            cmd = self.command(_IL0373_DTM2, end=False)
-
-            while not self.spi_device.try_lock():
-                pass
-            self._dc.value = True
-            xfer = bytearray([cmd])
-            outbuf = bytearray(1)
-            for _ in range(self.bw_bufsize):
-                outbuf[0] = xfer[0]
-                self.spi_device.write_readinto(outbuf, xfer)
-            self._cs.value = True
-            self.sram.cs_pin.value = True
-            self.spi_device.unlock()
-        else:
-            cmd = self.command(_IL0373_DTM1, end=False)
-            while not self.spi_device.try_lock():
-                pass
-            self._dc.value = True
-            self.spi_device.write(self._bw_buffer)
-            self._cs.value = True
-            self.spi_device.unlock()
-
-            time.sleep(.02)
-
-            cmd = self.command(_IL0373_DTM2, end=False)
-            while not self.spi_device.try_lock():
-                pass
-            self._dc.value = True
-            self.spi_device.write(self._red_buffer)
-            self._cs.value = True
-            self.spi_device.unlock()
-
-        self.update()
-
-    def image(self, image):
-        """Set buffer to value of Python Imaging Library image.  The image should
-        be in RGB mode and a size equal to the display size.
-        """
-        if image.mode != 'RGB':
-            raise ValueError('Image must be in mode RGB.')
-        imwidth, imheight = image.size
-        if imwidth != self.width or imheight != self.height:
-            raise ValueError('Image must be same dimensions as display ({0}x{1}).' \
-                .format(self.width, self.height))
-        # Grab all the pixels from the image, faster than getpixel.
-        pix = image.load()
-
-        for y in iter(range(image.size[1])):
-            for x in iter(range(image.size[0])):
-                if x == 0:
-                    x = 1
-                pixel = pix[x, y]
-
-                addr = int(((self._width - x) * self._height + y)/8)
-
-                if pixel == (0xFF, 0, 0):
-                    addr = addr + self.bw_bufsize
-                current = self.sram.read8(addr)
-
-                if pixel in ((0xFF, 0, 0), (0, 0, 0)):
-                    current = current & ~(1 << (7 - y%8))
-                else:
-                    current = current | (1 << (7 - y%8))
-
-                self.sram.write8(addr, current)
-
-    def pixel(self, x, y, color):
-        """draw a single pixel in the display buffer"""
-        if self.sram:
-            if (x < 0) or (x >= self._width) or (y < 0) or (y >= self._height):
-                return
-            if x == 0:
-                x = 1
-            addr = ((self._width - x) * self._height + y) // 8
-            if color == Adafruit_EPD.RED:
-                current = self.sram.read8(addr + self.bw_bufsize)
-            else:
-                current = self.sram.read8(addr)
-
-            if color == Adafruit_EPD.WHITE:
-                current = current | (1 << (7 - y%8))
-            elif color in (Adafruit_EPD.RED, Adafruit_EPD.BLACK):
-                current = current & ~(1 << (7 - y%8))
-            elif color == Adafruit_EPD.INVERSE:
-                current = current ^ (1 << (7 - y%8))
-
-            if color == Adafruit_EPD.RED:
-                self.sram.write8(addr + self.bw_bufsize, current)
-            else:
-                self.sram.write8(addr, current)
-        else:
-            super().pixel(x, y, color)
-
-    def fill(self, color):
-        """fill the screen with the passed color"""
-        red_fill = 0xFF
-        black_fill = 0xFF
-        if color == Adafruit_EPD.BLACK:
-            black_fill = 0x00
-        if color == Adafruit_EPD.RED:
-            red_fill = 0x00
-        if self.sram:
-            self.sram.erase(0x00, self.bw_bufsize, black_fill)
-            self.sram.erase(self.bw_bufsize, self.red_bufsize, red_fill)
-        else:
-            super().fill(color)
+    def set_ram_address(self, x, y):
+        return # on this chip it does nothing
