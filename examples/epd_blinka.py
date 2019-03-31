@@ -5,6 +5,7 @@ import board
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
+from adafruit_epd.epd import Adafruit_EPD
 from adafruit_epd.il0373 import Adafruit_IL0373
 
 # create the spi device and pins we will need
