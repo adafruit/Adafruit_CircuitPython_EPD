@@ -110,7 +110,8 @@ class Adafruit_SSD1608(Adafruit_EPD):
         self.command(_SSD1608_SW_RESET)
         self.busy_wait()
         # driver output control
-        self.command(_SSD1608_DRIVER_CONTROL, bytearray([self._width-1, (self._width-1) >> 8, 0x00]))
+        self.command(_SSD1608_DRIVER_CONTROL,
+                     bytearray([self._width-1, (self._width-1) >> 8, 0x00]))
         # Set dummy line period
         self.command(_SSD1608_WRITE_DUMMY, bytearray([0x1B]))
         # Set gate line width
@@ -120,7 +121,8 @@ class Adafruit_SSD1608(Adafruit_EPD):
         # Set ram X start/end postion
         self.command(_SSD1608_SET_RAMXPOS, bytearray([0x00, self._height//8 - 1]))
         # Set ram Y start/end postion
-        self.command(_SSD1608_SET_RAMYPOS, bytearray([0, 0, self._height - 1, (self._height - 1) >> 8]))
+        self.command(_SSD1608_SET_RAMYPOS,
+                     bytearray([0, 0, self._height - 1, (self._height - 1) >> 8]))
         # Vcom Voltage
         self.command(_SSD1608_WRITE_VCOM, bytearray([0x70]))
         # LUT
