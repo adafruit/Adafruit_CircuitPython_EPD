@@ -133,24 +133,25 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
             self.spi_device.write(self._buf, end=3)
             self.spi_device.unlock()
 
-        #first data byte from SRAM will be transfered in at the
-        #same time as the EPD command is transferred out
-        databyte = self.write_ram(1)
+        if self._buffer2_size != 0:
+            #first data byte from SRAM will be transfered in at the
+            #same time as the EPD command is transferred out
+            databyte = self.write_ram(1)
 
-        while not self.spi_device.try_lock():
-            pass
-        self._dc.value = True
+            while not self.spi_device.try_lock():
+                pass
+            self._dc.value = True
 
-        if self.sram:
-            for _ in range(self._buffer2_size):
-                databyte = self._spi_transfer(databyte)
-            self.sram.cs_pin.value = True
-        else:
-            for databyte in self._buffer2:
-                self._spi_transfer(databyte)
+            if self.sram:
+                for _ in range(self._buffer2_size):
+                    databyte = self._spi_transfer(databyte)
+                self.sram.cs_pin.value = True
+            else:
+                for databyte in self._buffer2:
+                    self._spi_transfer(databyte)
 
-        self._cs.value = True
-        self.spi_device.unlock()
+            self._cs.value = True
+            self.spi_device.unlock()
         self.update()
 
 
@@ -305,7 +306,8 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
     @rotation.setter
     def rotation(self, val):
         self._framebuf1.rotation = val
-        self._framebuf2.rotation = val
+        if self._framebuf2:
+            self._framebuf2.rotation = val
 
     def hline(self, x, y, width, color):
         """draw a horizontal line"""
