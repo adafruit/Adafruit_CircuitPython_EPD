@@ -50,8 +50,8 @@ _SSD1608_DISP_CTRL1 = const(0x21)
 _SSD1608_DISP_CTRL2 = const(0x22)
 _SSD1608_WRITE_RAM = const(0x24)
 _SSD1608_READ_RAM = const(0x25)
-_SSD1608_VCOM_SENSE  = const(0x28)
-_SSD1608_VCOM_DURATION  = const(0x29)
+_SSD1608_VCOM_SENSE = const(0x28)
+_SSD1608_VCOM_DURATION = const(0x29)
 _SSD1608_WRITE_VCOM = const(0x2C)
 _SSD1608_READ_OTP = const(0x2D)
 _SSD1608_WRITE_LUT = const(0x32)
@@ -63,14 +63,14 @@ _SSD1608_SET_RAMYPOS = const(0x45)
 _SSD1608_SET_RAMXCOUNT = const(0x4E)
 _SSD1608_SET_RAMYCOUNT = const(0x4F)
 _SSD1608_NOP = const(0xFF)
-_LUT_DATA = b'\x02\x02\x01\x11\x12\x12""fiiYX\x99\x99\x88\x00\x00\x00\x00\xf8\xb4\x13Q5QQ\x19\x01\x00'
+_LUT_DATA = b'\x02\x02\x01\x11\x12\x12""fiiYX\x99\x99\x88\x00\x00\x00\x00\xf8\xb4\x13Q5QQ\x19\x01\x00' # pylint: disable=line-too-long
 
 class Adafruit_SSD1608(Adafruit_EPD):
     """driver class for Adafruit SSD1608 ePaper display breakouts"""
     # pylint: disable=too-many-arguments
     def __init__(self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin):
         super(Adafruit_SSD1608, self).__init__(width, height, spi, cs_pin, dc_pin,
-                                              sramcs_pin, rst_pin, busy_pin)
+                                               sramcs_pin, rst_pin, busy_pin)
 
         if height % 8 != 0:
             height += (8 - height % 8)

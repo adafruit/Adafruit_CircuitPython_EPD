@@ -3,8 +3,9 @@ import busio
 import board
 from adafruit_epd.epd import Adafruit_EPD
 from adafruit_epd.il0373 import Adafruit_IL0373
-from adafruit_epd.il91874 import Adafruit_IL91874
-from adafruit_epd.il0398 import Adafruit_IL0398
+from adafruit_epd.il91874 import Adafruit_IL91874    # pylint: disable=unused-import
+from adafruit_epd.il0398 import Adafruit_IL0398      # pylint: disable=unused-import
+from adafruit_epd.ssd1608 import Adafruit_SSD1608    # pylint: disable=unused-import
 
 # create the spi device and pins we will need
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
@@ -16,6 +17,7 @@ busy = digitalio.DigitalInOut(board.D12)   # can be None to not use this pin
 
 # give them all to our driver
 print("Creating display")
+#display = Adafruit_SSD1608(200, 200, spi,         # 1.54" HD mono display
 #display = Adafruit_IL91874(176, 264, spi,         # 2.7" Tri-color display
 #display = Adafruit_IL0373(152, 152, spi,         # 1.54" Tri-color display
 #display = Adafruit_IL0373(128, 296, spi,          # 2.9" Tri-color display
@@ -28,9 +30,9 @@ display = Adafruit_IL0373(104, 212, spi,         # 2.13" Tri-color display
 #display.set_black_buffer(1, False)
 #display.set_color_buffer(1, False)
 
-display.rotation = 3
+display.rotation = 0
 
-FILENAME = "blinka.bmp"
+FILENAME = "blinka154mono.bmp"
 
 def read_le(s):
     # as of this writting, int.from_bytes does not have LE support, DIY!
@@ -44,8 +46,7 @@ def read_le(s):
 class BMPError(Exception):
     pass
 
-
-def display_bitmap(epd, filename):
+def display_bitmap(epd, filename): # pylint: disable=too-many-locals, too-many-branches
     try:
         f = open("/" + filename, "rb")
     except OSError:
