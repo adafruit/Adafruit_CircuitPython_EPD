@@ -9,11 +9,11 @@ from adafruit_epd.ssd1608 import Adafruit_SSD1608    # pylint: disable=unused-im
 
 # create the spi device and pins we will need
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
-ecs = digitalio.DigitalInOut(board.D10)
-dc = digitalio.DigitalInOut(board.D9)
-srcs = digitalio.DigitalInOut(board.D7)    # can be None to use internal memory
-rst = digitalio.DigitalInOut(board.D11)    # can be None to not use this pin
-busy = digitalio.DigitalInOut(board.D12)   # can be None to not use this pin
+ecs = digitalio.DigitalInOut(board.D12)
+dc = digitalio.DigitalInOut(board.D11)
+srcs = digitalio.DigitalInOut(board.D10)    # can be None to use internal memory
+rst = digitalio.DigitalInOut(board.D9)    # can be None to not use this pin
+busy = digitalio.DigitalInOut(board.D5)   # can be None to not use this pin
 
 # give them all to our driver
 print("Creating display")
