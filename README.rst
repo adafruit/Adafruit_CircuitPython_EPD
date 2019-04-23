@@ -21,6 +21,7 @@ This driver depends on:
 
 * `Adafruit CircuitPython <https://github.com/adafruit/circuitpython>`_
 * `Bus Device <https://github.com/adafruit/Adafruit_CircuitPython_BusDevice>`_
+* `font5x8.bin found in the examples bundle <https://github.com/adafruit/Adafruit_CircuitPython_Bundle>`_
 
 Please ensure all dependencies are available on the CircuitPython filesystem.
 This is easily achieved by downloading
