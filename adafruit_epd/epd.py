@@ -128,8 +128,8 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
             #send read command
             self._buf[0] = mcp_sram.Adafruit_MCP_SRAM.SRAM_READ
             #send start address
-            self._buf[1] = self._buffer1_size >> 8
-            self._buf[2] = self._buffer1_size
+            self._buf[1] = (self._buffer1_size >> 8) & 0xFF
+            self._buf[2] = self._buffer1_size & 0xFF
             self.spi_device.write(self._buf, end=3)
             self.spi_device.unlock()
 

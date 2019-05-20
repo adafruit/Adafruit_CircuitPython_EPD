@@ -71,8 +71,8 @@ class Adafruit_MCP_SRAM:
     def write(self, addr, buf, reg=SRAM_WRITE):
         """write the passed buffer to the passed address"""
         self._buf[0] = reg
-        self._buf[1] = addr >> 8
-        self._buf[2] = addr
+        self._buf[1] = (addr >> 8) & 0xFF
+        self._buf[2] = addr & 0xFF
 
         with self._spi as spi:
             spi.write(self._buf, end=3)    # pylint: disable=no-member
@@ -81,8 +81,8 @@ class Adafruit_MCP_SRAM:
     def read(self, addr, length, reg=SRAM_READ):
         """read passed number of bytes at the passed address"""
         self._buf[0] = reg
-        self._buf[1] = addr >> 8
-        self._buf[2] = addr
+        self._buf[1] = (addr >> 8) & 0xFF
+        self._buf[2] = addr & 0xFF
 
         buf = bytearray(length)
         with self._spi as spi:
@@ -110,8 +110,8 @@ class Adafruit_MCP_SRAM:
     def erase(self, addr, length, value):
         """erase the passed number of bytes starting at the passed address"""
         self._buf[0] = Adafruit_MCP_SRAM.SRAM_WRITE
-        self._buf[1] = addr >> 8
-        self._buf[2] = addr
+        self._buf[1] = (addr >> 8) & 0xFF
+        self._buf[2] = addr & 0xFF
         fill = bytearray([value])
         with self._spi as spi:
             spi.write(self._buf, end=3)     # pylint: disable=no-member
