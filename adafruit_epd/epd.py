@@ -152,6 +152,10 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
 
             self._cs.value = True
             self.spi_device.unlock()
+        else:
+            if self.sram:
+                self.sram.cs_pin.value = True
+
         self.update()
 
 
