@@ -31,6 +31,9 @@ from micropython import const
 import adafruit_framebuf
 from adafruit_epd.epd import Adafruit_EPD
 
+__version__ = "0.0.0-auto.0"
+__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_EPD.git"
+
 _IL0373_PANEL_SETTING = const(0x00)
 _IL0373_POWER_SETTING = const(0x01)
 _IL0373_POWER_OFF = const(0x02)

@@ -31,6 +31,9 @@ from micropython import const
 import adafruit_framebuf
 from adafruit_epd.epd import Adafruit_EPD
 
+__version__ = "0.0.0-auto.0"
+__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_EPD.git"
+
 _SSD1608_DRIVER_CONTROL = const(0x01)
 _SSD1608_GATE_VOLTAGE = const(0x03)
 _SSD1608_SOURCE_VOLTAGE = const(0x04)
