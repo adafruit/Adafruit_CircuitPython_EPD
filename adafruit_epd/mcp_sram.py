@@ -29,6 +29,9 @@ CircuitPython driver for Microchip SRAM chips
 from micropython import const
 from adafruit_bus_device import spi_device
 
+__version__ = "0.0.0-auto.0"
+__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_EPD.git"
+
 SRAM_SEQUENTIAL_MODE = const(1 << 6)
 
 class Adafruit_MCP_SRAM_View:
