@@ -71,6 +71,11 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
 
         # SPI interface (required)
         self.spi_device = spi
+        while not self.spi_device.try_lock():
+            pass
+        self.spi_device.configure(baudrate=1000000) # 1 Mhz
+        self.spi_device.unlock()
+
         self._spibuf = bytearray(1)
         self._single_byte_tx = False
 
