@@ -19,7 +19,7 @@ busy = digitalio.DigitalInOut(board.D5)   # can be None to not use this pin
 # give them all to our driver
 print("Creating display")
 #display = Adafruit_SSD1608(200, 200, spi,        # 1.54" HD mono display
-#display = Adafruit_SSD1675(250, 122, spi,        # 2.13" HD mono display
+#display = Adafruit_SSD1675(122, 250, spi,        # 2.13" HD mono display
 #display = Adafruit_IL91874(176, 264, spi,        # 2.7" Tri-color display
 #display = Adafruit_IL0373(152, 152, spi,         # 1.54" Tri-color display
 #display = Adafruit_IL0373(128, 296, spi,         # 2.9" Tri-color display
