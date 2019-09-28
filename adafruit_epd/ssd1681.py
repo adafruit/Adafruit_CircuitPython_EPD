@@ -134,7 +134,7 @@ class Adafruit_SSD1681(Adafruit_EPD):
         self.command(_SSD1681_DRIVER_CONTROL,
                      bytearray([self._width-1, (self._width-1) >> 8, 0x00]))
         # data entry mode
-        self.command(_SSD1681_DATA_MODE, bytearray([0x01]))
+        self.command(_SSD1681_DATA_MODE, bytearray([0x03]))
         # Set ram X start/end postion
         self.command(_SSD1681_SET_RAMXPOS, bytearray([0x00, self._height//8 - 1]))
         # Set ram Y start/end postion
