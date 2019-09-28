@@ -147,17 +147,16 @@ class Adafruit_SSD1675B(Adafruit_EPD):
         # set digital block control
         self.command(_SSD1675B_SET_DIGITALBLOCK, bytearray([0x3B]))
 
-        # driver output control
         self.command(_SSD1675B_DRIVER_CONTROL,
-                     bytearray([0xF9, 0x00, 0x00]))
+                     bytearray([self._height-1, (self._height-1) >> 8, 0x00]))
 
         # Data entry sequence
-        self.command(_SSD1675B_DATA_MODE, bytearray([0x01]))
+        self.command(_SSD1675B_DATA_MODE, bytearray([0x03]))
 
         # Set ram X start/end postion
-        self.command(_SSD1675B_SET_RAMXPOS, bytearray([0x00, 0x0F]))
+        self.command(_SSD1675B_SET_RAMXPOS, bytearray([0x00, self._width // 8]))
         # Set ram Y start/end postion
-        self.command(_SSD1675B_SET_RAMYPOS, bytearray([0xF9, 0x0, 0x0, 0x0]))
+        self.command(_SSD1675B_SET_RAMYPOS, bytearray([0x0, 0x0, self._height-1, (self._height-1) >> 8]))
 
         # Border color
         self.command(_SSD1675B_WRITE_BORDER, bytearray([0x01]))
@@ -181,7 +180,7 @@ class Adafruit_SSD1675B(Adafruit_EPD):
         # Set RAM X address counter
         self.command(_SSD1675B_SET_RAMXCOUNT, bytearray([0]))
         # Set RAM Y address counter
-        self.command(_SSD1675B_SET_RAMYCOUNT, bytearray([0xF9, 0]))
+        self.command(_SSD1675B_SET_RAMYCOUNT, bytearray([self._height-1, (self._height-1) >> 8]))
 
         self.busy_wait()
 
