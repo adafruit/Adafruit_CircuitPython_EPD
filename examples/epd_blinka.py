@@ -15,11 +15,14 @@ from adafruit_epd.ssd1675 import Adafruit_SSD1675  # pylint: disable=unused-impo
 # create the spi device and pins we will need
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
 
-ecs = digitalio.DigitalInOut(board.D22)
-dc = digitalio.DigitalInOut(board.D13)
-srcs = digitalio.DigitalInOut(board.D6)
-rst = digitalio.DigitalInOut(board.D19)
-busy = digitalio.DigitalInOut(board.D26)
+# create the spi device and pins we will need
+spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
+ecs = digitalio.DigitalInOut(board.D4)
+dc = digitalio.DigitalInOut(board.D5)
+srcs = None
+rst = digitalio.DigitalInOut(board.D6)    # can be None to not use this pin
+busy = digitalio.DigitalInOut(board.D7)    # can be None to not use this pin
+
 
 
 # give them all to our driver
@@ -34,7 +37,7 @@ display = Adafruit_IL0373(104, 212, spi,          # 2.13" Tri-color display
                           cs_pin=ecs, dc_pin=dc, sramcs_pin=srcs,
                           rst_pin=rst, busy_pin=busy)
 
-
+display.rotation = 3
 # Create blank image for drawing.
 # Make sure to create image with mode '1' for 1-bit color.
 width = display.width
@@ -50,13 +53,15 @@ display.fill(Adafruit_EPD.WHITE)
 
 # Get drawing object to draw on image.
 draw = ImageDraw.Draw(image)
+# empty it
+draw.rectangle((0, 0, width, height), fill=WHITE)
 
-# Draw a white filled box to clear the image.
-draw.rectangle((0,0,width,height), outline=BLACK, fill=WHITE)
+# Draw an outline box
+draw.rectangle((1, 1, width-2, height-2), outline=BLACK, fill=WHITE)
 
 # Draw some shapes.
 # First define some constants to allow easy resizing of shapes.
-padding = 2
+padding = 5
 shape_width = 30
 top = padding
 bottom = height-padding
@@ -78,7 +83,7 @@ draw.line((x, top, x+shape_width, bottom), fill=RED)
 x += shape_width+padding
 
 # Load default font.
-font = ImageFont.load_default()
+font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 20)
 
 # Alternatively load a TTF font.  Make sure the .ttf font
 # file is in the same directory as the python script!
