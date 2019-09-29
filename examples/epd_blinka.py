@@ -38,8 +38,8 @@ display = Adafruit_SSD1675B(122, 250, spi,       # 2.13" HD mono display (rev B)
 #display = Adafruit_IL0373(128, 296, spi,         # 2.9" Tri-color display
 #display = Adafruit_IL0398(400, 300, spi,         # 4.2" Tri-color display
 #display = Adafruit_IL0373(104, 212, spi,          # 2.13" Tri-color display
-                          cs_pin=ecs, dc_pin=dc, sramcs_pin=srcs,
-                          rst_pin=rst, busy_pin=busy)
+                            cs_pin=ecs, dc_pin=dc, sramcs_pin=srcs,
+                            rst_pin=rst, busy_pin=busy)
 
 display.rotation = 3
 # Create blank image for drawing.

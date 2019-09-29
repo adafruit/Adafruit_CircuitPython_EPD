@@ -346,7 +346,7 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
         pix = image.load()
         # clear out any display buffers
         self.fill(Adafruit_EPD.WHITE)
-        
+
         for y in range(image.size[1]):
             for x in range(image.size[0]):
                 pixel = pix[x, y]

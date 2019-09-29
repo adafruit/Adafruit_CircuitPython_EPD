@@ -94,7 +94,7 @@ class Adafruit_SSD1675B(Adafruit_EPD):
     # pylint: disable=too-many-arguments
     def __init__(self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin):
         super(Adafruit_SSD1675B, self).__init__(width, height, spi, cs_pin, dc_pin,
-                                               sramcs_pin, rst_pin, busy_pin)
+                                                sramcs_pin, rst_pin, busy_pin)
         if width % 8 != 0:
             width += (8 - width % 8)
 
@@ -155,7 +155,8 @@ class Adafruit_SSD1675B(Adafruit_EPD):
         # Set ram X start/end postion
         self.command(_SSD1675B_SET_RAMXPOS, bytearray([0x00, self._width // 8]))
         # Set ram Y start/end postion
-        self.command(_SSD1675B_SET_RAMYPOS, bytearray([0x0, 0x0, self._height-1, (self._height-1) >> 8]))
+        self.command(_SSD1675B_SET_RAMYPOS,
+                     bytearray([0x0, 0x0, self._height-1, (self._height-1) >> 8]))
 
         # Border color
         self.command(_SSD1675B_WRITE_BORDER, bytearray([0x03]))
