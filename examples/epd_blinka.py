@@ -6,13 +6,13 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 from adafruit_epd.epd import Adafruit_EPD
-from adafruit_epd.il0373 import Adafruit_IL0373
-from adafruit_epd.il91874 import Adafruit_IL91874  # pylint: disable=unused-import
-from adafruit_epd.il0398 import Adafruit_IL0398    # pylint: disable=unused-import
-from adafruit_epd.ssd1608 import Adafruit_SSD1608  # pylint: disable=unused-import
-from adafruit_epd.ssd1675 import Adafruit_SSD1675  # pylint: disable=unused-import
+from adafruit_epd.il0373 import Adafruit_IL0373      # pylint: disable=unused-import
+from adafruit_epd.il91874 import Adafruit_IL91874    # pylint: disable=unused-import
+from adafruit_epd.il0398 import Adafruit_IL0398      # pylint: disable=unused-import
+from adafruit_epd.ssd1608 import Adafruit_SSD1608    # pylint: disable=unused-import
+from adafruit_epd.ssd1675 import Adafruit_SSD1675    # pylint: disable=unused-import
 from adafruit_epd.ssd1675b import Adafruit_SSD1675B  # pylint: disable=unused-import
-from adafruit_epd.ssd1681 import Adafruit_SSD1681  # pylint: disable=unused-import
+from adafruit_epd.ssd1681 import Adafruit_SSD1681    # pylint: disable=unused-import
 
 # create the spi device and pins we will need
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
@@ -32,12 +32,12 @@ print("Creating display")
 #display =  Adafruit_SSD1608(200, 200, spi,        # 1.54" HD mono display
 #display =  Adafruit_SSD1681(200, 200, spi,        # 1.54" HD mono display (alt)
 #display =  Adafruit_SSD1675(122, 250, spi,        # 2.13" HD mono display
-display = Adafruit_SSD1675B(122, 250, spi,       # 2.13" HD mono display (rev B)
 #display = Adafruit_IL91874(176, 264, spi,        # 2.7" Tri-color display
 #display =  Adafruit_IL0373(152, 152, spi,         # 1.54" Tri-color display
 #display =  Adafruit_IL0373(128, 296, spi,         # 2.9" Tri-color display
 #display =  Adafruit_IL0398(400, 300, spi,         # 4.2" Tri-color display
 #display =  Adafruit_IL0373(104, 212, spi,          # 2.13" Tri-color display
+display = Adafruit_SSD1675B(122, 250, spi,       # 2.13" HD mono display (rev B)
                             cs_pin=ecs, dc_pin=dc, sramcs_pin=srcs,
                             rst_pin=rst, busy_pin=busy)
 
