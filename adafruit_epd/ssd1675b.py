@@ -94,10 +94,11 @@ class Adafruit_SSD1675B(Adafruit_EPD):
     def __init__(self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin):
         super(Adafruit_SSD1675B, self).__init__(width, height, spi, cs_pin, dc_pin,
                                                 sramcs_pin, rst_pin, busy_pin)
-        if width % 8 != 0:
-            width += (8 - width % 8)
+        stride = width
+        if stride % 8 != 0:
+            stride += (8 - stride % 8)
 
-        self._buffer1_size = int(width * height / 8)
+        self._buffer1_size = int(stride * height / 8)
         self._buffer2_size = self._buffer1_size
 
         if sramcs_pin:
@@ -108,9 +109,9 @@ class Adafruit_SSD1675B(Adafruit_EPD):
             self._buffer2 = bytearray(self._buffer2_size)
         # since we have *two* framebuffers - one for red and one for black
         # we dont subclass but manage manually
-        self._framebuf1 = adafruit_framebuf.FrameBuffer(self._buffer1, width, height,
+        self._framebuf1 = adafruit_framebuf.FrameBuffer(self._buffer1, width, height, stride=stride,
                                                         buf_format=adafruit_framebuf.MHMSB)
-        self._framebuf2 = adafruit_framebuf.FrameBuffer(self._buffer2, width, height,
+        self._framebuf2 = adafruit_framebuf.FrameBuffer(self._buffer2, width, height, stride=stride,
                                                         buf_format=adafruit_framebuf.MHMSB)
         self.set_black_buffer(0, True)
         self.set_color_buffer(0, True)
