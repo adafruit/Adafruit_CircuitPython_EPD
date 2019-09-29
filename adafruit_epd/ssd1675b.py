@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 """
-`adafruit_epd.ssd1675` - Adafruit SSD1675 - ePaper display driver
+`adafruit_epd.ssd1675b` - Adafruit SSD1675 - ePaper display driver
 ====================================================================================
 CircuitPython driver for Adafruit SSD1675 display breakouts
 * Author(s): Dean Miller, Ladyada
