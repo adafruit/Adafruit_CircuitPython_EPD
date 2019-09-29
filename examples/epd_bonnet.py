@@ -1,12 +1,20 @@
+import time
 import digitalio
 import busio
 import board
+from digitalio import DigitalInOut, Direction, Pull
 
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 from adafruit_epd.epd import Adafruit_EPD
 from adafruit_epd.ssd1675b import Adafruit_SSD1675B  # pylint: disable=unused-import
+
+# create two buttons
+switch1 = DigitalInOut(board.D6)
+switch2 = DigitalInOut(board.D5)
+switch1.direction = Direction.INPUT
+switch2.direction = Direction.INPUT
 
 # create the spi device and pins we will need
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
@@ -32,6 +40,8 @@ BLACK = (0x00, 0x00, 0x00)
 
 # clear the buffer
 display.fill(Adafruit_EPD.WHITE)
+# clear it out
+display.display()
 
 # Get drawing object to draw on image.
 draw = ImageDraw.Draw(image)
@@ -74,7 +84,18 @@ font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 20)
 # Write two lines of text.
 draw.text((x, top),    'Hello',  font=font, fill=BLACK)
 draw.text((x, top+20), 'World!', font=font, fill=BLACK)
-# Display image.
-display.image(image)
 
-display.display()
+while True:
+    if not switch1.value:
+        print("Switch 1")
+        display.image(image)
+        display.display()
+        while not switch1.value:
+            time.sleep(0.01)
+    if not switch2.value:
+        print("Switch 2")
+        display.fill(Adafruit_EPD.WHITE)
+        display.display()
+        while not switch2.value:
+            time.sleep(0.01)
+    time.sleep(0.01)
