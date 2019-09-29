@@ -89,7 +89,6 @@ _SSD1675B_SET_DIGITALBLOCK = const(0x7E)
 _SSD1675B_NOP = const(0xFF)
 _LUT_DATA = b'\xa0\x90P\x00\x00\x00\x00\x00\x00\x00P\x90\xa0\x00\x00\x00\x00\x00\x00\x00\xa0\x90P\x00\x00\x00\x00\x00\x00\x00P\x90\xa0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x0f\x0f\x00\x00\x00\x0f\x0f\x00\x00\x03\x0f\x0f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x15A\xa82P,\x0b' # pylint: disable=line-too-long
 
-
 class Adafruit_SSD1675B(Adafruit_EPD):
     """driver class for Adafruit SSD1675B ePaper display breakouts"""
     # pylint: disable=too-many-arguments
@@ -115,7 +114,7 @@ class Adafruit_SSD1675B(Adafruit_EPD):
         self._framebuf2 = adafruit_framebuf.FrameBuffer(self._buffer2, width, height,
                                                         buf_format=adafruit_framebuf.MHMSB)
         self.set_black_buffer(0, True)
-        self.set_color_buffer(1, True)
+        self.set_color_buffer(0, True)
         # pylint: enable=too-many-arguments
 
     def begin(self, reset=True):
@@ -159,7 +158,7 @@ class Adafruit_SSD1675B(Adafruit_EPD):
         self.command(_SSD1675B_SET_RAMYPOS, bytearray([0x0, 0x0, self._height-1, (self._height-1) >> 8]))
 
         # Border color
-        self.command(_SSD1675B_WRITE_BORDER, bytearray([0x01]))
+        self.command(_SSD1675B_WRITE_BORDER, bytearray([0x03]))
 
         # Vcom Voltage
         self.command(_SSD1675B_WRITE_VCOM_REG, bytearray([0x50]))
@@ -191,7 +190,7 @@ class Adafruit_SSD1675B(Adafruit_EPD):
 
     def update(self):
         """Update the display from internal memory"""
-        self.command(_SSD1675B_DISP_CTRL2, bytearray([0xFF]))
+        self.command(_SSD1675B_DISP_CTRL2, bytearray([0xC7]))
         self.command(_SSD1675B_MASTER_ACTIVATE)
         self.busy_wait()
         if not self._busy:
