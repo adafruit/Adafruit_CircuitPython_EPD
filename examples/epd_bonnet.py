@@ -1,8 +1,7 @@
 import time
-import digitalio
 import busio
 import board
-from digitalio import DigitalInOut, Direction, Pull
+from digitalio import DigitalInOut, Direction
 
 from PIL import Image
 from PIL import ImageDraw
@@ -18,10 +17,10 @@ switch2.direction = Direction.INPUT
 
 # create the spi device and pins we will need
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
-ecs = digitalio.DigitalInOut(board.D8)
-dc = digitalio.DigitalInOut(board.D22)
-rst = digitalio.DigitalInOut(board.D27)
-busy = digitalio.DigitalInOut(board.D17)
+ecs = DigitalInOut(board.D8)
+dc = DigitalInOut(board.D22)
+rst = DigitalInOut(board.D27)
+busy = DigitalInOut(board.D17)
 
 # give them all to our driver
 display = Adafruit_SSD1675B(122, 250, spi,       # 2.13" HD mono display (rev B)
