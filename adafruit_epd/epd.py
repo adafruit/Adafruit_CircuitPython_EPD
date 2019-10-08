@@ -340,24 +340,19 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
         if imwidth != self.width or imheight != self.height:
             raise ValueError('Image must be same dimensions as display ({0}x{1}).' \
                 .format(self.width, self.height))
+        if self.sram:
+            raise RuntimeError("PIL image is not for use with SRAM assist")
         # Grab all the pixels from the image, faster than getpixel.
         pix = image.load()
+        # clear out any display buffers
+        self.fill(Adafruit_EPD.WHITE)
 
-        for y in iter(range(image.size[1])):
-            for x in iter(range(image.size[0])):
-                if x == 0:
-                    x = 1
+        for y in range(image.size[1]):
+            for x in range(image.size[0]):
                 pixel = pix[x, y]
-
-                addr = int(((self._width - x) * self._height + y)/8)
-
-                if pixel == (0xFF, 0, 0):
-                    addr = addr + self._buffer1_size
-                current = self.sram.read8(addr)
-
-                if pixel in ((0xFF, 0, 0), (0, 0, 0)):
-                    current = current & ~(1 << (7 - y%8))
-                else:
-                    current = current | (1 << (7 - y%8))
-
-                self.sram.write8(addr, current)
+                if (pixel[0] >= 0x80) and (pixel[1] < 0x80) and (pixel[2] < 0x80):
+                    # reddish
+                    self.pixel(x, y, Adafruit_EPD.RED)
+                elif (pixel[0] < 0x80) and (pixel[1] < 0x80) and (pixel[2] < 0x80):
+                    # dark
+                    self.pixel(x, y, Adafruit_EPD.BLACK)
