@@ -9,7 +9,7 @@ Written by Melissa LeBlanc-Williams for Adafruit Industries
 import digitalio
 import busio
 import board
-from PIL import Image, ImageDraw
+from PIL import Image
 from adafruit_epd.il0373 import Adafruit_IL0373
 from adafruit_epd.il91874 import Adafruit_IL91874    # pylint: disable=unused-import
 from adafruit_epd.il0398 import Adafruit_IL0398      # pylint: disable=unused-import
@@ -42,14 +42,7 @@ display = Adafruit_IL0373(104, 212, spi,          # 2.13" Tri-color display
 
 display.rotation = 1
 
-FILENAME = "blinka.png"
-
-image = Image.new('RGB', (display.width, display.height))
-
-# Get drawing object to draw on image.
-draw = ImageDraw.Draw(image)
-
-image = Image.open(FILENAME)
+image = Image.open("blinka.png")
 
 # Scale the image to the smaller screen dimension
 image_ratio = image.width / image.height
