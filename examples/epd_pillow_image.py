@@ -44,10 +44,7 @@ display.rotation = 1
 
 FILENAME = "blinka.png"
 
-width = display.width
-height = display.height
-
-image = Image.new('RGB', (width, height))
+image = Image.new('RGB', (display.width, display.height))
 
 # Get drawing object to draw on image.
 draw = ImageDraw.Draw(image)
@@ -56,19 +53,19 @@ image = Image.open(FILENAME)
 
 # Scale the image to the smaller screen dimension
 image_ratio = image.width / image.height
-screen_ratio = width / height
+screen_ratio = display.width / display.height
 if screen_ratio < image_ratio:
-    scaled_width = image.width * height // image.height
-    scaled_height = height
+    scaled_width = image.width * display.height // image.height
+    scaled_height = display.height
 else:
-    scaled_width = width
-    scaled_height = image.height * width // image.width
+    scaled_width = display.width
+    scaled_height = image.height * display.width // image.width
 image = image.resize((scaled_width, scaled_height), Image.BICUBIC)
 
 # Crop and center the image
-x = scaled_width // 2 - width // 2
-y = scaled_height // 2 - height // 2
-image = image.crop((x, y, x + width, y + height))
+x = scaled_width // 2 - display.width // 2
+y = scaled_height // 2 - display.height // 2
+image = image.crop((x, y, x + display.width, y + display.height))
 
 # Display image.
 display.image(image)
