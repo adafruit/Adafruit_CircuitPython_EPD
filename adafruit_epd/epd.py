@@ -72,7 +72,7 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
         # SPI interface (required)
         self.spi_device = spi
         while not self.spi_device.try_lock():
-            pass
+            sleep(0.01)
         self.spi_device.configure(baudrate=1000000) # 1 Mhz
         self.spi_device.unlock()
 
@@ -99,7 +99,7 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
 
         if self.sram:
             while not self.spi_device.try_lock():
-                pass
+                sleep(0.01)
             self.sram.cs_pin.value = False
             #send read command
             self._buf[0] = mcp_sram.Adafruit_MCP_SRAM.SRAM_READ
@@ -114,7 +114,7 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
         databyte = self.write_ram(0)
 
         while not self.spi_device.try_lock():
-            pass
+            sleep(0.01)
         self._dc.value = True
 
         if self.sram:
@@ -131,7 +131,7 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
 
         if self.sram:
             while not self.spi_device.try_lock():
-                pass
+                sleep(0.01)
             self.sram.cs_pin.value = False
             #send read command
             self._buf[0] = mcp_sram.Adafruit_MCP_SRAM.SRAM_READ
@@ -147,7 +147,7 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
             databyte = self.write_ram(1)
 
             while not self.spi_device.try_lock():
-                pass
+                sleep(0.01)
             self._dc.value = True
 
             if self.sram:
@@ -182,7 +182,7 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
         self._cs.value = False
 
         while not self.spi_device.try_lock():
-            pass
+            sleep(0.01)
         ret = self._spi_transfer(cmd)
 
         if data is not None:
