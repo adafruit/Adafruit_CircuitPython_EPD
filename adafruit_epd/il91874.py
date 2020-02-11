@@ -105,7 +105,7 @@ class Adafruit_IL91874(Adafruit_EPD):
         busy pin, or pausing"""
         if self._busy:
             while not self._busy.value:
-                pass
+                time.sleep(0.01)
         else:
             time.sleep(0.5)
 
