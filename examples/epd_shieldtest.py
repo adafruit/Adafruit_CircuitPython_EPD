@@ -11,15 +11,23 @@ from adafruit_epd.il91874 import Adafruit_IL91874
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
 ecs = digitalio.DigitalInOut(board.D10)
 dc = digitalio.DigitalInOut(board.D9)
-srcs = digitalio.DigitalInOut(board.D8)    # can be None to use internal memory
+srcs = digitalio.DigitalInOut(board.D8)  # can be None to use internal memory
 
 # give them all to our driver
 print("Creating display")
-display = Adafruit_IL91874(176, 264, spi,         # 2.7" Tri-color display
-                           cs_pin=ecs, dc_pin=dc, sramcs_pin=srcs,
-                           rst_pin=None, busy_pin=None)
+display = Adafruit_IL91874(
+    176,
+    264,
+    spi,  # 2.7" Tri-color display
+    cs_pin=ecs,
+    dc_pin=dc,
+    sramcs_pin=srcs,
+    rst_pin=None,
+    busy_pin=None,
+)
 
 display.rotation = 1
+
 
 def read_buttons():
     with AnalogIn(board.A3) as ain:
@@ -33,6 +41,7 @@ def read_buttons():
         if reading > 0.13:
             return 2
         return 1
+
 
 while True:
     button = read_buttons()
@@ -50,11 +59,11 @@ while True:
         display.display()
     if button == 3:
         print("Draw lines")
-        display.line(0, 0, display.width-1, display.height-1, Adafruit_EPD.BLACK)
-        display.line(0, display.height-1, display.width-1, 0, Adafruit_EPD.RED)
+        display.line(0, 0, display.width - 1, display.height - 1, Adafruit_EPD.BLACK)
+        display.line(0, display.height - 1, display.width - 1, 0, Adafruit_EPD.RED)
         display.display()
     if button == 4:
         print("Draw text")
-        display.text('hello world', 25, 10, Adafruit_EPD.BLACK)
+        display.text("hello world", 25, 10, Adafruit_EPD.BLACK)
         display.display()
     time.sleep(0.01)

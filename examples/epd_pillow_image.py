@@ -11,9 +11,9 @@ import busio
 import board
 from PIL import Image
 from adafruit_epd.il0373 import Adafruit_IL0373
-from adafruit_epd.il91874 import Adafruit_IL91874    # pylint: disable=unused-import
-from adafruit_epd.il0398 import Adafruit_IL0398      # pylint: disable=unused-import
-from adafruit_epd.ssd1608 import Adafruit_SSD1608    # pylint: disable=unused-import
+from adafruit_epd.il91874 import Adafruit_IL91874  # pylint: disable=unused-import
+from adafruit_epd.il0398 import Adafruit_IL0398  # pylint: disable=unused-import
+from adafruit_epd.ssd1608 import Adafruit_SSD1608  # pylint: disable=unused-import
 from adafruit_epd.ssd1675 import Adafruit_SSD1675  # pylint: disable=unused-import
 
 
@@ -26,19 +26,26 @@ rst = digitalio.DigitalInOut(board.D27)
 busy = digitalio.DigitalInOut(board.D17)
 
 # give them all to our driver
-#display = Adafruit_SSD1608(200, 200, spi,        # 1.54" HD mono display
-#display = Adafruit_SSD1675(122, 250, spi,        # 2.13" HD mono display
-#display = Adafruit_IL91874(176, 264, spi,        # 2.7" Tri-color display
-#display = Adafruit_IL0373(152, 152, spi,         # 1.54" Tri-color display
-#display = Adafruit_IL0373(128, 296, spi,         # 2.9" Tri-color display
-#display = Adafruit_IL0398(400, 300, spi,         # 4.2" Tri-color display
-display = Adafruit_IL0373(104, 212, spi,          # 2.13" Tri-color display
-                          cs_pin=ecs, dc_pin=dc, sramcs_pin=srcs,
-                          rst_pin=rst, busy_pin=busy)
+# display = Adafruit_SSD1608(200, 200, spi,        # 1.54" HD mono display
+# display = Adafruit_SSD1675(122, 250, spi,        # 2.13" HD mono display
+# display = Adafruit_IL91874(176, 264, spi,        # 2.7" Tri-color display
+# display = Adafruit_IL0373(152, 152, spi,         # 1.54" Tri-color display
+# display = Adafruit_IL0373(128, 296, spi,         # 2.9" Tri-color display
+# display = Adafruit_IL0398(400, 300, spi,         # 4.2" Tri-color display
+display = Adafruit_IL0373(
+    104,
+    212,
+    spi,  # 2.13" Tri-color display
+    cs_pin=ecs,
+    dc_pin=dc,
+    sramcs_pin=srcs,
+    rst_pin=rst,
+    busy_pin=busy,
+)
 
 # IF YOU HAVE A FLEXIBLE DISPLAY (2.13" or 2.9") uncomment these lines!
-#display.set_black_buffer(1, False)
-#display.set_color_buffer(1, False)
+# display.set_black_buffer(1, False)
+# display.set_color_buffer(1, False)
 
 display.rotation = 1
 

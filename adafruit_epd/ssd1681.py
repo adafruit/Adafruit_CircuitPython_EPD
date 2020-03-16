@@ -83,17 +83,22 @@ _SSD1681_SET_RAMXCOUNT = const(0x4E)
 _SSD1681_SET_RAMYCOUNT = const(0x4F)
 _SSD1681_NOP = const(0xFF)
 
-_LUT_DATA = b'\x02\x02\x01\x11\x12\x12""fiiYX\x99\x99\x88\x00\x00\x00\x00\xf8\xb4\x13Q5QQ\x19\x01\x00' # pylint: disable=line-too-long
+_LUT_DATA = b'\x02\x02\x01\x11\x12\x12""fiiYX\x99\x99\x88\x00\x00\x00\x00\xf8\xb4\x13Q5QQ\x19\x01\x00'  # pylint: disable=line-too-long
+
 
 class Adafruit_SSD1681(Adafruit_EPD):
     """driver class for Adafruit SSD1681 ePaper display breakouts"""
+
     # pylint: disable=too-many-arguments
-    def __init__(self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin):
-        super(Adafruit_SSD1681, self).__init__(width, height, spi, cs_pin, dc_pin,
-                                               sramcs_pin, rst_pin, busy_pin)
+    def __init__(
+        self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
+    ):
+        super(Adafruit_SSD1681, self).__init__(
+            width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
+        )
 
         if height % 8 != 0:
-            height += (8 - height % 8)
+            height += 8 - height % 8
             self._height = height
 
         self._buffer1_size = int(width * height / 8)
@@ -102,8 +107,9 @@ class Adafruit_SSD1681(Adafruit_EPD):
             self._buffer1 = self.sram.get_view(0)
         else:
             self._buffer1 = bytearray((width * height) // 8)
-        self._framebuf1 = adafruit_framebuf.FrameBuffer(self._buffer1, width, height,
-                                                        buf_format=adafruit_framebuf.MHMSB)
+        self._framebuf1 = adafruit_framebuf.FrameBuffer(
+            self._buffer1, width, height, buf_format=adafruit_framebuf.MHMSB
+        )
         self.set_black_buffer(0, True)
         self.set_color_buffer(0, True)
         # pylint: enable=too-many-arguments
@@ -130,15 +136,19 @@ class Adafruit_SSD1681(Adafruit_EPD):
         self.command(_SSD1681_SW_RESET)
         self.busy_wait()
         # driver output control
-        self.command(_SSD1681_DRIVER_CONTROL,
-                     bytearray([self._width-1, (self._width-1) >> 8, 0x00]))
+        self.command(
+            _SSD1681_DRIVER_CONTROL,
+            bytearray([self._width - 1, (self._width - 1) >> 8, 0x00]),
+        )
         # data entry mode
         self.command(_SSD1681_DATA_MODE, bytearray([0x03]))
         # Set ram X start/end postion
-        self.command(_SSD1681_SET_RAMXPOS, bytearray([0x00, self._height//8 - 1]))
+        self.command(_SSD1681_SET_RAMXPOS, bytearray([0x00, self._height // 8 - 1]))
         # Set ram Y start/end postion
-        self.command(_SSD1681_SET_RAMYPOS,
-                     bytearray([0, 0, self._height - 1, (self._height - 1) >> 8]))
+        self.command(
+            _SSD1681_SET_RAMYPOS,
+            bytearray([0, 0, self._height - 1, (self._height - 1) >> 8]),
+        )
         # Set border waveform
         self.command(_SSD1681_WRITE_BORDER, bytearray([0x05]))
         # Set temperature control
@@ -157,7 +167,7 @@ class Adafruit_SSD1681(Adafruit_EPD):
         self.command(_SSD1681_MASTER_ACTIVATE)
         self.busy_wait()
         if not self._busy:
-            time.sleep(3)   # wait 3 seconds
+            time.sleep(3)  # wait 3 seconds
 
     def write_ram(self, index):
         """Send the one byte command for starting the RAM write process. Returns
@@ -167,10 +177,10 @@ class Adafruit_SSD1681(Adafruit_EPD):
             return self.command(_SSD1681_WRITE_BWRAM, end=False)
         raise RuntimeError("RAM index must be 0")
 
-    def set_ram_address(self, x, y): # pylint: disable=unused-argument, no-self-use
+    def set_ram_address(self, x, y):  # pylint: disable=unused-argument, no-self-use
         """Set the RAM address location, not used on this chipset but required by
         the superclass"""
         # Set RAM X address counter
         self.command(_SSD1681_SET_RAMXCOUNT, bytearray([x]))
         # Set RAM Y address counter
-        self.command(_SSD1681_SET_RAMYCOUNT, bytearray([y>>8, y]))
+        self.command(_SSD1681_SET_RAMYCOUNT, bytearray([y >> 8, y]))

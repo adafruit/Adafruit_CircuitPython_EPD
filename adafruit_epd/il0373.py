@@ -59,12 +59,17 @@ _IL0373_CDI = const(0x50)
 _IL0373_RESOLUTION = const(0x61)
 _IL0373_VCM_DC_SETTING = const(0x82)
 
+
 class Adafruit_IL0373(Adafruit_EPD):
     """driver class for Adafruit IL0373 ePaper display breakouts"""
+
     # pylint: disable=too-many-arguments
-    def __init__(self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin):
-        super(Adafruit_IL0373, self).__init__(width, height, spi, cs_pin, dc_pin,
-                                              sramcs_pin, rst_pin, busy_pin)
+    def __init__(
+        self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
+    ):
+        super(Adafruit_IL0373, self).__init__(
+            width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
+        )
 
         self._buffer1_size = int(width * height / 8)
         self._buffer2_size = int(width * height / 8)
@@ -77,10 +82,12 @@ class Adafruit_IL0373(Adafruit_EPD):
             self._buffer2 = bytearray((width * height) // 8)
         # since we have *two* framebuffers - one for red and one for black
         # we dont subclass but manage manually
-        self._framebuf1 = adafruit_framebuf.FrameBuffer(self._buffer1, width, height,
-                                                        buf_format=adafruit_framebuf.MHMSB)
-        self._framebuf2 = adafruit_framebuf.FrameBuffer(self._buffer2, width, height,
-                                                        buf_format=adafruit_framebuf.MHMSB)
+        self._framebuf1 = adafruit_framebuf.FrameBuffer(
+            self._buffer1, width, height, buf_format=adafruit_framebuf.MHMSB
+        )
+        self._framebuf2 = adafruit_framebuf.FrameBuffer(
+            self._buffer2, width, height, buf_format=adafruit_framebuf.MHMSB
+        )
         self.set_black_buffer(0, True)
         self.set_color_buffer(1, True)
         # pylint: enable=too-many-arguments
@@ -105,7 +112,7 @@ class Adafruit_IL0373(Adafruit_EPD):
         self.hardware_reset()
         self.busy_wait()
 
-        self.command(_IL0373_POWER_SETTING, bytearray([0x03, 0x00, 0x2b, 0x2b, 0x09]))
+        self.command(_IL0373_POWER_SETTING, bytearray([0x03, 0x00, 0x2B, 0x2B, 0x09]))
         self.command(_IL0373_BOOSTER_SOFT_START, bytearray([0x17, 0x17, 0x17]))
         self.command(_IL0373_POWER_ON)
 
@@ -134,7 +141,7 @@ class Adafruit_IL0373(Adafruit_EPD):
         time.sleep(0.1)
         self.busy_wait()
         if not self._busy:
-            time.sleep(15)   # wait 15 seconds
+            time.sleep(15)  # wait 15 seconds
 
     def write_ram(self, index):
         """Send the one byte command for starting the RAM write process. Returns
@@ -146,7 +153,7 @@ class Adafruit_IL0373(Adafruit_EPD):
             return self.command(_IL0373_DTM2, end=False)
         raise RuntimeError("RAM index must be 0 or 1")
 
-    def set_ram_address(self, x, y): # pylint: disable=unused-argument, no-self-use
+    def set_ram_address(self, x, y):  # pylint: disable=unused-argument, no-self-use
         """Set the RAM address location, not used on this chipset but required by
         the superclass"""
-        return # on this chip it does nothing
+        return  # on this chip it does nothing

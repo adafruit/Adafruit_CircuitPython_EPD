@@ -34,9 +34,11 @@ from adafruit_epd import mcp_sram
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_EPD.git"
 
-class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-public-methods
+
+class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-public-methods
     """Base class for EPD displays
     """
+
     BLACK = const(0)
     WHITE = const(1)
     INVERSE = const(2)
@@ -44,8 +46,9 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
     DARK = const(4)
     LIGHT = const(5)
 
-
-    def __init__(self, width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin): # pylint: disable=too-many-arguments
+    def __init__(
+        self, width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
+    ):  # pylint: disable=too-many-arguments
         self._width = width
         self._height = height
 
@@ -73,7 +76,7 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
         self.spi_device = spi
         while not self.spi_device.try_lock():
             time.sleep(0.01)
-        self.spi_device.configure(baudrate=1000000) # 1 Mhz
+        self.spi_device.configure(baudrate=1000000)  # 1 Mhz
         self.spi_device.unlock()
 
         self._spibuf = bytearray(1)
@@ -101,16 +104,16 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
             while not self.spi_device.try_lock():
                 time.sleep(0.01)
             self.sram.cs_pin.value = False
-            #send read command
+            # send read command
             self._buf[0] = mcp_sram.Adafruit_MCP_SRAM.SRAM_READ
-            #send start address
+            # send start address
             self._buf[1] = 0
             self._buf[2] = 0
             self.spi_device.write(self._buf, end=3)
             self.spi_device.unlock()
 
-        #first data byte from SRAM will be transfered in at the
-        #same time as the EPD command is transferred out
+        # first data byte from SRAM will be transfered in at the
+        # same time as the EPD command is transferred out
         databyte = self.write_ram(0)
 
         while not self.spi_device.try_lock():
@@ -127,23 +130,23 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
 
         self._cs.value = True
         self.spi_device.unlock()
-        time.sleep(.002)
+        time.sleep(0.002)
 
         if self.sram:
             while not self.spi_device.try_lock():
                 time.sleep(0.01)
             self.sram.cs_pin.value = False
-            #send read command
+            # send read command
             self._buf[0] = mcp_sram.Adafruit_MCP_SRAM.SRAM_READ
-            #send start address
+            # send start address
             self._buf[1] = (self._buffer1_size >> 8) & 0xFF
             self._buf[2] = self._buffer1_size & 0xFF
             self.spi_device.write(self._buf, end=3)
             self.spi_device.unlock()
 
         if self._buffer2_size != 0:
-            #first data byte from SRAM will be transfered in at the
-            #same time as the EPD command is transferred out
+            # first data byte from SRAM will be transfered in at the
+            # same time as the EPD command is transferred out
             databyte = self.write_ram(1)
 
             while not self.spi_device.try_lock():
@@ -165,7 +168,6 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
                 self.sram.cs_pin.value = True
 
         self.update()
-
 
     def hardware_reset(self):
         """If we have a reset pin, do a hardware reset by toggling it"""
@@ -251,7 +253,7 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
     def _color_dup(self, func, args, color):
         black = getattr(self._blackframebuf, func)
         red = getattr(self._colorframebuf, func)
-        if self._blackframebuf is self._colorframebuf:   # monochrome
+        if self._blackframebuf is self._colorframebuf:  # monochrome
             black(*args, color=(color != Adafruit_EPD.WHITE) != self._black_inverted)
         else:
             black(*args, color=(color == Adafruit_EPD.BLACK) != self._black_inverted)
@@ -259,7 +261,7 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
 
     def pixel(self, x, y, color):
         """draw a single pixel in the display buffer"""
-        self._color_dup('pixel', (x, y), color)
+        self._color_dup("pixel", (x, y), color)
 
     def fill(self, color):
         """fill the screen with the passed color"""
@@ -273,28 +275,45 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
             self._blackframebuf.fill(black_fill)
             self._colorframebuf.fill(red_fill)
 
-    def rect(self, x, y, width, height, color):     # pylint: disable=too-many-arguments
+    def rect(self, x, y, width, height, color):  # pylint: disable=too-many-arguments
         """draw a rectangle"""
-        self._color_dup('rect', (x, y, width, height), color)
+        self._color_dup("rect", (x, y, width, height), color)
 
-    def fill_rect(self, x, y, width, height, color):     # pylint: disable=too-many-arguments
+    def fill_rect(
+        self, x, y, width, height, color
+    ):  # pylint: disable=too-many-arguments
         """fill a rectangle with the passed color"""
-        self._color_dup('fill_rect', (x, y, width, height), color)
+        self._color_dup("fill_rect", (x, y, width, height), color)
 
-    def line(self, x_0, y_0, x_1, y_1, color):     # pylint: disable=too-many-arguments
+    def line(self, x_0, y_0, x_1, y_1, color):  # pylint: disable=too-many-arguments
         """Draw a line from (x_0, y_0) to (x_1, y_1) in passed color"""
-        self._color_dup('line', (x_0, y_0, x_1, y_1), color)
+        self._color_dup("line", (x_0, y_0, x_1, y_1), color)
 
     def text(self, string, x, y, color, *, font_name="font5x8.bin"):
         """Write text string at location (x, y) in given color, using font file"""
-        if self._blackframebuf is self._colorframebuf:   # monochrome
-            self._blackframebuf.text(string, x, y, font_name=font_name,
-                                     color=(color != Adafruit_EPD.WHITE) != self._black_inverted)
+        if self._blackframebuf is self._colorframebuf:  # monochrome
+            self._blackframebuf.text(
+                string,
+                x,
+                y,
+                font_name=font_name,
+                color=(color != Adafruit_EPD.WHITE) != self._black_inverted,
+            )
         else:
-            self._blackframebuf.text(string, x, y, font_name=font_name,
-                                     color=(color == Adafruit_EPD.BLACK) != self._black_inverted)
-            self._colorframebuf.text(string, x, y, font_name=font_name,
-                                     color=(color == Adafruit_EPD.RED) != self._color_inverted)
+            self._blackframebuf.text(
+                string,
+                x,
+                y,
+                font_name=font_name,
+                color=(color == Adafruit_EPD.BLACK) != self._black_inverted,
+            )
+            self._colorframebuf.text(
+                string,
+                x,
+                y,
+                font_name=font_name,
+                color=(color == Adafruit_EPD.RED) != self._color_inverted,
+            )
 
     @property
     def width(self):
@@ -329,17 +348,19 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
         """draw a vertical line"""
         self.fill_rect(x, y, 1, height, color)
 
-
     def image(self, image):
         """Set buffer to value of Python Imaging Library image.  The image should
         be in RGB mode and a size equal to the display size.
         """
-        if image.mode != 'RGB':
-            raise ValueError('Image must be in mode RGB.')
+        if image.mode != "RGB":
+            raise ValueError("Image must be in mode RGB.")
         imwidth, imheight = image.size
         if imwidth != self.width or imheight != self.height:
-            raise ValueError('Image must be same dimensions as display ({0}x{1}).' \
-                .format(self.width, self.height))
+            raise ValueError(
+                "Image must be same dimensions as display ({0}x{1}).".format(
+                    self.width, self.height
+                )
+            )
         if self.sram:
             raise RuntimeError("PIL image is not for use with SRAM assist")
         # Grab all the pixels from the image, faster than getpixel.
@@ -350,7 +371,7 @@ class Adafruit_EPD: # pylint: disable=too-many-instance-attributes, too-many-pub
         for y in range(image.size[1]):
             for x in range(image.size[0]):
                 pixel = pix[x, y]
-                if (pixel[0] >= 0x80) and (pixel[1] < 0x80) and (pixel[2] < 0x80):
+                if (pixel[1] < 0x80 <= pixel[0]) and (pixel[2] < 0x80):
                     # reddish
                     self.pixel(x, y, Adafruit_EPD.RED)
                 elif (pixel[0] < 0x80) and (pixel[1] < 0x80) and (pixel[2] < 0x80):
