@@ -34,23 +34,27 @@ __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_EPD.git"
 
 SRAM_SEQUENTIAL_MODE = const(1 << 6)
 
+
 class Adafruit_MCP_SRAM_View:
     """A interface class that turns an SRAM chip into something like a memoryview"""
+
     def __init__(self, sram, offset):
         self._sram = sram
         self._offset = offset
         self._buf = [0]
 
     def __getitem__(self, i):
-        return self._sram.read(self._offset+i, 1)[0]
+        return self._sram.read(self._offset + i, 1)[0]
 
     def __setitem__(self, i, val):
         self._buf[0] = val
-        self._sram.write(self._offset+i, self._buf)
+        self._sram.write(self._offset + i, self._buf)
+
 
 class Adafruit_MCP_SRAM:
     """supporting class for communicating with
     Microchip SRAM chips"""
+
     SRAM_READ = 0x03
     SRAM_WRITE = 0x02
     SRAM_RDSR = 0x05
@@ -65,7 +69,7 @@ class Adafruit_MCP_SRAM:
         self._buf[0] = Adafruit_MCP_SRAM.SRAM_WRSR
         self._buf[1] = 0x43
         with self._spi as spidev:
-            spidev.write(self._buf, end=2)   # pylint: disable=no-member
+            spidev.write(self._buf, end=2)  # pylint: disable=no-member
 
     def get_view(self, offset):
         """Create an object that can be used as a memoryview, with a given offset"""
@@ -78,8 +82,8 @@ class Adafruit_MCP_SRAM:
         self._buf[2] = addr & 0xFF
 
         with self._spi as spi:
-            spi.write(self._buf, end=3)    # pylint: disable=no-member
-            spi.write(bytearray(buf))      # pylint: disable=no-member
+            spi.write(self._buf, end=3)  # pylint: disable=no-member
+            spi.write(bytearray(buf))  # pylint: disable=no-member
 
     def read(self, addr, length, reg=SRAM_READ):
         """read passed number of bytes at the passed address"""
@@ -89,8 +93,8 @@ class Adafruit_MCP_SRAM:
 
         buf = bytearray(length)
         with self._spi as spi:
-            spi.write(self._buf, end=3)   # pylint: disable=no-member
-            spi.readinto(buf)             # pylint: disable=no-member
+            spi.write(self._buf, end=3)  # pylint: disable=no-member
+            spi.readinto(buf)  # pylint: disable=no-member
         return buf
 
     def read8(self, addr, reg=SRAM_READ):
@@ -117,6 +121,6 @@ class Adafruit_MCP_SRAM:
         self._buf[2] = addr & 0xFF
         fill = bytearray([value])
         with self._spi as spi:
-            spi.write(self._buf, end=3)     # pylint: disable=no-member
+            spi.write(self._buf, end=3)  # pylint: disable=no-member
             for _ in range(length):
-                spi.write(fill)             # pylint: disable=no-member
+                spi.write(fill)  # pylint: disable=no-member

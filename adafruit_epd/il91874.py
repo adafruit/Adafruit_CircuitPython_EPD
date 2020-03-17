@@ -60,19 +60,24 @@ _IL91874_RESOLUTION = const(0x61)
 _IL91874_VCM_DC_SETTING = const(0x82)
 
 # pylint: disable=line-too-long
-_LUT_VCOMDC = b'\x00\x00\x00\x1a\x1a\x00\x00\x01\x00\n\n\x00\x00\x08\x00\x0e\x01\x0e\x01\x10\x00\n\n\x00\x00\x08\x00\x04\x10\x00\x00\x05\x00\x03\x0e\x00\x00\n\x00#\x00\x00\x00\x01'
-_LUT_WW = b'\x90\x1a\x1a\x00\x00\x01@\n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x80\n\n\x00\x00\x08\x00\x04\x10\x00\x00\x05\x00\x03\x0e\x00\x00\n\x00#\x00\x00\x00\x01'
-_LUT_BW = b'\xa0\x1a\x1a\x00\x00\x01\x00\n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x90\n\n\x00\x00\x08\xb0\x04\x10\x00\x00\x05\xb0\x03\x0e\x00\x00\n\xc0#\x00\x00\x00\x01'
-_LUT_BB = b'\x90\x1a\x1a\x00\x00\x01@\n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x80\n\n\x00\x00\x08\x00\x04\x10\x00\x00\x05\x00\x03\x0e\x00\x00\n\x00#\x00\x00\x00\x01'
-_LUT_WB = b'\x90\x1a\x1a\x00\x00\x01 \n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x10\n\n\x00\x00\x08\x00\x04\x10\x00\x00\x05\x00\x03\x0e\x00\x00\n\x00#\x00\x00\x00\x01'
+_LUT_VCOMDC = b"\x00\x00\x00\x1a\x1a\x00\x00\x01\x00\n\n\x00\x00\x08\x00\x0e\x01\x0e\x01\x10\x00\n\n\x00\x00\x08\x00\x04\x10\x00\x00\x05\x00\x03\x0e\x00\x00\n\x00#\x00\x00\x00\x01"
+_LUT_WW = b"\x90\x1a\x1a\x00\x00\x01@\n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x80\n\n\x00\x00\x08\x00\x04\x10\x00\x00\x05\x00\x03\x0e\x00\x00\n\x00#\x00\x00\x00\x01"
+_LUT_BW = b"\xa0\x1a\x1a\x00\x00\x01\x00\n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x90\n\n\x00\x00\x08\xb0\x04\x10\x00\x00\x05\xb0\x03\x0e\x00\x00\n\xc0#\x00\x00\x00\x01"
+_LUT_BB = b"\x90\x1a\x1a\x00\x00\x01@\n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x80\n\n\x00\x00\x08\x00\x04\x10\x00\x00\x05\x00\x03\x0e\x00\x00\n\x00#\x00\x00\x00\x01"
+_LUT_WB = b"\x90\x1a\x1a\x00\x00\x01 \n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x10\n\n\x00\x00\x08\x00\x04\x10\x00\x00\x05\x00\x03\x0e\x00\x00\n\x00#\x00\x00\x00\x01"
 # pylint: enable=line-too-long
+
 
 class Adafruit_IL91874(Adafruit_EPD):
     """driver class for Adafruit IL91874 ePaper display breakouts"""
+
     # pylint: disable=too-many-arguments
-    def __init__(self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin):
-        super(Adafruit_IL91874, self).__init__(width, height, spi, cs_pin, dc_pin,
-                                               sramcs_pin, rst_pin, busy_pin)
+    def __init__(
+        self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
+    ):
+        super(Adafruit_IL91874, self).__init__(
+            width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
+        )
 
         self._buffer1_size = int(width * height / 8)
         self._buffer2_size = int(width * height / 8)
@@ -85,10 +90,12 @@ class Adafruit_IL91874(Adafruit_EPD):
             self._buffer2 = bytearray((width * height) // 8)
         # since we have *two* framebuffers - one for red and one for black
         # we dont subclass but manage manually
-        self._framebuf1 = adafruit_framebuf.FrameBuffer(self._buffer1, width, height,
-                                                        buf_format=adafruit_framebuf.MHMSB)
-        self._framebuf2 = adafruit_framebuf.FrameBuffer(self._buffer2, width, height,
-                                                        buf_format=adafruit_framebuf.MHMSB)
+        self._framebuf1 = adafruit_framebuf.FrameBuffer(
+            self._buffer1, width, height, buf_format=adafruit_framebuf.MHMSB
+        )
+        self._framebuf2 = adafruit_framebuf.FrameBuffer(
+            self._buffer2, width, height, buf_format=adafruit_framebuf.MHMSB
+        )
         self.set_black_buffer(0, True)
         self.set_color_buffer(1, False)
         self._single_byte_tx = True
@@ -118,7 +125,7 @@ class Adafruit_IL91874(Adafruit_EPD):
 
         self.command(_IL91874_PANEL_SETTING, bytearray([0xAF]))
         self.command(_IL91874_PLL, bytearray([0x3A]))
-        self.command(_IL91874_POWER_SETTING, bytearray([0x03, 0x00, 0x2b, 0x2b, 0x09]))
+        self.command(_IL91874_POWER_SETTING, bytearray([0x03, 0x00, 0x2B, 0x2B, 0x09]))
         self.command(_IL91874_BOOSTER_SOFT_START, bytearray([0x07, 0x07, 0x17]))
 
         self.command(0xF8, bytearray([0x60, 0xA5]))  # mystery command in example code
@@ -157,7 +164,7 @@ class Adafruit_IL91874(Adafruit_EPD):
         self.command(_IL91874_DISPLAY_REFRESH)
         self.busy_wait()
         if not self._busy:
-            time.sleep(16)   # wait 16 seconds
+            time.sleep(16)  # wait 16 seconds
 
     def write_ram(self, index):
         """Send the one byte command for starting the RAM write process. Returns
@@ -169,7 +176,7 @@ class Adafruit_IL91874(Adafruit_EPD):
             return self.command(_IL91874_DTM2, end=False)
         raise RuntimeError("RAM index must be 0 or 1")
 
-    def set_ram_address(self, x, y): # pylint: disable=unused-argument, no-self-use
+    def set_ram_address(self, x, y):  # pylint: disable=unused-argument, no-self-use
         """Set the RAM address location, not used on this chipset but required by
         the superclass"""
-        return # on this chip it does nothing
+        return  # on this chip it does nothing

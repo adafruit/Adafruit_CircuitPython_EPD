@@ -86,17 +86,22 @@ _SSD1675B_SET_RAMYCOUNT = const(0x4F)
 _SSD1675B_SET_ANALOGBLOCK = const(0x74)
 _SSD1675B_SET_DIGITALBLOCK = const(0x7E)
 _SSD1675B_NOP = const(0xFF)
-_LUT_DATA = b'\xa0\x90P\x00\x00\x00\x00\x00\x00\x00P\x90\xa0\x00\x00\x00\x00\x00\x00\x00\xa0\x90P\x00\x00\x00\x00\x00\x00\x00P\x90\xa0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x0f\x0f\x00\x00\x00\x0f\x0f\x00\x00\x03\x0f\x0f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x15A\xa82P,\x0b' # pylint: disable=line-too-long
+_LUT_DATA = b"\xa0\x90P\x00\x00\x00\x00\x00\x00\x00P\x90\xa0\x00\x00\x00\x00\x00\x00\x00\xa0\x90P\x00\x00\x00\x00\x00\x00\x00P\x90\xa0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x0f\x0f\x00\x00\x00\x0f\x0f\x00\x00\x03\x0f\x0f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x15A\xa82P,\x0b"  # pylint: disable=line-too-long
+
 
 class Adafruit_SSD1675B(Adafruit_EPD):
     """driver class for Adafruit SSD1675B ePaper display breakouts"""
+
     # pylint: disable=too-many-arguments
-    def __init__(self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin):
-        super(Adafruit_SSD1675B, self).__init__(width, height, spi, cs_pin, dc_pin,
-                                                sramcs_pin, rst_pin, busy_pin)
+    def __init__(
+        self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
+    ):
+        super(Adafruit_SSD1675B, self).__init__(
+            width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
+        )
         stride = width
         if stride % 8 != 0:
-            stride += (8 - stride % 8)
+            stride += 8 - stride % 8
 
         self._buffer1_size = int(stride * height / 8)
         self._buffer2_size = self._buffer1_size
@@ -109,10 +114,20 @@ class Adafruit_SSD1675B(Adafruit_EPD):
             self._buffer2 = bytearray(self._buffer2_size)
         # since we have *two* framebuffers - one for red and one for black
         # we dont subclass but manage manually
-        self._framebuf1 = adafruit_framebuf.FrameBuffer(self._buffer1, width, height, stride=stride,
-                                                        buf_format=adafruit_framebuf.MHMSB)
-        self._framebuf2 = adafruit_framebuf.FrameBuffer(self._buffer2, width, height, stride=stride,
-                                                        buf_format=adafruit_framebuf.MHMSB)
+        self._framebuf1 = adafruit_framebuf.FrameBuffer(
+            self._buffer1,
+            width,
+            height,
+            stride=stride,
+            buf_format=adafruit_framebuf.MHMSB,
+        )
+        self._framebuf2 = adafruit_framebuf.FrameBuffer(
+            self._buffer2,
+            width,
+            height,
+            stride=stride,
+            buf_format=adafruit_framebuf.MHMSB,
+        )
         self.set_black_buffer(0, True)
         self.set_color_buffer(0, True)
         # pylint: enable=too-many-arguments
@@ -146,8 +161,10 @@ class Adafruit_SSD1675B(Adafruit_EPD):
         # set digital block control
         self.command(_SSD1675B_SET_DIGITALBLOCK, bytearray([0x3B]))
 
-        self.command(_SSD1675B_DRIVER_CONTROL,
-                     bytearray([self._height-1, (self._height-1) >> 8, 0x00]))
+        self.command(
+            _SSD1675B_DRIVER_CONTROL,
+            bytearray([self._height - 1, (self._height - 1) >> 8, 0x00]),
+        )
 
         # Data entry sequence
         self.command(_SSD1675B_DATA_MODE, bytearray([0x03]))
@@ -155,8 +172,10 @@ class Adafruit_SSD1675B(Adafruit_EPD):
         # Set ram X start/end postion
         self.command(_SSD1675B_SET_RAMXPOS, bytearray([0x00, self._width // 8]))
         # Set ram Y start/end postion
-        self.command(_SSD1675B_SET_RAMYPOS,
-                     bytearray([0x0, 0x0, self._height-1, (self._height-1) >> 8]))
+        self.command(
+            _SSD1675B_SET_RAMYPOS,
+            bytearray([0x0, 0x0, self._height - 1, (self._height - 1) >> 8]),
+        )
 
         # Border color
         self.command(_SSD1675B_WRITE_BORDER, bytearray([0x03]))
@@ -175,12 +194,15 @@ class Adafruit_SSD1675B(Adafruit_EPD):
         self.command(_SSD1675B_WRITE_LUT, _LUT_DATA[0:100])
 
         # Set temperature control
-        #self.command(_SSD1675B_TEMP_CONTROL, bytearray([0x80]))
+        # self.command(_SSD1675B_TEMP_CONTROL, bytearray([0x80]))
 
         # Set RAM X address counter
         self.command(_SSD1675B_SET_RAMXCOUNT, bytearray([0]))
         # Set RAM Y address counter
-        self.command(_SSD1675B_SET_RAMYCOUNT, bytearray([self._height-1, (self._height-1) >> 8]))
+        self.command(
+            _SSD1675B_SET_RAMYCOUNT,
+            bytearray([self._height - 1, (self._height - 1) >> 8]),
+        )
 
         self.busy_wait()
 
@@ -195,7 +217,7 @@ class Adafruit_SSD1675B(Adafruit_EPD):
         self.command(_SSD1675B_MASTER_ACTIVATE)
         self.busy_wait()
         if not self._busy:
-            time.sleep(3)   # wait 3 seconds
+            time.sleep(3)  # wait 3 seconds
 
     def write_ram(self, index):
         """Send the one byte command for starting the RAM write process. Returns
@@ -207,8 +229,8 @@ class Adafruit_SSD1675B(Adafruit_EPD):
             return self.command(_SSD1675B_WRITE_RAM2, end=False)
         raise RuntimeError("RAM index must be 0 or 1")
 
-    def set_ram_address(self, x, y): # pylint: disable=unused-argument, no-self-use
+    def set_ram_address(self, x, y):  # pylint: disable=unused-argument, no-self-use
         """Set the RAM address location, not used on this chipset but required by
         the superclass"""
         self.command(_SSD1675B_SET_RAMXCOUNT, bytearray([x]))
-        self.command(_SSD1675B_SET_RAMYCOUNT, bytearray([y, y>>8]))
+        self.command(_SSD1675B_SET_RAMYCOUNT, bytearray([y, y >> 8]))
