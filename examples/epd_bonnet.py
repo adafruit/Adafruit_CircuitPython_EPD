@@ -106,7 +106,8 @@ while True:
             time.sleep(0.01)
     if not switch2.value:
         print("Switch 2")
-        display.fill(Adafruit_EPD.WHITE)
+        blinkaimage = Image.open('epd_bonnet_blinka_250x122.bmp')
+        display.image(blinkaimage)
         display.display()
         while not switch2.value:
             time.sleep(0.01)
