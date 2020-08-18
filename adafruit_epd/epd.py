@@ -352,8 +352,6 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
         """Set buffer to value of Python Imaging Library image.  The image should
         be in RGB mode and a size equal to the display size.
         """
-        if image.mode != "RGB":
-            raise ValueError("Image must be in mode RGB.")
         imwidth, imheight = image.size
         if imwidth != self.width or imheight != self.height:
             raise ValueError(
@@ -368,12 +366,21 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
         # clear out any display buffers
         self.fill(Adafruit_EPD.WHITE)
 
-        for y in range(image.size[1]):
-            for x in range(image.size[0]):
-                pixel = pix[x, y]
-                if (pixel[1] < 0x80 <= pixel[0]) and (pixel[2] < 0x80):
-                    # reddish
-                    self.pixel(x, y, Adafruit_EPD.RED)
-                elif (pixel[0] < 0x80) and (pixel[1] < 0x80) and (pixel[2] < 0x80):
-                    # dark
-                    self.pixel(x, y, Adafruit_EPD.BLACK)
+        if image.mode == "RGB":  # RGB Mode
+            for y in range(image.size[1]):
+                for x in range(image.size[0]):
+                    pixel = pix[x, y]
+                    if (pixel[1] < 0x80 <= pixel[0]) and (pixel[2] < 0x80):
+                        # reddish
+                        self.pixel(x, y, Adafruit_EPD.RED)
+                    elif (pixel[0] < 0x80) and (pixel[1] < 0x80) and (pixel[2] < 0x80):
+                        # dark
+                        self.pixel(x, y, Adafruit_EPD.BLACK)
+        elif image.mode == "L":  # Grayscale
+            for y in range(image.size[1]):
+                for x in range(image.size[0]):
+                    pixel = pix[x, y]
+                    if pixel < 0x80:
+                        self.pixel(x, y, Adafruit_EPD.BLACK)
+        else:
+            raise ValueError("Image must be in mode RGB or mode L.")
