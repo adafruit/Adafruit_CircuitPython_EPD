@@ -1,10 +1,9 @@
-# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
+# SPDX-FileCopyrightText: 2019 Melissa LeBlanc-Williams for Adafruit Industries
 # SPDX-License-Identifier: MIT
 
 """
 ePaper Display Shapes and Text demo using the Pillow Library.
 
-Written by Melissa LeBlanc-Williams for Adafruit Industries
 """
 
 import digitalio
