@@ -1,9 +1,11 @@
+# SPDX-FileCopyrightText: 2019 Melissa LeBlanc-Williams for Adafruit Industries
+# SPDX-License-Identifier: MIT
+
 """
 Image resizing and drawing using the Pillow Library. For the image, check out the
 associated Adafruit Learn guide at:
 https://learn.adafruit.com/adafruit-eink-display-breakouts/python-code
 
-Written by Melissa LeBlanc-Williams for Adafruit Industries
 """
 
 import digitalio
