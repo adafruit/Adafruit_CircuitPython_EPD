@@ -16,7 +16,6 @@ from adafruit_epd.ssd1608 import Adafruit_SSD1608  # pylint: disable=unused-impo
 from adafruit_epd.ssd1675 import Adafruit_SSD1675  # pylint: disable=unused-import
 from adafruit_epd.ssd1675b import Adafruit_SSD1675B  # pylint: disable=unused-import
 from adafruit_epd.ssd1681 import Adafruit_SSD1681  # pylint: disable=unused-import
-from adafruit_epd.ssd1681b import Adafruit_SSD1681B  # pylint: disable=unused-import
 
 # create the spi device and pins we will need
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
@@ -33,7 +32,6 @@ busy = digitalio.DigitalInOut(board.D7)  # can be None to not use this pin
 # give them all to our driver
 print("Creating display")
 # display = Adafruit_SSD1608(200, 200,         # 1.54" HD mono display
-# display = Adafruit_SSD1681B(200, 200,         # 1.54" HD mono display (alt)
 # display = Adafruit_SSD1681(200, 200,         # 1.54" HD Tri-color display
 # display = Adafruit_SSD1675(122, 250,         # 2.13" HD mono display
 # display = Adafruit_IL91874(176, 264,         # 2.7" Tri-color display
