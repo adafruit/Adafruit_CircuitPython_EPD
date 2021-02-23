@@ -6,7 +6,7 @@
 `adafruit_epd.ssd1681` - Adafruit SSD1681 - ePaper display driver
 ====================================================================================
 CircuitPython driver for Adafruit SSD1681 display breakouts
-* Author(s): Dean Miller, Ladyada
+* Author(s): Dean Miller, Ladyada, Melissa LeBlanc-Williams
 """
 
 import time
@@ -66,8 +66,6 @@ _SSD1681_SET_RAMXCOUNT = const(0x4E)
 _SSD1681_SET_RAMYCOUNT = const(0x4F)
 _SSD1681_NOP = const(0xFF)
 
-_LUT_DATA = b'\x02\x02\x01\x11\x12\x12""fiiYX\x99\x99\x88\x00\x00\x00\x00\xf8\xb4\x13Q5QQ\x19\x01\x00'  # pylint: disable=line-too-long
-
 
 class Adafruit_SSD1681(Adafruit_EPD):
     """driver class for Adafruit SSD1681 ePaper display breakouts"""
@@ -85,16 +83,22 @@ class Adafruit_SSD1681(Adafruit_EPD):
             self._height = height
 
         self._buffer1_size = int(width * height / 8)
+        self._buffer2_size = int(width * height / 8)
 
         if sramcs_pin:
             self._buffer1 = self.sram.get_view(0)
+            self._buffer2 = self.sram.get_view(self._buffer1_size)
         else:
             self._buffer1 = bytearray((width * height) // 8)
+            self._buffer2 = bytearray((width * height) // 8)
         self._framebuf1 = adafruit_framebuf.FrameBuffer(
             self._buffer1, width, height, buf_format=adafruit_framebuf.MHMSB
         )
+        self._framebuf2 = adafruit_framebuf.FrameBuffer(
+            self._buffer2, width, height, buf_format=adafruit_framebuf.MHMSB
+        )
         self.set_black_buffer(0, True)
-        self.set_color_buffer(0, True)
+        self.set_color_buffer(1, False)
         # pylint: enable=too-many-arguments
 
     def begin(self, reset=True):
@@ -158,7 +162,9 @@ class Adafruit_SSD1681(Adafruit_EPD):
         0 or 1 for tri-color displays."""
         if index == 0:
             return self.command(_SSD1681_WRITE_BWRAM, end=False)
-        raise RuntimeError("RAM index must be 0")
+        if index == 1:
+            return self.command(_SSD1681_WRITE_REDRAM, end=False)
+        raise RuntimeError("RAM index must be 0 or 1")
 
     def set_ram_address(self, x, y):  # pylint: disable=unused-argument, no-self-use
         """Set the RAM address location, not used on this chipset but required by
@@ -166,4 +172,4 @@ class Adafruit_SSD1681(Adafruit_EPD):
         # Set RAM X address counter
         self.command(_SSD1681_SET_RAMXCOUNT, bytearray([x]))
         # Set RAM Y address counter
-        self.command(_SSD1681_SET_RAMYCOUNT, bytearray([y >> 8, y]))
+        self.command(_SSD1681_SET_RAMYCOUNT, bytearray([y, y >> 8]))
