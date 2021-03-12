@@ -17,6 +17,7 @@ from adafruit_epd.il91874 import Adafruit_IL91874  # pylint: disable=unused-impo
 from adafruit_epd.il0398 import Adafruit_IL0398  # pylint: disable=unused-import
 from adafruit_epd.ssd1608 import Adafruit_SSD1608  # pylint: disable=unused-import
 from adafruit_epd.ssd1675 import Adafruit_SSD1675  # pylint: disable=unused-import
+from adafruit_epd.ssd1680 import Adafruit_SSD1680  # pylint: disable=unused-import
 from adafruit_epd.ssd1681 import Adafruit_SSD1681  # pylint: disable=unused-import
 
 
@@ -31,6 +32,7 @@ busy = digitalio.DigitalInOut(board.D17)
 # give them all to our driver
 # display = Adafruit_SSD1608(200, 200,        # 1.54" HD mono display
 # display = Adafruit_SSD1675(122, 250,        # 2.13" HD mono display
+# display = Adafruit_SSD1680(122, 250,        # 2.13" HD Tri-color display
 # display = Adafruit_SSD1681(200, 200,        # 1.54" HD Tri-color display
 # display = Adafruit_IL91874(176, 264,        # 2.7" Tri-color display
 # display = Adafruit_IL0373(152, 152,         # 1.54" Tri-color display
