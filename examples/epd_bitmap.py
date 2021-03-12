@@ -49,7 +49,7 @@ display = Adafruit_IL0373(
 
 display.rotation = 0
 
-FILENAME = "blinka154mono.bmp"
+FILENAME = "blinka.bmp"
 
 
 def read_le(s):
@@ -68,7 +68,7 @@ class BMPError(Exception):
 
 def display_bitmap(epd, filename):  # pylint: disable=too-many-locals, too-many-branches
     try:
-        f = open("/" + filename, "rb")
+        f = open(filename, "rb")
     except OSError:
         print("Couldn't open file")
         return
