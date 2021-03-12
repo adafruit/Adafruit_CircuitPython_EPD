@@ -136,7 +136,7 @@ class Adafruit_SSD1680(Adafruit_EPD):
         self.command(_SSD1680_SOURCE_VOLTAGE, bytearray([0x41, 0x00, 0x32]))
 
         # Set ram X start/end postion
-        self.command(_SSD1680_SET_RAMXPOS, bytearray([0x00, 0x0F]))
+        self.command(_SSD1680_SET_RAMXPOS, bytearray([0x01, 0x10]))
         # Set ram Y start/end postion
         self.command(
             _SSD1680_SET_RAMYPOS,
