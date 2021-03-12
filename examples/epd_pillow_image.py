@@ -71,7 +71,10 @@ image = image.resize((scaled_width, scaled_height), Image.BICUBIC)
 # Crop and center the image
 x = scaled_width // 2 - display.width // 2
 y = scaled_height // 2 - display.height // 2
-image = image.crop((x, y, x + display.width, y + display.height))
+image = image.crop((x, y, x + display.width, y + display.height)).convert("RGB")
+
+# Convert to Monochrome and Add dithering
+# image = image.convert("1").convert("L")
 
 # Display image.
 display.image(image)
