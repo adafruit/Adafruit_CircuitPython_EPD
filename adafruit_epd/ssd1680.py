@@ -134,7 +134,7 @@ class Adafruit_SSD1680(Adafruit_EPD):
         self.command(_SSD1680_WRITE_VCOM_REG, bytearray([0x36]))
         self.command(_SSD1680_GATE_VOLTAGE, bytearray([0x17]))
         self.command(_SSD1680_SOURCE_VOLTAGE, bytearray([0x41, 0x00, 0x32]))
-        
+
         # Set ram X start/end postion
         self.command(_SSD1680_SET_RAMXPOS, bytearray([0x00, 0x0F]))
         # Set ram Y start/end postion
@@ -144,7 +144,7 @@ class Adafruit_SSD1680(Adafruit_EPD):
         )
         # Set border waveform
         self.command(_SSD1680_WRITE_BORDER, bytearray([0x05]))
-        
+
         # Set ram X count
         self.command(_SSD1680_SET_RAMXCOUNT, bytearray([0x01]))
         # Set ram Y count
