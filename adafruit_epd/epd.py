@@ -271,7 +271,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
         """Draw a line from (x_0, y_0) to (x_1, y_1) in passed color"""
         self._color_dup("line", (x_0, y_0, x_1, y_1), color)
 
-    def text(self, string, x, y, color, *, font_name="font5x8.bin"):
+    def text(self, string, x, y, color, *, font_name="font5x8.bin", size=1):
         """Write text string at location (x, y) in given color, using font file"""
         if self._blackframebuf is self._colorframebuf:  # monochrome
             self._blackframebuf.text(
@@ -279,6 +279,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
                 x,
                 y,
                 font_name=font_name,
+                size=size,
                 color=(color != Adafruit_EPD.WHITE) != self._black_inverted,
             )
         else:
@@ -287,6 +288,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
                 x,
                 y,
                 font_name=font_name,
+                size=size,
                 color=(color == Adafruit_EPD.BLACK) != self._black_inverted,
             )
             self._colorframebuf.text(
@@ -294,6 +296,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
                 x,
                 y,
                 font_name=font_name,
+                size=size,
                 color=(color == Adafruit_EPD.RED) != self._color_inverted,
             )
 
