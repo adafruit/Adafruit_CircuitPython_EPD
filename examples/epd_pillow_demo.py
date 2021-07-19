@@ -41,7 +41,7 @@ busy = digitalio.DigitalInOut(board.D17)
 # give them all to our driver
 # display = Adafruit_SSD1608(200, 200,        # 1.54" HD mono display
 # display = Adafruit_SSD1675(122, 250,        # 2.13" HD mono display
-# display = Adafruit_SSD1680(122, 250,        # 2.13" HD Tri-color display
+# display = Adafruit_SSD1680(122, 250,        # 2.13" HD Tri-color or mono display
 # display = Adafruit_SSD1681(200, 200,        # 1.54" HD Tri-color display
 # display = Adafruit_IL91874(176, 264,        # 2.7" Tri-color display
 # display = Adafruit_IL0373(152, 152,         # 1.54" Tri-color display
@@ -70,7 +70,7 @@ image = Image.new("RGB", (display.width, display.height))
 draw = ImageDraw.Draw(image)
 
 # Draw a filled box as the background
-draw.rectangle((0, 0, display.width, display.height), fill=BACKGROUND_COLOR)
+draw.rectangle((0, 0, display.width - 1, display.height - 1), fill=BACKGROUND_COLOR)
 
 # Draw a smaller inner foreground rectangle
 draw.rectangle(
