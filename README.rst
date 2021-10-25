@@ -97,6 +97,11 @@ Usage Example
     display.display()
 
 
+Documentation
+=============
+
+API documentation for this library can be found on `Read the Docs <https://circuitpython.readthedocs.io/projects/epd/en/latest/>`_.
+
 Contributing
 ============
 
