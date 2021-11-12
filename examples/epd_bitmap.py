@@ -74,7 +74,7 @@ class BMPError(Exception):
 
 def display_bitmap(epd, filename):  # pylint: disable=too-many-locals, too-many-branches
     try:
-        f = open(filename, "rb")
+        f = open(filename, "rb")  # pylint: disable=consider-using-with
     except OSError:
         print("Couldn't open file")
         return
