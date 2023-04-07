@@ -178,7 +178,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
 
     def _spi_transfer(self, data):
         """Transfer one byte or bytearray, toggling the cs pin if required by the EPD chipset"""
-        if isinstance(data, int): # single byte!
+        if isinstance(data, int):  # single byte!
             self._spibuf[0] = data
 
         # easy & fast case: array and no twiddling
@@ -187,7 +187,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
             return None
 
         # if its a single byte
-        if isinstance(data, int): # single byte!
+        if isinstance(data, int):  # single byte!
             if self._single_byte_tx:
                 self._cs.value = False
             try:
