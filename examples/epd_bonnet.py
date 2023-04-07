@@ -61,29 +61,29 @@ draw.rectangle((0, 0, width, height), fill=WHITE)
 draw.rectangle((1, 1, width - 2, height - 2), outline=BLACK, fill=WHITE)
 # Draw some shapes.
 # First define some constants to allow easy resizing of shapes.
-padding = 5
-shape_width = 30
-top = padding
-bottom = height - padding
+PADDING = 5
+SHAPE_WIDTH = 30
+TOP = PADDING
+bottom = height - PADDING
 # Move left to right keeping track of the current x position for drawing shapes.
-x = padding
+x = PADDING
 # Draw an ellipse.
-draw.ellipse((x, top, x + shape_width, bottom), outline=BLACK, fill=WHITE)
-x += shape_width + padding
+draw.ellipse((x, TOP, x + SHAPE_WIDTH, bottom), outline=BLACK, fill=WHITE)
+x += SHAPE_WIDTH + PADDING
 # Draw a rectangle.
-draw.rectangle((x, top, x + shape_width, bottom), outline=WHITE, fill=BLACK)
-x += shape_width + padding
+draw.rectangle((x, TOP, x + SHAPE_WIDTH, bottom), outline=WHITE, fill=BLACK)
+x += SHAPE_WIDTH + PADDING
 # Draw a triangle.
 draw.polygon(
-    [(x, bottom), (x + shape_width / 2, top), (x + shape_width, bottom)],
+    [(x, bottom), (x + SHAPE_WIDTH / 2, TOP), (x + SHAPE_WIDTH, bottom)],
     outline=BLACK,
     fill=WHITE,
 )
-x += shape_width + padding
+x += SHAPE_WIDTH + PADDING
 # Draw an X.
-draw.line((x, bottom, x + shape_width, top), fill=BLACK)
-draw.line((x, top, x + shape_width, bottom), fill=BLACK)
-x += shape_width + padding
+draw.line((x, bottom, x + SHAPE_WIDTH, TOP), fill=BLACK)
+draw.line((x, TOP, x + SHAPE_WIDTH, bottom), fill=BLACK)
+x += SHAPE_WIDTH + PADDING
 
 # Load default font.
 font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 20)
@@ -94,8 +94,8 @@ font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 20)
 # font = ImageFont.truetype('Minecraftia.ttf', 8)
 
 # Write two lines of text.
-draw.text((x, top), "Hello", font=font, fill=BLACK)
-draw.text((x, top + 20), "World!", font=font, fill=BLACK)
+draw.text((x, TOP), "Hello", font=font, fill=BLACK)
+draw.text((x, TOP + 20), "World!", font=font, fill=BLACK)
 
 while True:
     if not switch1.value:
