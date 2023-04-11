@@ -107,8 +107,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
                 databyte = self._spi_transfer(databyte)
             self.sram.cs_pin.value = True
         else:
-            for databyte in self._buffer1:
-                self._spi_transfer(databyte)
+            self._spi_transfer(self._buffer1)
 
         self._cs.value = True
         self.spi_device.unlock()
@@ -140,8 +139,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
                     databyte = self._spi_transfer(databyte)
                 self.sram.cs_pin.value = True
             else:
-                for databyte in self._buffer2:
-                    self._spi_transfer(databyte)
+                self._spi_transfer(self._buffer2)
 
             self._cs.value = True
             self.spi_device.unlock()
@@ -171,23 +169,39 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
 
         if data is not None:
             self._dc.value = True
-            for b in data:
-                self._spi_transfer(b)
+            self._spi_transfer(data)
         if end:
             self._cs.value = True
         self.spi_device.unlock()
 
         return ret
 
-    def _spi_transfer(self, databyte):
-        """Transfer one byte, toggling the cs pin if required by the EPD chipset"""
-        self._spibuf[0] = databyte
-        if self._single_byte_tx:
-            self._cs.value = False
-        self.spi_device.write_readinto(self._spibuf, self._spibuf)
-        if self._single_byte_tx:
-            self._cs.value = True
-        return self._spibuf[0]
+    def _spi_transfer(self, data):
+        """Transfer one byte or bytearray, toggling the cs pin if required by the EPD chipset"""
+        if isinstance(data, int):  # single byte!
+            self._spibuf[0] = data
+
+        # easy & fast case: array and no twiddling
+        if not self._single_byte_tx and isinstance(data, bytearray):
+            self.spi_device.write(data)
+            return None
+
+        # if its a single byte
+        if isinstance(data, int):  # single byte!
+            if self._single_byte_tx:
+                self._cs.value = False
+            try:
+                self.spi_device.write_readinto(self._spibuf, self._spibuf)
+            except NotImplementedError:
+                self.spi_device.write(self._spibuf)
+            if self._single_byte_tx:
+                self._cs.value = True
+            return self._spibuf[0]
+
+        if isinstance(data, bytearray):
+            for x in data:
+                self._spi_transfer(x)
+        return None
 
     def power_up(self):
         """Power up the display in preparation for writing RAM and updating.
