@@ -27,6 +27,12 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
     RED = const(3)
     DARK = const(4)
     LIGHT = const(5)
+    
+    acep_GREEN  = const(2)
+    acep_BLUE   = const(3)
+    acep_RED    = const(4)
+    acep_YELLOW = const(5)
+    acep_ORANGE = const(6)
 
     def __init__(
         self, width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
@@ -248,28 +254,47 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
 
     def _color_dup(self, func, args, color):
         black = getattr(self._blackframebuf, func)
+        green = getattr(self._colorframebuf, func)
+        blue = getattr(self._colorframebuf, func)
         red = getattr(self._colorframebuf, func)
-        if self._blackframebuf is self._colorframebuf:  # monochrome
+        yellow = getattr(self._colorframebuf, func)
+        orange = getattr(self._colorframebuf, func)
+        '''if self._blackframebuf is self._colorframebuf:  # monochrome
             black(*args, color=(color != Adafruit_EPD.WHITE) != self._black_inverted)
-        else:
-            black(*args, color=(color == Adafruit_EPD.BLACK) != self._black_inverted)
-            red(*args, color=(color == Adafruit_EPD.RED) != self._color_inverted)
+        else:'''
+        black(*args, color=(color == Adafruit_EPD.BLACK) != self._black_inverted)
+        red(*args, color=(color == Adafruit_EPD.acep_RED or color == Adafruit_EPD.RED) != self._color_inverted)
+        blue(*args, color=(color == Adafruit_EPD.acep_BLUE) != self._color_inverted)
+        green(*args, color=(color == Adafruit_EPD.acep_GREEN) != self._color_inverted)
+        yellow(*args, color=(color == Adafruit_EPD.acep_YELLOW) != self._color_inverted)
+        orange(*args, color=(color == Adafruit_EPD.acep_ORANGE) != self._color_inverted)
 
     def pixel(self, x, y, color):
         """draw a single pixel in the display buffer"""
         self._color_dup("pixel", (x, y), color)
-
+    
     def fill(self, color):
         """fill the screen with the passed color"""
-        red_fill = ((color == Adafruit_EPD.RED) != self._color_inverted) * 0xFF
         black_fill = ((color == Adafruit_EPD.BLACK) != self._black_inverted) * 0xFF
-
+        green_fill = ((color == Adafruit_EPD.acep_GREEN) != self._color_inverted) * 0xFF
+        blue_fill = ((color == Adafruit_EPD.acep_BLUE) != self._color_inverted) * 0xFF
+        red_fill = ((color == Adafruit_EPD.acep_RED or color == Adafruit_EPD.RED) != self._color_inverted) * 0xFF
+        yellow_fill = ((color == Adafruit_EPD.acep_YELLOW) != self._color_inverted) * 0xFF
+        orange_fill = ((color == Adafruit_EPD.acep_ORANGE) != self._color_inverted) * 0xFF
         if self.sram:
             self.sram.erase(0x00, self._buffer1_size, black_fill)
+            self.sram.erase(self._buffer1_size, self._buffer2_size, green_fill)
+            self.sram.erase(self._buffer1_size, self._buffer2_size, blue_fill)
             self.sram.erase(self._buffer1_size, self._buffer2_size, red_fill)
+            self.sram.erase(self._buffer1_size, self._buffer2_size, yellow_fill)
+            self.sram.erase(self._buffer1_size, self._buffer2_size, orange_fill)
         else:
             self._blackframebuf.fill(black_fill)
+            self._colorframebuf.fill(green_fill)
+            self._colorframebuf.fill(blue_fill)
             self._colorframebuf.fill(red_fill)
+            self._colorframebuf.fill(yellow_fill)
+            self._colorframebuf.fill(orange_fill)
 
     def rect(self, x, y, width, height, color):  # pylint: disable=too-many-arguments
         """draw a rectangle"""
