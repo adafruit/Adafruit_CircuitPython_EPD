@@ -10,8 +10,6 @@ CircuitPython driver for Adafruit ACEP display breakouts
 """
 
 import time
-import PIL
-from PIL import Image
 from micropython import const
 import adafruit_framebuf
 from adafruit_epd.epd import Adafruit_EPD
@@ -31,9 +29,10 @@ _ACEP_DISPLAY_REFRESH = const(0x12)
 _ACEP_PLL = const(0x30)
 _ACEP_TSE = const(0x40)
 _ACEP_CDI = const(0x50)
-_ACEP_TCON = const(0X60)
+_ACEP_TCON = const(0x60)
 _ACEP_RESOLUTION = const(0x61)
 _ACEP_PWS = const(0xE3)
+
 
 class Adafruit_ACEP(Adafruit_EPD):
     """driver class for Adafruit ACEP ePaper display breakouts"""
@@ -45,10 +44,10 @@ class Adafruit_ACEP(Adafruit_EPD):
         super().__init__(
             width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
         )
-        
-        if ((height % 8) != 0):
+
+        if (height % 8) != 0:
             height += 8 - (height % 8)
-        
+
         self._buffer1_size = int(width * height / 2)
         self._buffer2_size = 0
 
@@ -101,7 +100,7 @@ class Adafruit_ACEP(Adafruit_EPD):
         self.command(_ACEP_PWS, bytearray([0xAA]))
         time.sleep(0.1)
         self.command(_ACEP_CDI, bytearray([0x37]))
-        
+
         self.command(_ACEP_RESOLUTION, bytearray([0x02, 0x58, 0x01, 0xC0]))
         time.sleep(0.1)
 
@@ -110,7 +109,7 @@ class Adafruit_ACEP(Adafruit_EPD):
         time.sleep(1)
 
         self.command(_ACEP_DEEP_SLEEP, bytearray([0xA5]))
-        
+
         time.sleep(0.1)
 
     def update(self):
@@ -129,7 +128,7 @@ class Adafruit_ACEP(Adafruit_EPD):
         """Send the one byte command for starting the RAM write process. Returns
         the byte read at the same time over SPI. index is the RAM buffer, can be
         0 or 1 for tri-color displays."""
-        #self.command(_ACEP_DTM, end=False)
+        # self.command(_ACEP_DTM, end=False)
         if index == 0:
             return self.command(_ACEP_DTM, end=False)
         if index == 1:
