@@ -4,7 +4,7 @@
 import digitalio
 import busio
 import board
-from adafruit_epd.epd import Adafruit_EPD
+from adafruit_epd.epd import Adafruit_ADV_EPD
 from adafruit_epd.acep_7color import Adafruit_ACEP
 
 # create the spi device and pins we will need
@@ -26,13 +26,14 @@ display = Adafruit_ACEP(
     busy_pin=epd_busy,
 )
 
-display.fill(Adafruit_EPD.WHITE)
+display.fill(Adafruit_ADV_EPD.ACEP_WHITE)
 
-display.fill_rect(30, 20, 20, 20, Adafruit_EPD.BLACK)
-display.fill_rect(70, 10, 20, 20, Adafruit_EPD.acep_BLUE)
-display.fill_rect(110, 10, 20, 20, Adafruit_EPD.acep_RED)
-display.fill_rect(150, 10, 20, 20, Adafruit_EPD.acep_GREEN)
-display.fill_rect(190, 10, 20, 20, Adafruit_EPD.acep_YELLOW)
-display.fill_rect(230, 10, 20, 20, Adafruit_EPD.acep_ORANGE)
+display.fill_rect(30, 20, 20, 20, Adafruit_ADV_EPD.ACEP_BLACK)
+display.fill_rect(70, 10, 20, 20, Adafruit_ADV_EPD.ACEP_BLUE)
+display.fill_rect(110, 10, 20, 20, Adafruit_ADV_EPD.ACEP_RED)
+display.fill_rect(150, 10, 20, 20, Adafruit_ADV_EPD.ACEP_GREEN)
+display.fill_rect(190, 10, 20, 20, Adafruit_ADV_EPD.ACEP_YELLOW)
+display.fill_rect(230, 10, 20, 20, Adafruit_ADV_EPD.ACEP_ORANGE)
 
+display.set_border(Adafruit_ADV_EPD.ACEP_BLACK)
 display.display()

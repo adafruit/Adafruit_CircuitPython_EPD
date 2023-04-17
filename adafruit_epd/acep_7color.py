@@ -12,7 +12,7 @@ CircuitPython driver for Adafruit ACEP display breakouts
 import time
 from micropython import const
 import adafruit_framebuf
-from adafruit_epd.epd import Adafruit_EPD
+from adafruit_epd.epd import Adafruit_ADV_EPD
 
 __version__ = "0.0.0+auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_EPD.git"
@@ -34,7 +34,7 @@ _ACEP_RESOLUTION = const(0x61)
 _ACEP_PWS = const(0xE3)
 
 
-class Adafruit_ACEP(Adafruit_EPD):
+class Adafruit_ACEP(Adafruit_ADV_EPD):
     """driver class for Adafruit ACEP ePaper display breakouts"""
 
     # pylint: disable=too-many-arguments
@@ -48,22 +48,45 @@ class Adafruit_ACEP(Adafruit_EPD):
         if (height % 8) != 0:
             height += 8 - (height % 8)
 
-        self._buffer1_size = int(width * height / 2)
-        self._buffer2_size = 0
+        self._buffer0_size = int(width * height / 2)
+        self._buffer1_size = self._buffer0_size
+        self._buffer2_size = self._buffer0_size
+        self._buffer3_size = self._buffer0_size
+        self._buffer4_size = self._buffer0_size
+        self._buffer5_size = self._buffer0_size
 
-        if sramcs_pin:
-            self._buffer1 = 0
-            self._buffer2 = 0
-        else:
-            self._buffer1 = bytearray(self._buffer1_size)
-            self._buffer2 = self._buffer1
+        self._buffer0 = bytearray(self._buffer0_size)
+        self._buffer1 = self._buffer0
+        self._buffer2 = self._buffer0
+        self._buffer3 = self._buffer0
+        self._buffer4 = self._buffer0
+        self._buffer5 = self._buffer0
 
-        self._framebuf1 = adafruit_framebuf.FrameBuffer(
+        self._framebuf_black = adafruit_framebuf.FrameBuffer(
+            self._buffer0, width, height, buf_format=adafruit_framebuf.MHMSB
+        )
+        self._framebuf_green = adafruit_framebuf.FrameBuffer(
             self._buffer1, width, height, buf_format=adafruit_framebuf.MHMSB
+        )
+        self._framebuf_blue = adafruit_framebuf.FrameBuffer(
+            self._buffer2, width, height, buf_format=adafruit_framebuf.MHMSB
+        )
+        self._framebuf_red = adafruit_framebuf.FrameBuffer(
+            self._buffer3, width, height, buf_format=adafruit_framebuf.MHMSB
+        )
+        self._framebuf_yellow = adafruit_framebuf.FrameBuffer(
+            self._buffer4, width, height, buf_format=adafruit_framebuf.MHMSB
+        )
+        self._framebuf_orange = adafruit_framebuf.FrameBuffer(
+            self._buffer5, width, height, buf_format=adafruit_framebuf.MHMSB
         )
 
         self.set_black_buffer(0, True)
-        self.set_color_buffer(0, True)
+        self.set_green_buffer(0, False)
+        self.set_blue_buffer(0, False)
+        self.set_red_buffer(0, False)
+        self.set_yellow_buffer(0, False)
+        self.set_orange_buffer(0, False)
         # pylint: enable=too-many-arguments
 
     def begin(self, reset=True):
@@ -112,17 +135,23 @@ class Adafruit_ACEP(Adafruit_EPD):
 
         time.sleep(0.1)
 
+    def set_resolution(self):
+        self.command(_ACEP_RESOLUTION, bytearray([0x02, 0x58, 0x01, 0xC0]))
+        self.command(_ACEP_DTM, end=False)
+
     def update(self):
         """Update the display from internal memory"""
         self.command(_ACEP_POWER_ON)
         self.busy_wait()
-        self.command(_ACEP_DISPLAY_REFRESH, bytearray([0x01, 0x00]))
+        # self.command(_ACEP_DISPLAY_REFRESH, bytearray([0x01, 0x00]))
+        self.command(_ACEP_DISPLAY_REFRESH)
         self.busy_wait()
         self.command(_ACEP_POWER_OFF)
         if not self._busy:
             time.sleep(15)  # wait 15 seconds
         else:
             self.busy_wait()
+        time.sleep(0.2)
 
     def write_ram(self, index):
         """Send the one byte command for starting the RAM write process. Returns
