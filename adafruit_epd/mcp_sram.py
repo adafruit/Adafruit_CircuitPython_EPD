@@ -19,7 +19,7 @@ SRAM_SEQUENTIAL_MODE = const(1 << 6)
 
 
 class Adafruit_MCP_SRAM_View:
-    """A interface class that turns an SRAM chip into something like a memoryview"""
+    """An interface class that turns an SRAM chip into something like a memoryview"""
 
     def __init__(self, sram, offset):
         self._sram = sram
