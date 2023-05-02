@@ -11,6 +11,13 @@ CircuitPython driver for Microchip SRAM chips
 
 from micropython import const
 from adafruit_bus_device import spi_device
+from digitalio import DigitalInOut  # Needed for type annotation
+from busio import SPI  # Needed for type annotation
+
+try:
+    from typing import Any, List
+except ImportError:
+    pass
 
 __version__ = "0.0.0+auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_EPD.git"
@@ -21,15 +28,15 @@ SRAM_SEQUENTIAL_MODE = const(1 << 6)
 class Adafruit_MCP_SRAM_View:
     """A interface class that turns an SRAM chip into something like a memoryview"""
 
-    def __init__(self, sram, offset):
+    def __init__(self, sram: int, offset: int) -> None:
         self._sram = sram
         self._offset = offset
         self._buf = [0]
 
-    def __getitem__(self, i):
+    def __getitem__(self, i: int) -> Any:
         return self._sram.read(self._offset + i, 1)[0]
 
-    def __setitem__(self, i, val):
+    def __setitem__(self, i: int, val: Any) -> None:
         self._buf[0] = val
         self._sram.write(self._offset + i, self._buf)
 
@@ -43,7 +50,7 @@ class Adafruit_MCP_SRAM:
     SRAM_RDSR = 0x05
     SRAM_WRSR = 0x01
 
-    def __init__(self, cs_pin, spi):
+    def __init__(self, cs_pin: DigitalInOut, spi: SPI):
         # Handle hardware SPI
         self._spi = spi_device.SPIDevice(spi, cs_pin, baudrate=8000000)
         self.spi_device = spi
@@ -54,11 +61,11 @@ class Adafruit_MCP_SRAM:
         with self._spi as spidev:
             spidev.write(self._buf, end=2)  # pylint: disable=no-member
 
-    def get_view(self, offset):
+    def get_view(self, offset: int) -> Adafruit_MCP_SRAM_View:
         """Create an object that can be used as a memoryview, with a given offset"""
         return Adafruit_MCP_SRAM_View(self, offset)
 
-    def write(self, addr, buf, reg=SRAM_WRITE):
+    def write(self, addr: int, buf: List, reg=SRAM_WRITE):
         """write the passed buffer to the passed address"""
         self._buf[0] = reg
         self._buf[1] = (addr >> 8) & 0xFF
@@ -68,7 +75,7 @@ class Adafruit_MCP_SRAM:
             spi.write(self._buf, end=3)  # pylint: disable=no-member
             spi.write(bytearray(buf))  # pylint: disable=no-member
 
-    def read(self, addr, length, reg=SRAM_READ):
+    def read(self, addr: int, length: int, reg: int = SRAM_READ):
         """read passed number of bytes at the passed address"""
         self._buf[0] = reg
         self._buf[1] = (addr >> 8) & 0xFF
@@ -80,24 +87,24 @@ class Adafruit_MCP_SRAM:
             spi.readinto(buf)  # pylint: disable=no-member
         return buf
 
-    def read8(self, addr, reg=SRAM_READ):
+    def read8(self, addr: int, reg: int = SRAM_READ):
         """read a single byte at the passed address"""
         return self.read(addr, 1, reg)[0]
 
-    def read16(self, addr, reg=SRAM_READ):
+    def read16(self, addr: int, reg: int = SRAM_READ):
         """read 2 bytes at the passed address"""
         buf = self.read(addr, 2, reg)
         return buf[0] << 8 | buf[1]
 
-    def write8(self, addr, value, reg=SRAM_WRITE):
+    def write8(self, addr: int, value: Any, reg: int = SRAM_WRITE):
         """write a single byte at the passed address"""
         self.write(addr, [value], reg)
 
-    def write16(self, addr, value, reg=SRAM_WRITE):
+    def write16(self, addr: int, value: Any, reg: int = SRAM_WRITE):
         """write 2 bytes at the passed address"""
         self.write(addr, [value >> 8, value], reg)
 
-    def erase(self, addr, length, value):
+    def erase(self, addr: int, length: int, value: Any):
         """erase the passed number of bytes starting at the passed address"""
         self._buf[0] = Adafruit_MCP_SRAM.SRAM_WRITE
         self._buf[1] = (addr >> 8) & 0xFF
