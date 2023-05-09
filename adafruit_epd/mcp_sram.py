@@ -11,11 +11,13 @@ CircuitPython driver for Microchip SRAM chips
 
 from micropython import const
 from adafruit_bus_device import spi_device
-from digitalio import DigitalInOut  # Needed for type annotation
-from busio import SPI  # Needed for type annotation
+
 
 try:
+    """Needed for type annotations"""
     from typing import Any, List
+    from digitalio import DigitalInOut
+    from busio import SPI
 except ImportError:
     pass
 
@@ -96,11 +98,11 @@ class Adafruit_MCP_SRAM:
         buf = self.read(addr, 2, reg)
         return buf[0] << 8 | buf[1]
 
-    def write8(self, addr: int, value: Any, reg: int = SRAM_WRITE):
+    def write8(self, addr: int, value: int, reg: int = SRAM_WRITE):
         """write a single byte at the passed address"""
         self.write(addr, [value], reg)
 
-    def write16(self, addr: int, value: Any, reg: int = SRAM_WRITE):
+    def write16(self, addr: int, value: int, reg: int = SRAM_WRITE):
         """write 2 bytes at the passed address"""
         self.write(addr, [value >> 8, value], reg)
 
