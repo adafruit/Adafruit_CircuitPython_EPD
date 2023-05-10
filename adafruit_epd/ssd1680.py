@@ -81,8 +81,15 @@ class Adafruit_SSD1680(Adafruit_EPD):
 
     # pylint: disable=too-many-arguments
     def __init__(
-        self, width: int, height: int, spi: SPI, *, cs_pin: DigitalInOut,
-        dc_pin: DigitalInOut, sramcs_pin: DigitalInOut, rst_pin: DigitalInOut,
+        self,
+        width: int,
+        height: int,
+        spi: SPI,
+        *,
+        cs_pin: DigitalInOut,
+        dc_pin: DigitalInOut,
+        sramcs_pin: DigitalInOut,
+        rst_pin: DigitalInOut,
         busy_pin: DigitalInOut
     ) -> None:
         super().__init__(
@@ -121,7 +128,7 @@ class Adafruit_SSD1680(Adafruit_EPD):
         self.set_color_buffer(1, False)
         # pylint: enable=too-many-arguments
 
-    def begin(self, reset: bool=True) -> None:
+    def begin(self, reset: bool = True) -> None:
         """Begin communication with the display and set basic settings"""
         if reset:
             self.hardware_reset()
@@ -194,7 +201,9 @@ class Adafruit_SSD1680(Adafruit_EPD):
             return self.command(_SSD1680_WRITE_REDRAM, end=False)
         raise RuntimeError("RAM index must be 0 or 1")
 
-    def set_ram_address(self, x: int, y: int) -> None:  # pylint: disable=unused-argument, no-self-use
+    def set_ram_address(
+        self, x: int, y: int
+    ) -> None:  # pylint: disable=unused-argument, no-self-use
         """Set the RAM address location, not used on this chipset but required by
         the superclass"""
         # Set RAM X address counter
