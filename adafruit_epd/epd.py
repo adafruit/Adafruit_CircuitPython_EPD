@@ -11,14 +11,15 @@ CircuitPython driver for Adafruit ePaper display breakouts
 
 import time
 from micropython import const
-from digitalio import Direction, DigitalInOut
 from adafruit_epd import mcp_sram
 
 try:
     """Needed for type annotations"""
-    from typing import Any, Union, Callable
+    from typing import Any, Union, Callable, Optional
     from busio import SPI
+    from digitalio import Direction, DigitalInOut
     from PIL.Image import Image
+
 except ImportError:
     pass
 
@@ -26,7 +27,7 @@ __version__ = "0.0.0+auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_EPD.git"
 
 
-class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-public-methods
+class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-public-methods, too-many-arguments
     """Base class for EPD displays"""
 
     BLACK = const(0)
@@ -173,7 +174,9 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
             self._rst.value = True
             time.sleep(0.1)
 
-    def command(self, cmd: Any, data: Any = None, end: bool = True) -> Any:
+    def command(
+        self, cmd: int, data: Optional[bytearray] = None, end: bool = True
+    ) -> int:
         """Send command byte to display."""
         self._cs.value = True
         self._dc.value = False
@@ -192,7 +195,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
 
         return ret
 
-    def _spi_transfer(self, data: Any) -> Any:
+    def _spi_transfer(self, data: Union[int, bytearray]) -> int:
         """Transfer one byte or bytearray, toggling the cs pin if required by the EPD chipset"""
         if isinstance(data, int):  # single byte!
             self._spibuf[0] = data
