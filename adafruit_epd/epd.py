@@ -18,7 +18,7 @@ try:
     from typing import Any, Union, Callable, Optional
     from busio import SPI
     from digitalio import Direction, DigitalInOut
-    from PIL.Image import Image
+    from circuitpython_typing.pil import Image
 
 except ImportError:
     pass
@@ -195,7 +195,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
 
         return ret
 
-    def _spi_transfer(self, data: Union[int, bytearray]) -> int:
+    def _spi_transfer(self, data: Union[int, bytearray]) -> Optional[int]:
         """Transfer one byte or bytearray, toggling the cs pin if required by the EPD chipset"""
         if isinstance(data, int):  # single byte!
             self._spibuf[0] = data
