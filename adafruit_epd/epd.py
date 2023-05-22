@@ -8,16 +8,18 @@
 CircuitPython driver for Adafruit ePaper display breakouts
 * Author(s): Dean Miller
 """
+# pylint: disable=ungrouped-imports
 
 import time
 from micropython import const
+from digitalio import Direction
 from adafruit_epd import mcp_sram
 
 try:
     """Needed for type annotations"""
     from typing import Any, Union, Callable, Optional
     from busio import SPI
-    from digitalio import Direction, DigitalInOut
+    from digitalio import DigitalInOut
     from circuitpython_typing.pil import Image
 
 except ImportError:
