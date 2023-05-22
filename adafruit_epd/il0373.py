@@ -14,6 +14,15 @@ from micropython import const
 import adafruit_framebuf
 from adafruit_epd.epd import Adafruit_EPD
 
+try:
+    """Needed for type annotations"""
+    from typing import Union
+    from busio import SPI
+    from digitalio import DigitalInOut
+
+except ImportError:
+    pass
+
 __version__ = "0.0.0+auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_EPD.git"
 
@@ -48,8 +57,17 @@ class Adafruit_IL0373(Adafruit_EPD):
 
     # pylint: disable=too-many-arguments
     def __init__(
-        self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
-    ):
+        self,
+        width: int,
+        height: int,
+        spi: SPI,
+        *,
+        cs_pin: DigitalInOut,
+        dc_pin: DigitalInOut,
+        sramcs_pin: DigitalInOut,
+        rst_pin: DigitalInOut,
+        busy_pin: DigitalInOut
+    ) -> None:
         super().__init__(
             width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
         )
@@ -75,13 +93,13 @@ class Adafruit_IL0373(Adafruit_EPD):
         self.set_color_buffer(1, True)
         # pylint: enable=too-many-arguments
 
-    def begin(self, reset=True):
+    def begin(self, reset: bool = True) -> None:
         """Begin communication with the display and set basic settings"""
         if reset:
             self.hardware_reset()
         self.power_down()
 
-    def busy_wait(self):
+    def busy_wait(self) -> None:
         """Wait for display to be done with current task, either by polling the
         busy pin, or pausing"""
         if self._busy:
@@ -90,7 +108,7 @@ class Adafruit_IL0373(Adafruit_EPD):
         else:
             time.sleep(0.5)
 
-    def power_up(self):
+    def power_up(self) -> None:
         """Power up the display in preparation for writing RAM and updating"""
         self.hardware_reset()
         self.busy_wait()
@@ -112,13 +130,13 @@ class Adafruit_IL0373(Adafruit_EPD):
         self.command(_IL0373_VCM_DC_SETTING, bytearray([0x0A]))
         time.sleep(0.05)
 
-    def power_down(self):
+    def power_down(self) -> None:
         """Power down the display - required when not actively displaying!"""
         self.command(_IL0373_CDI, bytearray([0x17]))
         self.command(_IL0373_VCM_DC_SETTING, bytearray([0x00]))
         self.command(_IL0373_POWER_OFF)
 
-    def update(self):
+    def update(self) -> None:
         """Update the display from internal memory"""
         self.command(_IL0373_DISPLAY_REFRESH)
         time.sleep(0.1)
@@ -126,7 +144,7 @@ class Adafruit_IL0373(Adafruit_EPD):
         if not self._busy:
             time.sleep(15)  # wait 15 seconds
 
-    def write_ram(self, index):
+    def write_ram(self, index: Union[0, 1]) -> int:
         """Send the one byte command for starting the RAM write process. Returns
         the byte read at the same time over SPI. index is the RAM buffer, can be
         0 or 1 for tri-color displays."""
@@ -136,7 +154,9 @@ class Adafruit_IL0373(Adafruit_EPD):
             return self.command(_IL0373_DTM2, end=False)
         raise RuntimeError("RAM index must be 0 or 1")
 
-    def set_ram_address(self, x, y):  # pylint: disable=unused-argument, no-self-use
+    def set_ram_address(
+        self, x: int, y: int
+    ) -> None:  # pylint: disable=unused-argument, no-self-use
         """Set the RAM address location, not used on this chipset but required by
         the superclass"""
         return  # on this chip it does nothing

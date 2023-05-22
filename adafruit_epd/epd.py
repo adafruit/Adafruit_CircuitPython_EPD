@@ -8,17 +8,28 @@
 CircuitPython driver for Adafruit ePaper display breakouts
 * Author(s): Dean Miller
 """
+# pylint: disable=ungrouped-imports
 
 import time
 from micropython import const
 from digitalio import Direction
 from adafruit_epd import mcp_sram
 
+try:
+    """Needed for type annotations"""
+    from typing import Any, Union, Callable, Optional
+    from busio import SPI
+    from digitalio import DigitalInOut
+    from circuitpython_typing.pil import Image
+
+except ImportError:
+    pass
+
 __version__ = "0.0.0+auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_EPD.git"
 
 
-class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-public-methods
+class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-public-methods, too-many-arguments
     """Base class for EPD displays"""
 
     BLACK = const(0)
@@ -29,8 +40,16 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
     LIGHT = const(5)
 
     def __init__(
-        self, width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
-    ):  # pylint: disable=too-many-arguments
+        self,
+        width: int,
+        height: int,
+        spi: SPI,
+        cs_pin: DigitalInOut,
+        dc_pin: DigitalInOut,
+        sramcs_pin: DigitalInOut,
+        rst_pin: DigitalInOut,
+        busy_pin: DigitalInOut,
+    ) -> None:  # pylint: disable=too-many-arguments
         self._width = width
         self._height = height
 
@@ -76,7 +95,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
         self._black_inverted = self._color_inverted = True
         self.hardware_reset()
 
-    def display(self):  # pylint: disable=too-many-branches
+    def display(self) -> None:  # pylint: disable=too-many-branches
         """show the contents of the display buffer"""
         self.power_up()
 
@@ -149,7 +168,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
 
         self.update()
 
-    def hardware_reset(self):
+    def hardware_reset(self) -> None:
         """If we have a reset pin, do a hardware reset by toggling it"""
         if self._rst:
             self._rst.value = False
@@ -157,7 +176,9 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
             self._rst.value = True
             time.sleep(0.1)
 
-    def command(self, cmd, data=None, end=True):
+    def command(
+        self, cmd: int, data: Optional[bytearray] = None, end: bool = True
+    ) -> int:
         """Send command byte to display."""
         self._cs.value = True
         self._dc.value = False
@@ -176,7 +197,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
 
         return ret
 
-    def _spi_transfer(self, data):
+    def _spi_transfer(self, data: Union[int, bytearray]) -> Optional[int]:
         """Transfer one byte or bytearray, toggling the cs pin if required by the EPD chipset"""
         if isinstance(data, int):  # single byte!
             self._spibuf[0] = data
@@ -203,30 +224,30 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
                 self._spi_transfer(x)
         return None
 
-    def power_up(self):
+    def power_up(self) -> None:
         """Power up the display in preparation for writing RAM and updating.
         must be implemented in subclass"""
         raise NotImplementedError()
 
-    def power_down(self):
+    def power_down(self) -> None:
         """Power down the display, must be implemented in subclass"""
         raise NotImplementedError()
 
-    def update(self):
+    def update(self) -> None:
         """Update the display from internal memory, must be implemented in subclass"""
         raise NotImplementedError()
 
-    def write_ram(self, index):
+    def write_ram(self, index: int) -> None:
         """Send the one byte command for starting the RAM write process. Returns
         the byte read at the same time over SPI. index is the RAM buffer, can be
         0 or 1 for tri-color displays. must be implemented in subclass"""
         raise NotImplementedError()
 
-    def set_ram_address(self, x, y):
+    def set_ram_address(self, x: int, y: int) -> None:
         """Set the RAM address location, must be implemented in subclass"""
         raise NotImplementedError()
 
-    def set_black_buffer(self, index, inverted):
+    def set_black_buffer(self, index: Union[0, 1], inverted: bool) -> None:
         """Set the index for the black buffer data (0 or 1) and whether its inverted"""
         if index == 0:
             self._blackframebuf = self._framebuf1
@@ -236,7 +257,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
             raise RuntimeError("Buffer index must be 0 or 1")
         self._black_inverted = inverted
 
-    def set_color_buffer(self, index, inverted):
+    def set_color_buffer(self, index: Union[0, 1], inverted: bool) -> None:
         """Set the index for the color buffer data (0 or 1) and whether its inverted"""
         if index == 0:
             self._colorframebuf = self._framebuf1
@@ -246,7 +267,12 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
             raise RuntimeError("Buffer index must be 0 or 1")
         self._color_inverted = inverted
 
-    def _color_dup(self, func, args, color):
+    def _color_dup(
+        self,
+        func: Callable,
+        args: Any,
+        color: Union[0, 1, 2, 3, 4, 5],
+    ) -> None:
         black = getattr(self._blackframebuf, func)
         red = getattr(self._colorframebuf, func)
         if self._blackframebuf is self._colorframebuf:  # monochrome
@@ -255,11 +281,11 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
             black(*args, color=(color == Adafruit_EPD.BLACK) != self._black_inverted)
             red(*args, color=(color == Adafruit_EPD.RED) != self._color_inverted)
 
-    def pixel(self, x, y, color):
+    def pixel(self, x: int, y: int, color: int) -> None:
         """draw a single pixel in the display buffer"""
         self._color_dup("pixel", (x, y), color)
 
-    def fill(self, color):
+    def fill(self, color: int) -> None:
         """fill the screen with the passed color"""
         red_fill = ((color == Adafruit_EPD.RED) != self._color_inverted) * 0xFF
         black_fill = ((color == Adafruit_EPD.BLACK) != self._black_inverted) * 0xFF
@@ -271,21 +297,34 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
             self._blackframebuf.fill(black_fill)
             self._colorframebuf.fill(red_fill)
 
-    def rect(self, x, y, width, height, color):  # pylint: disable=too-many-arguments
+    def rect(
+        self, x: int, y: int, width: int, height: int, color: int
+    ) -> None:  # pylint: disable=too-many-arguments
         """draw a rectangle"""
         self._color_dup("rect", (x, y, width, height), color)
 
     def fill_rect(
-        self, x, y, width, height, color
-    ):  # pylint: disable=too-many-arguments
+        self, x: int, y: int, width: int, height: int, color: int
+    ) -> None:  # pylint: disable=too-many-arguments
         """fill a rectangle with the passed color"""
         self._color_dup("fill_rect", (x, y, width, height), color)
 
-    def line(self, x_0, y_0, x_1, y_1, color):  # pylint: disable=too-many-arguments
+    def line(
+        self, x_0: int, y_0: int, x_1: int, y_1: int, color: int
+    ) -> None:  # pylint: disable=too-many-arguments
         """Draw a line from (x_0, y_0) to (x_1, y_1) in passed color"""
         self._color_dup("line", (x_0, y_0, x_1, y_1), color)
 
-    def text(self, string, x, y, color, *, font_name="font5x8.bin", size=1):
+    def text(
+        self,
+        string: str,
+        x: int,
+        y: int,
+        color: int,
+        *,
+        font_name: str = "font5x8.bin",
+        size: int = 1
+    ) -> None:
         """Write text string at location (x, y) in given color, using font file"""
         if self._blackframebuf is self._colorframebuf:  # monochrome
             self._blackframebuf.text(
@@ -315,39 +354,51 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
             )
 
     @property
-    def width(self):
+    def width(self) -> int:
         """The width of the display, accounting for rotation"""
         if self.rotation in (0, 2):
             return self._width
         return self._height
 
     @property
-    def height(self):
+    def height(self) -> int:
         """The height of the display, accounting for rotation"""
         if self.rotation in (0, 2):
             return self._height
         return self._width
 
     @property
-    def rotation(self):
+    def rotation(self) -> Union[0, 1, 2, 3]:
         """The rotation of the display, can be one of (0, 1, 2, 3)"""
         return self._framebuf1.rotation
 
     @rotation.setter
-    def rotation(self, val):
+    def rotation(self, val: int) -> None:
         self._framebuf1.rotation = val
         if self._framebuf2:
             self._framebuf2.rotation = val
 
-    def hline(self, x, y, width, color):
+    def hline(
+        self,
+        x: int,
+        y: int,
+        width: int,
+        color: int,
+    ) -> None:
         """draw a horizontal line"""
         self.fill_rect(x, y, width, 1, color)
 
-    def vline(self, x, y, height, color):
+    def vline(
+        self,
+        x: int,
+        y: int,
+        height: int,
+        color: int,
+    ) -> None:
         """draw a vertical line"""
         self.fill_rect(x, y, 1, height, color)
 
-    def image(self, image):
+    def image(self, image: Image) -> None:
         """Set buffer to value of Python Imaging Library image.  The image should
         be in RGB mode and a size equal to the display size.
         """
