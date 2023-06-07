@@ -15,7 +15,8 @@ import adafruit_framebuf
 from adafruit_epd.epd import Adafruit_EPD
 
 try:
-    from typing import Union
+    import typing  # pylint: disable=unused-import
+    from typing_extensions import Literal
     from busio import SPI
     from digitalio import DigitalInOut
 
@@ -173,7 +174,7 @@ class Adafruit_SSD1681(Adafruit_EPD):
         if not self._busy:
             time.sleep(3)  # wait 3 seconds
 
-    def write_ram(self, index: Union[0, 1]) -> int:
+    def write_ram(self, index: Literal[0, 1]) -> int:
         """Send the one byte command for starting the RAM write process. Returns
         the byte read at the same time over SPI. index is the RAM buffer, can be
         0 or 1 for tri-color displays."""
