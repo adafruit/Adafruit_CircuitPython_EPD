@@ -18,6 +18,7 @@ from adafruit_epd import mcp_sram
 try:
     """Needed for type annotations"""
     from typing import Any, Union, Callable, Optional
+    from typing_extensions import Literal
     from busio import SPI
     from digitalio import DigitalInOut
     from circuitpython_typing.pil import Image
@@ -247,7 +248,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
         """Set the RAM address location, must be implemented in subclass"""
         raise NotImplementedError()
 
-    def set_black_buffer(self, index: Union[0, 1], inverted: bool) -> None:
+    def set_black_buffer(self, index: Literal[0, 1], inverted: bool) -> None:
         """Set the index for the black buffer data (0 or 1) and whether its inverted"""
         if index == 0:
             self._blackframebuf = self._framebuf1
@@ -257,7 +258,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
             raise RuntimeError("Buffer index must be 0 or 1")
         self._black_inverted = inverted
 
-    def set_color_buffer(self, index: Union[0, 1], inverted: bool) -> None:
+    def set_color_buffer(self, index: Literal[0, 1], inverted: bool) -> None:
         """Set the index for the color buffer data (0 or 1) and whether its inverted"""
         if index == 0:
             self._colorframebuf = self._framebuf1
@@ -271,7 +272,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
         self,
         func: Callable,
         args: Any,
-        color: Union[0, 1, 2, 3, 4, 5],
+        color: Literal[0, 1, 2, 3, 4, 5],
     ) -> None:
         black = getattr(self._blackframebuf, func)
         red = getattr(self._colorframebuf, func)
@@ -368,7 +369,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
         return self._width
 
     @property
-    def rotation(self) -> Union[0, 1, 2, 3]:
+    def rotation(self) -> Literal[0, 1, 2, 3]:
         """The rotation of the display, can be one of (0, 1, 2, 3)"""
         return self._framebuf1.rotation
 
