@@ -173,7 +173,7 @@ class Adafruit_SSD1675(Adafruit_EPD):
 
     def update(self) -> None:
         """Update the display from internal memory"""
-        self.command(_SSD1675_DISP_CTRL2, bytearray([0xC7]))
+        self.command(_SSD1675_DISP_CTRL2, bytearray([0xF4]))
         self.command(_SSD1675_MASTER_ACTIVATE)
         self.busy_wait()
         if not self._busy:
