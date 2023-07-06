@@ -18,6 +18,7 @@ from adafruit_epd.ssd1675b import Adafruit_SSD1675B  # pylint: disable=unused-im
 from adafruit_epd.ssd1680 import Adafruit_SSD1680  # pylint: disable=unused-import
 from adafruit_epd.ssd1681 import Adafruit_SSD1681  # pylint: disable=unused-import
 from adafruit_epd.uc8151d import Adafruit_UC8151D  # pylint: disable=unused-import
+from adafruit_epd.ek79686 import Adafruit_EK79686  # pylint: disable=unused-import
 
 # create the spi device and pins we will need
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
@@ -38,6 +39,7 @@ print("Creating display")
 # display = Adafruit_SSD1681(200, 200,        # 1.54" HD Tri-color display
 # display = Adafruit_SSD1675(122, 250,        # 2.13" HD mono display
 # display = Adafruit_IL91874(176, 264,        # 2.7" Tri-color display
+# display = Adafruit_EK79686(176, 264,        # 2.7" Tri-color display
 # display = Adafruit_IL0373(152, 152,         # 1.54" Tri-color display
 # display = Adafruit_UC8151D(128, 296,        # 2.9" mono flexible display
 # display = Adafruit_IL0373(128, 296,         # 2.9" Tri-color display
