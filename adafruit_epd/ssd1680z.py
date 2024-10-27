@@ -4,7 +4,7 @@
 `adafruit_epd.ssd1680z` - Adafruit SSD1680Z - ePaper display driver
 ====================================================================================
 CircuitPython driver for Adafruit SSD1680Z display breakouts
-* Author(s): Mikey Sklar Melissa LeBlanc-Williams 
+* Author(s): Mikey Sklar Melissa LeBlanc-Williams
 """
 
 import time
@@ -15,7 +15,6 @@ from adafruit_epd.epd import Adafruit_EPD
 try:
     """Needed for type annotations"""
     import typing  # pylint: disable=unused-import
-    from typing_extensions import Literal
     from busio import SPI
     from digitalio import DigitalInOut
 
