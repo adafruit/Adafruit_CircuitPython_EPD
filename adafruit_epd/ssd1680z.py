@@ -1,5 +1,6 @@
+# SPDX-FileCopyrightText: 2018 Dean Miller for Adafruit Industries
+#
 # SPDX-License-Identifier: MIT
-
 """
 `adafruit_epd.ssd1680z` - Adafruit SSD1680Z - ePaper display driver
 ====================================================================================
