@@ -8,10 +8,10 @@
 CircuitPython driver for Adafruit SSD1680 display breakouts
 * Author(s): Melissa LeBlanc-Williams Mikey Sklar
 """
+import time
 from micropython import const
 import adafruit_framebuf
 from adafruit_epd.epd import Adafruit_EPD
-import time
 
 # Define all SSD1680 constants
 _SSD1680_DRIVER_CONTROL = const(0x01)
@@ -30,7 +30,9 @@ _SSD1680_DEEP_SLEEP = const(0x10)
 class Adafruit_SSD1680(Adafruit_EPD):
     """Driver for SSD1680 ePaper display, default driver."""
 
+    # pylint: disable=too-many-arguments
     def __init__(self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin):
+        # Call parent class's __init__ to initialize sram and other attributes
         super().__init__(width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin)
 
         self.cs_pin = cs_pin
@@ -40,8 +42,10 @@ class Adafruit_SSD1680(Adafruit_EPD):
         self.busy_pin = busy_pin
 
         self.initialize_buffers(width, height)
+        # pylint: enable=too-many-arguments
 
     def initialize_buffers(self, width, height):
+        """Initialize width height stride buffers"""
         stride = width
         if stride % 8 != 0:
             stride += 8 - stride % 8
@@ -80,16 +84,22 @@ class Adafruit_SSD1680(Adafruit_EPD):
         self.command(_SSD1680_SW_RESET)
         self.busy_wait()
 
-        self.command(_SSD1680_DRIVER_CONTROL, bytearray([self._height - 1, (self._height - 1) >> 8, 0x00]))
+        self.command(
+            _SSD1680_DRIVER_CONTROL,
+            bytearray([self._height - 1, (self._height - 1) >> 8, 0x00]),
+        )
         self.command(_SSD1680_DATA_MODE, bytearray([0x03]))
         self.command(_SSD1680_SET_RAMXPOS, bytearray([0x01, 0x10]))
-        self.command(_SSD1680_SET_RAMYPOS, bytearray([0, 0, self._height - 1, (self._height - 1) >> 8]))
+        self.command(
+            _SSD1680_SET_RAMYPOS,
+            bytearray([0, 0, self._height - 1, (self._height - 1) >> 8]),
+        )
 
     def write_ram(self, index):
         """Write to RAM for SSD1680."""
         if index == 0:
             return self.command(_SSD1680_WRITE_BWRAM, end=False)
-        elif index == 1:
+        if index == 1:
             return self.command(_SSD1680_WRITE_REDRAM, end=False)
         else:
             raise RuntimeError("RAM index must be 0 or 1")
@@ -112,13 +122,15 @@ class Adafruit_SSD1680(Adafruit_EPD):
         self.command(_SSD1680_DEEP_SLEEP, bytearray([0x01]))
         time.sleep(0.1)
 
-
 class Adafruit_SSD1680Z(Adafruit_SSD1680):
     """Driver for SSD1680Z ePaper display, overriding SSD1680 settings."""
 
+    # pylint: disable=too-many-arguments
     def __init__(self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin):
+        # Call the parent class's __init__() to initialize attributes
         super().__init__(width, height, spi, cs_pin=cs_pin, dc_pin=dc_pin,
                          sramcs_pin=sramcs_pin, rst_pin=rst_pin, busy_pin=busy_pin)
+        # pylint: enable=too-many-arguments
 
     def power_up(self):
         """Power up sequence specifically for SSD1680Z."""
@@ -127,10 +139,16 @@ class Adafruit_SSD1680Z(Adafruit_SSD1680):
         self.command(_SSD1680_SW_RESET)
         self.busy_wait()
 
-        self.command(_SSD1680_DRIVER_CONTROL, bytearray([self._height - 1, (self._height - 1) >> 8, 0x00]))
+        self.command(
+            _SSD1680_DRIVER_CONTROL,
+            bytearray([self._height - 1, (self._height - 1) >> 8, 0x00]),
+        )
         self.command(_SSD1680_DATA_MODE, bytearray([0x03]))
         self.command(_SSD1680_SET_RAMXPOS, bytearray([0x00, (self._width // 8) - 1]))
-        self.command(_SSD1680_SET_RAMYPOS, bytearray([0x00, 0x00, self._height - 1, (self._height - 1) >> 8]))
+        self.command(
+            _SSD1680_SET_RAMYPOS,
+            bytearray([0x00, 0x00, self._height - 1, (self._height - 1) >> 8]),
+        )
 
     def update(self):
         """Update the display specifically for SSD1680Z."""
