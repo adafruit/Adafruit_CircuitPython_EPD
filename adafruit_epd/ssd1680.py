@@ -30,10 +30,14 @@ _SSD1680_DEEP_SLEEP = const(0x10)
 class Adafruit_SSD1680(Adafruit_EPD):
     """Driver for SSD1680 ePaper display, default driver."""
 
-    # pylint: disable=too-many-arguments
-    def __init__(self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin):
+    # pylint: disable=too-many-arguments, useless-parent-delegation
+    def __init__(
+        self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
+    ):
         # Call parent class's __init__ to initialize sram and other attributes
-        super().__init__(width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin)
+        super().__init__(
+            width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
+        )
 
         self.cs_pin = cs_pin
         self.dc_pin = dc_pin
@@ -42,7 +46,8 @@ class Adafruit_SSD1680(Adafruit_EPD):
         self.busy_pin = busy_pin
 
         self.initialize_buffers(width, height)
-        # pylint: enable=too-many-arguments
+    # pylint: enable=too-many-arguments, useless-parent-delegation
+
 
     def initialize_buffers(self, width, height):
         """Initialize width height stride buffers"""
@@ -101,8 +106,9 @@ class Adafruit_SSD1680(Adafruit_EPD):
             return self.command(_SSD1680_WRITE_BWRAM, end=False)
         if index == 1:
             return self.command(_SSD1680_WRITE_REDRAM, end=False)
-        else:
-            raise RuntimeError("RAM index must be 0 or 1")
+
+        # Raise an error if the index is not 0 or 1
+        raise RuntimeError("RAM index must be 0 or 1")
 
     def set_ram_address(self, x, y):
         """Set RAM address location for SSD1680."""
@@ -125,12 +131,22 @@ class Adafruit_SSD1680(Adafruit_EPD):
 class Adafruit_SSD1680Z(Adafruit_SSD1680):
     """Driver for SSD1680Z ePaper display, overriding SSD1680 settings."""
 
-    # pylint: disable=too-many-arguments
-    def __init__(self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin):
+    # pylint: disable=too-many-arguments, useless-parent-delegation
+    def __init__(
+        self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
+    ):
         # Call the parent class's __init__() to initialize attributes
-        super().__init__(width, height, spi, cs_pin=cs_pin, dc_pin=dc_pin,
-                         sramcs_pin=sramcs_pin, rst_pin=rst_pin, busy_pin=busy_pin)
-        # pylint: enable=too-many-arguments
+        super().__init__(
+            width,
+            height,
+            spi,
+            cs_pin=cs_pin,
+            dc_pin=dc_pin,
+            sramcs_pin=sramcs_pin,
+            rst_pin=rst_pin,
+            busy_pin=busy_pin,
+        )
+    # pylint: enable=too-many-arguments, useless-parent-delegation
 
     def power_up(self):
         """Power up sequence specifically for SSD1680Z."""
