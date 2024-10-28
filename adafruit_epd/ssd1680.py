@@ -27,6 +27,7 @@ _SSD1680_DISP_CTRL2 = const(0x22)
 _SSD1680_MASTER_ACTIVATE = const(0x20)
 _SSD1680_DEEP_SLEEP = const(0x10)
 
+
 class Adafruit_SSD1680(Adafruit_EPD):
     """Driver for SSD1680 ePaper display, default driver."""
 
@@ -46,7 +47,9 @@ class Adafruit_SSD1680(Adafruit_EPD):
         self.busy_pin = busy_pin
 
         self.initialize_buffers(width, height)
+
     # pylint: enable=too-many-arguments, useless-parent-delegation
+
 
 
     def initialize_buffers(self, width, height):
@@ -128,6 +131,7 @@ class Adafruit_SSD1680(Adafruit_EPD):
         self.command(_SSD1680_DEEP_SLEEP, bytearray([0x01]))
         time.sleep(0.1)
 
+
 class Adafruit_SSD1680Z(Adafruit_SSD1680):
     """Driver for SSD1680Z ePaper display, overriding SSD1680 settings."""
 
@@ -146,7 +150,8 @@ class Adafruit_SSD1680Z(Adafruit_SSD1680):
             rst_pin=rst_pin,
             busy_pin=busy_pin,
         )
-    # pylint: enable=too-many-arguments, useless-parent-delegation
+
+     # pylint: enable=too-many-arguments, useless-parent-delegation
 
     def power_up(self):
         """Power up sequence specifically for SSD1680Z."""
