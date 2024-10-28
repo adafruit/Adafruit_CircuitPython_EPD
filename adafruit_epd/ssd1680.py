@@ -50,8 +50,6 @@ class Adafruit_SSD1680(Adafruit_EPD):
 
     # pylint: enable=too-many-arguments, useless-parent-delegation
 
-
-
     def initialize_buffers(self, width, height):
         """Initialize width height stride buffers"""
         stride = width
@@ -151,7 +149,7 @@ class Adafruit_SSD1680Z(Adafruit_SSD1680):
             busy_pin=busy_pin,
         )
 
-     # pylint: enable=too-many-arguments, useless-parent-delegation
+    # pylint: enable=too-many-arguments, useless-parent-delegation
 
     def power_up(self):
         """Power up sequence specifically for SSD1680Z."""
