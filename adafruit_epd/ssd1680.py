@@ -211,3 +211,52 @@ class Adafruit_SSD1680(Adafruit_EPD):
         self.command(_SSD1680_SET_RAMXCOUNT, bytearray([x + 1]))
         # Set RAM Y address counter
         self.command(_SSD1680_SET_RAMYCOUNT, bytearray([y, y >> 8]))
+
+
+class Adafruit_SSD1680Z(Adafruit_SSD1680):
+    """Driver for SSD1680Z ePaper display, overriding SSD1680 settings."""
+
+    # pylint: disable=too-many-arguments, useless-parent-delegation
+    def __init__(
+        self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
+    ):
+        # Call the parent class's __init__() to initialize attributes
+        super().__init__(
+            width,
+            height,
+            spi,
+            cs_pin=cs_pin,
+            dc_pin=dc_pin,
+            sramcs_pin=sramcs_pin,
+            rst_pin=rst_pin,
+            busy_pin=busy_pin,
+        )
+        self.busy_pin = busy_pin  # Ensure busy_pin is set
+
+    # pylint: enable=too-many-arguments, useless-parent-delegation
+
+    def power_up(self):
+        """Power up sequence specifically for SSD1680Z."""
+        self.hardware_reset()
+        self.busy_wait()
+        self.command(_SSD1680_SW_RESET)
+        self.busy_wait()
+
+        self.command(
+            _SSD1680_DRIVER_CONTROL,
+            bytearray([self._height - 1, (self._height - 1) >> 8, 0x00]),
+        )
+        self.command(_SSD1680_DATA_MODE, bytearray([0x03]))
+        self.command(_SSD1680_SET_RAMXPOS, bytearray([0x00, (self._width // 8) - 1]))
+        self.command(
+            _SSD1680_SET_RAMYPOS,
+            bytearray([0x00, 0x00, self._height - 1, (self._height - 1) >> 8]),
+        )
+
+    def update(self):
+        """Update the display specifically for SSD1680Z."""
+        self.command(_SSD1680_DISP_CTRL2, bytearray([0xF7]))  # Full update for SSD1680Z
+        self.command(_SSD1680_MASTER_ACTIVATE)
+        self.busy_wait()
+        if not self.busy_pin:
+            time.sleep(3)  # Wait for update to complete
