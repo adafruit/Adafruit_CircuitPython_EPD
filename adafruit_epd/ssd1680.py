@@ -24,7 +24,7 @@ try:
 except ImportError:
     pass
 
-__version__ = "2.13.0"
+__version__ = "0.0.0+auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_EPD.git"
 
 _SSD1680_DRIVER_CONTROL = const(0x01)
