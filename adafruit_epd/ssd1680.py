@@ -24,7 +24,7 @@ try:
 except ImportError:
     pass
 
-__version__ = "0.0.0+auto.0"
+__version__ = "2.13.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_EPD.git"
 
 _SSD1680_DRIVER_CONTROL = const(0x01)
@@ -244,13 +244,13 @@ class Adafruit_SSD1680Z(Adafruit_SSD1680):
 
         self.command(
             _SSD1680_DRIVER_CONTROL,
-            bytearray([self._height - 1, (self._height - 1) >> 8, 0x00]),
+            bytearray([self._height, (self._height) >> 8, 0x00]),
         )
         self.command(_SSD1680_DATA_MODE, bytearray([0x03]))
-        self.command(_SSD1680_SET_RAMXPOS, bytearray([0x00, (self._width // 8) - 1]))
+        self.command(_SSD1680_SET_RAMXPOS, bytearray([0x00, (self._width // 8)]))
         self.command(
             _SSD1680_SET_RAMYPOS,
-            bytearray([0x00, 0x00, self._height - 1, (self._height - 1) >> 8]),
+            bytearray([0x00, 0x00, self._height, (self._height) >> 8]),
         )
 
     def update(self):
@@ -260,3 +260,13 @@ class Adafruit_SSD1680Z(Adafruit_SSD1680):
         self.busy_wait()
         if not self.busy_pin:
             time.sleep(3)  # Wait for update to complete
+
+    def set_ram_address(
+        self, x: int, y: int
+    ) -> None:  # pylint: disable=unused-argument, no-self-use
+        """Set the RAM address location, not used on this chipset but required by
+        the superclass"""
+        # Set RAM X address counter
+        self.command(_SSD1680_SET_RAMXCOUNT, bytearray([x]))
+        # Set RAM Y address counter
+        self.command(_SSD1680_SET_RAMYCOUNT, bytearray([y, y >> 8])) 
