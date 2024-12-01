@@ -269,4 +269,4 @@ class Adafruit_SSD1680Z(Adafruit_SSD1680):
         # Set RAM X address counter
         self.command(_SSD1680_SET_RAMXCOUNT, bytearray([x]))
         # Set RAM Y address counter
-        self.command(_SSD1680_SET_RAMYCOUNT, bytearray([y, y >> 8])) 
+        self.command(_SSD1680_SET_RAMYCOUNT, bytearray([y, y >> 8]))
