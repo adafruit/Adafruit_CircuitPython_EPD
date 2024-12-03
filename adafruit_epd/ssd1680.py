@@ -244,14 +244,29 @@ class Adafruit_SSD1680Z(Adafruit_SSD1680):
 
         self.command(
             _SSD1680_DRIVER_CONTROL,
-            bytearray([self._height - 1, (self._height - 1) >> 8, 0x00]),
+            bytearray([self._height, (self._height) >> 8, 0x00]),
         )
         self.command(_SSD1680_DATA_MODE, bytearray([0x03]))
-        self.command(_SSD1680_SET_RAMXPOS, bytearray([0x00, (self._width // 8) - 1]))
+
+        # Set voltages
+        self.command(_SSD1680_WRITE_VCOM_REG, bytearray([0x36]))
+        self.command(_SSD1680_GATE_VOLTAGE, bytearray([0x17]))
+        self.command(_SSD1680_SOURCE_VOLTAGE, bytearray([0x41, 0x00, 0x32]))
+
+        self.command(_SSD1680_SET_RAMXPOS, bytearray([0x00, (self._width // 8)]))
         self.command(
             _SSD1680_SET_RAMYPOS,
-            bytearray([0x00, 0x00, self._height - 1, (self._height - 1) >> 8]),
+            bytearray([0x00, 0x00, self._height, (self._height) >> 8]),
         )
+
+        # Set border waveform
+        self.command(_SSD1680_WRITE_BORDER, bytearray([0x05]))
+
+        # Set ram X count
+        self.command(_SSD1680_SET_RAMXCOUNT, bytearray([0x01]))
+        # Set ram Y count
+        self.command(_SSD1680_SET_RAMYCOUNT, bytearray([self._height, 0]))
+        self.busy_wait()
 
     def update(self):
         """Update the display specifically for SSD1680Z."""
@@ -260,3 +275,13 @@ class Adafruit_SSD1680Z(Adafruit_SSD1680):
         self.busy_wait()
         if not self.busy_pin:
             time.sleep(3)  # Wait for update to complete
+
+    def set_ram_address(
+        self, x: int, y: int
+    ) -> None:  # pylint: disable=unused-argument, no-self-use
+        """Set the RAM address location, not used on this chipset but required by
+        the superclass"""
+        # Set RAM X address counter
+        self.command(_SSD1680_SET_RAMXCOUNT, bytearray([x]))
+        # Set RAM Y address counter
+        self.command(_SSD1680_SET_RAMYCOUNT, bytearray([y, y >> 8]))
