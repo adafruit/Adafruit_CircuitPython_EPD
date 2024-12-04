@@ -14,6 +14,11 @@ from micropython import const
 import adafruit_framebuf
 from adafruit_epd.epd import Adafruit_EPD
 
+# for backwards compatibility
+from adafruit_epd.ssd1680b import (  # pylint: disable=unused-import
+    Adafruit_SSD1680B as Adafruit_SSD1680Z,
+)
+
 try:
     """Needed for type annotations"""
     import typing  # pylint: disable=unused-import
@@ -209,79 +214,5 @@ class Adafruit_SSD1680(Adafruit_EPD):
         the superclass"""
         # Set RAM X address counter
         self.command(_SSD1680_SET_RAMXCOUNT, bytearray([x + 1]))
-        # Set RAM Y address counter
-        self.command(_SSD1680_SET_RAMYCOUNT, bytearray([y, y >> 8]))
-
-
-class Adafruit_SSD1680Z(Adafruit_SSD1680):
-    """Driver for SSD1680Z ePaper display, overriding SSD1680 settings."""
-
-    # pylint: disable=too-many-arguments, useless-parent-delegation
-    def __init__(
-        self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
-    ):
-        # Call the parent class's __init__() to initialize attributes
-        super().__init__(
-            width,
-            height,
-            spi,
-            cs_pin=cs_pin,
-            dc_pin=dc_pin,
-            sramcs_pin=sramcs_pin,
-            rst_pin=rst_pin,
-            busy_pin=busy_pin,
-        )
-        self.busy_pin = busy_pin  # Ensure busy_pin is set
-
-    # pylint: enable=too-many-arguments, useless-parent-delegation
-
-    def power_up(self):
-        """Power up sequence specifically for SSD1680Z."""
-        self.hardware_reset()
-        self.busy_wait()
-        self.command(_SSD1680_SW_RESET)
-        self.busy_wait()
-
-        self.command(
-            _SSD1680_DRIVER_CONTROL,
-            bytearray([self._height, (self._height) >> 8, 0x00]),
-        )
-        self.command(_SSD1680_DATA_MODE, bytearray([0x03]))
-
-        # Set voltages
-        self.command(_SSD1680_WRITE_VCOM_REG, bytearray([0x36]))
-        self.command(_SSD1680_GATE_VOLTAGE, bytearray([0x17]))
-        self.command(_SSD1680_SOURCE_VOLTAGE, bytearray([0x41, 0x00, 0x32]))
-
-        self.command(_SSD1680_SET_RAMXPOS, bytearray([0x00, (self._width // 8)]))
-        self.command(
-            _SSD1680_SET_RAMYPOS,
-            bytearray([0x00, 0x00, self._height, (self._height) >> 8]),
-        )
-
-        # Set border waveform
-        self.command(_SSD1680_WRITE_BORDER, bytearray([0x05]))
-
-        # Set ram X count
-        self.command(_SSD1680_SET_RAMXCOUNT, bytearray([0x01]))
-        # Set ram Y count
-        self.command(_SSD1680_SET_RAMYCOUNT, bytearray([self._height, 0]))
-        self.busy_wait()
-
-    def update(self):
-        """Update the display specifically for SSD1680Z."""
-        self.command(_SSD1680_DISP_CTRL2, bytearray([0xF7]))  # Full update for SSD1680Z
-        self.command(_SSD1680_MASTER_ACTIVATE)
-        self.busy_wait()
-        if not self.busy_pin:
-            time.sleep(3)  # Wait for update to complete
-
-    def set_ram_address(
-        self, x: int, y: int
-    ) -> None:  # pylint: disable=unused-argument, no-self-use
-        """Set the RAM address location, not used on this chipset but required by
-        the superclass"""
-        # Set RAM X address counter
-        self.command(_SSD1680_SET_RAMXCOUNT, bytearray([x]))
         # Set RAM Y address counter
         self.command(_SSD1680_SET_RAMYCOUNT, bytearray([y, y >> 8]))

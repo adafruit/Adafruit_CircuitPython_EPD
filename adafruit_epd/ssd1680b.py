@@ -7,7 +7,7 @@
 `adafruit_epd.ssd1680b` - Adafruit SSD1680B - ePaper display driver
 ====================================================================================
 CircuitPython driver for Adafruit SSD1680B displays (GDEY0213B74 display module)
-* Author(s): Melissa LeBlanc-Williams, Joel Miller
+* Author(s): Melissa LeBlanc-Williams, Joel Miller, Mikey Sklar
 """
 
 import time
@@ -158,7 +158,7 @@ class Adafruit_SSD1680B(Adafruit_EPD):
         # driver output control
         self.command(
             _SSD1680B_DRIVER_CONTROL,
-            bytearray([self._height - 1, (self._height - 1) >> 8, 0x00]),
+            bytearray([self._height, self._height >> 8, 0x00]),
         )
         # data entry mode
         self.command(_SSD1680B_DATA_MODE, bytearray([0x03]))
@@ -169,11 +169,11 @@ class Adafruit_SSD1680B(Adafruit_EPD):
         self.command(_SSD1680B_SOURCE_VOLTAGE, bytearray([0x41, 0x00, 0x32]))
 
         # Set ram X start/end postion
-        self.command(_SSD1680B_SET_RAMXPOS, bytearray([0x01, 0x10]))
+        self.command(_SSD1680B_SET_RAMXPOS, bytearray([0x00, self._width // 8]))
         # Set ram Y start/end postion
         self.command(
             _SSD1680B_SET_RAMYPOS,
-            bytearray([0, 0, self._height - 1, (self._height - 1) >> 8]),
+            bytearray([0, 0, self._height, self._height >> 8]),
         )
         # Set border waveform
         self.command(_SSD1680B_WRITE_BORDER, bytearray([0x05]))
@@ -181,7 +181,7 @@ class Adafruit_SSD1680B(Adafruit_EPD):
         # Set ram X count
         self.command(_SSD1680B_SET_RAMXCOUNT, bytearray([0x01]))
         # Set ram Y count
-        self.command(_SSD1680B_SET_RAMYCOUNT, bytearray([self._height - 1, 0]))
+        self.command(_SSD1680B_SET_RAMYCOUNT, bytearray([self._height, 0]))
         self.busy_wait()
 
     def power_down(self) -> None:
@@ -191,7 +191,7 @@ class Adafruit_SSD1680B(Adafruit_EPD):
 
     def update(self) -> None:
         """Update the display from internal memory"""
-        self.command(_SSD1680B_DISP_CTRL2, bytearray([0xF4]))
+        self.command(_SSD1680B_DISP_CTRL2, bytearray([0xF7]))
         self.command(_SSD1680B_MASTER_ACTIVATE)
         self.busy_wait()
         if not self._busy:
@@ -212,6 +212,6 @@ class Adafruit_SSD1680B(Adafruit_EPD):
     def set_ram_address(self, x: int, y: int) -> None:
         """Set the RAM address location"""
         # Set RAM X address counter
-        self.command(_SSD1680B_SET_RAMXCOUNT, bytearray([x + 1]))
+        self.command(_SSD1680B_SET_RAMXCOUNT, bytearray([x]))
         # Set RAM Y address counter
         self.command(_SSD1680B_SET_RAMYCOUNT, bytearray([y, y >> 8]))
