@@ -16,6 +16,7 @@ from adafruit_epd.ssd1608 import Adafruit_SSD1608  # pylint: disable=unused-impo
 from adafruit_epd.ssd1675 import Adafruit_SSD1675  # pylint: disable=unused-import
 from adafruit_epd.ssd1675b import Adafruit_SSD1675B  # pylint: disable=unused-import
 from adafruit_epd.ssd1680 import Adafruit_SSD1680  # pylint: disable=unused-import
+from adafruit_epd.ssd1680b import Adafruit_SSD1680B  # pylint: disable=unused-import
 from adafruit_epd.ssd1681 import Adafruit_SSD1681  # pylint: disable=unused-import
 from adafruit_epd.uc8151d import Adafruit_UC8151D  # pylint: disable=unused-import
 from adafruit_epd.ek79686 import Adafruit_EK79686  # pylint: disable=unused-import
@@ -36,6 +37,7 @@ busy = digitalio.DigitalInOut(board.D7)  # can be None to not use this pin
 print("Creating display")
 # display = Adafruit_SSD1608(200, 200,        # 1.54" HD mono display
 # display = Adafruit_SSD1680(122, 250,        # 2.13" HD Tri-color display
+# display = Adafruit_SSD1680B(122, 250        # 2.13" HD (Tri-color or mono) with GDEY0213B74
 # display = Adafruit_SSD1681(200, 200,        # 1.54" HD Tri-color display
 # display = Adafruit_SSD1675(122, 250,        # 2.13" HD mono display
 # display = Adafruit_IL91874(176, 264,        # 2.7" Tri-color display
