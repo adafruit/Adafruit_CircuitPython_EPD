@@ -3,10 +3,12 @@
 
 # EInk Shield test
 import time
-import digitalio
-import busio
+
 import board
+import busio
+import digitalio
 from analogio import AnalogIn
+
 from adafruit_epd.epd import Adafruit_EPD
 from adafruit_epd.il91874 import Adafruit_IL91874
 

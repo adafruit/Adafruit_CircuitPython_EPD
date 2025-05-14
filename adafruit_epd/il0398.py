@@ -10,16 +10,19 @@ CircuitPython driver for Adafruit IL0398 display breakouts
 """
 
 import time
-from micropython import const
+
 import adafruit_framebuf
+from micropython import const
+
 from adafruit_epd.epd import Adafruit_EPD
 
 try:
     """Needed for type annotations"""
     import typing  # pylint: disable=unused-import
-    from typing_extensions import Literal
+
     from busio import SPI
     from digitalio import DigitalInOut
+    from typing_extensions import Literal
 
 except ImportError:
     pass
@@ -68,11 +71,9 @@ class Adafruit_IL0398(Adafruit_EPD):
         dc_pin: DigitalInOut,
         sramcs_pin: DigitalInOut,
         rst_pin: DigitalInOut,
-        busy_pin: DigitalInOut
+        busy_pin: DigitalInOut,
     ) -> None:
-        super().__init__(
-            width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
-        )
+        super().__init__(width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin)
 
         self._buffer1_size = int(width * height / 8)
         self._buffer2_size = int(width * height / 8)
@@ -155,9 +156,7 @@ class Adafruit_IL0398(Adafruit_EPD):
             return self.command(_IL0398_DTM2, end=False)
         raise RuntimeError("RAM index must be 0 or 1")
 
-    def set_ram_address(
-        self, x: int, y: int
-    ) -> None:  # pylint: disable=unused-argument, no-self-use
+    def set_ram_address(self, x: int, y: int) -> None:  # noqa: PLR6301, F841
         """Set the RAM address location, not used on this chipset but required by
         the superclass"""
         return  # on this chip it does nothing

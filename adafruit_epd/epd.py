@@ -11,17 +11,20 @@ CircuitPython driver for Adafruit ePaper display breakouts
 # pylint: disable=ungrouped-imports
 
 import time
-from micropython import const
+
 from digitalio import Direction
+from micropython import const
+
 from adafruit_epd import mcp_sram
 
 try:
     """Needed for type annotations"""
-    from typing import Any, Union, Callable, Optional
-    from typing_extensions import Literal
+    from typing import Any, Callable, Optional, Union
+
     from busio import SPI
-    from digitalio import DigitalInOut
     from circuitpython_typing.pil import Image
+    from digitalio import DigitalInOut
+    from typing_extensions import Literal
 
 except ImportError:
     pass
@@ -163,9 +166,8 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
 
             self._cs.value = True
             self.spi_device.unlock()
-        else:
-            if self.sram:
-                self.sram.cs_pin.value = True
+        elif self.sram:
+            self.sram.cs_pin.value = True
 
         self.update()
 
@@ -177,9 +179,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
             self._rst.value = True
             time.sleep(0.1)
 
-    def command(
-        self, cmd: int, data: Optional[bytearray] = None, end: bool = True
-    ) -> int:
+    def command(self, cmd: int, data: Optional[bytearray] = None, end: bool = True) -> int:
         """Send command byte to display."""
         self._cs.value = True
         self._dc.value = False
@@ -298,21 +298,15 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
             self._blackframebuf.fill(black_fill)
             self._colorframebuf.fill(red_fill)
 
-    def rect(
-        self, x: int, y: int, width: int, height: int, color: int
-    ) -> None:  # pylint: disable=too-many-arguments
+    def rect(self, x: int, y: int, width: int, height: int, color: int) -> None:  # pylint: disable=too-many-arguments
         """draw a rectangle"""
         self._color_dup("rect", (x, y, width, height), color)
 
-    def fill_rect(
-        self, x: int, y: int, width: int, height: int, color: int
-    ) -> None:  # pylint: disable=too-many-arguments
+    def fill_rect(self, x: int, y: int, width: int, height: int, color: int) -> None:  # pylint: disable=too-many-arguments
         """fill a rectangle with the passed color"""
         self._color_dup("fill_rect", (x, y, width, height), color)
 
-    def line(
-        self, x_0: int, y_0: int, x_1: int, y_1: int, color: int
-    ) -> None:  # pylint: disable=too-many-arguments
+    def line(self, x_0: int, y_0: int, x_1: int, y_1: int, color: int) -> None:  # pylint: disable=too-many-arguments
         """Draw a line from (x_0, y_0) to (x_1, y_1) in passed color"""
         self._color_dup("line", (x_0, y_0, x_1, y_1), color)
 
@@ -324,7 +318,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
         color: int,
         *,
         font_name: str = "font5x8.bin",
-        size: int = 1
+        size: int = 1,
     ) -> None:
         """Write text string at location (x, y) in given color, using font file"""
         if self._blackframebuf is self._colorframebuf:  # monochrome
@@ -357,14 +351,14 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
     @property
     def width(self) -> int:
         """The width of the display, accounting for rotation"""
-        if self.rotation in (0, 2):
+        if self.rotation in {0, 2}:
             return self._width
         return self._height
 
     @property
     def height(self) -> int:
         """The height of the display, accounting for rotation"""
-        if self.rotation in (0, 2):
+        if self.rotation in {0, 2}:
             return self._height
         return self._width
 
@@ -406,9 +400,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
         imwidth, imheight = image.size
         if imwidth != self.width or imheight != self.height:
             raise ValueError(
-                "Image must be same dimensions as display ({0}x{1}).".format(
-                    self.width, self.height
-                )
+                f"Image must be same dimensions as display ({self.width}x{self.height})."
             )
         if self.sram:
             raise RuntimeError("PIL image is not for use with SRAM assist")

@@ -9,15 +9,15 @@ CircuitPython driver for Microchip SRAM chips
 * Author(s): Dean Miller
 """
 
-from micropython import const
 from adafruit_bus_device import spi_device
-
+from micropython import const
 
 try:
     """Needed for type annotations"""
     from typing import Any, List
-    from digitalio import DigitalInOut
+
     from busio import SPI
+    from digitalio import DigitalInOut
 except ImportError:
     pass
 

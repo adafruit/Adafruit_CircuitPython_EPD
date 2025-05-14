@@ -10,16 +10,19 @@ CircuitPython driver for Adafruit SSD1608 display breakouts
 """
 
 import time
-from micropython import const
+
 import adafruit_framebuf
+from micropython import const
+
 from adafruit_epd.epd import Adafruit_EPD
 
 try:
     """Needed for type annotations"""
     import typing  # pylint: disable=unused-import
-    from typing_extensions import Literal
+
     from busio import SPI
     from digitalio import DigitalInOut
+    from typing_extensions import Literal
 
 except ImportError:
     pass
@@ -59,7 +62,9 @@ _SSD1608_SET_RAMYPOS = const(0x45)
 _SSD1608_SET_RAMXCOUNT = const(0x4E)
 _SSD1608_SET_RAMYCOUNT = const(0x4F)
 _SSD1608_NOP = const(0xFF)
-_LUT_DATA = b'\x02\x02\x01\x11\x12\x12""fiiYX\x99\x99\x88\x00\x00\x00\x00\xf8\xb4\x13Q5QQ\x19\x01\x00'  # pylint: disable=line-too-long
+_LUT_DATA = (
+    b'\x02\x02\x01\x11\x12\x12""fiiYX\x99\x99\x88\x00\x00\x00\x00\xf8\xb4\x13Q5QQ\x19\x01\x00'  # noqa: E501
+)
 
 
 class Adafruit_SSD1608(Adafruit_EPD):
@@ -76,11 +81,9 @@ class Adafruit_SSD1608(Adafruit_EPD):
         dc_pin: DigitalInOut,
         sramcs_pin: DigitalInOut,
         rst_pin: DigitalInOut,
-        busy_pin: DigitalInOut
+        busy_pin: DigitalInOut,
     ) -> None:
-        super().__init__(
-            width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
-        )
+        super().__init__(width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin)
 
         if height % 8 != 0:
             height += 8 - height % 8
@@ -165,9 +168,7 @@ class Adafruit_SSD1608(Adafruit_EPD):
             return self.command(_SSD1608_WRITE_RAM, end=False)
         raise RuntimeError("RAM index must be 0")
 
-    def set_ram_address(
-        self, x: int, y: int
-    ) -> None:  # pylint: disable=unused-argument, no-self-use
+    def set_ram_address(self, x: int, y: int) -> None:  # noqa: PLR6301, F841
         """Set the RAM address location, not used on this chipset but required by
         the superclass"""
         # Set RAM X address counter
