@@ -18,7 +18,7 @@ from adafruit_epd.epd import Adafruit_EPD
 
 try:
     "Needed for type annotations"
-    import typing  # pylint: disable=unused-import
+    import typing
 
     from busio import SPI
     from digitalio import DigitalInOut
@@ -65,7 +65,6 @@ _LUT_WB = b"\x90\x1a\x1a\x00\x00\x01 \n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x1
 class Adafruit_IL91874(Adafruit_EPD):
     """driver class for Adafruit IL91874 ePaper display breakouts"""
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         width: int,

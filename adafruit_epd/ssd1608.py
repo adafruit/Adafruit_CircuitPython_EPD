@@ -18,7 +18,7 @@ from adafruit_epd.epd import Adafruit_EPD
 
 try:
     """Needed for type annotations"""
-    import typing  # pylint: disable=unused-import
+    import typing
 
     from busio import SPI
     from digitalio import DigitalInOut
@@ -70,7 +70,6 @@ _LUT_DATA = (
 class Adafruit_SSD1608(Adafruit_EPD):
     """driver class for Adafruit SSD1608 ePaper display breakouts"""
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         width: int,

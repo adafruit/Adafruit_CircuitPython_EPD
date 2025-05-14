@@ -18,7 +18,7 @@ from adafruit_epd.epd import Adafruit_EPD
 
 try:
     """Needed for type annotations"""
-    import typing  # pylint: disable=unused-import
+    import typing
 
     from busio import SPI
     from digitalio import DigitalInOut
@@ -59,7 +59,6 @@ _IL0373_VCM_DC_SETTING = const(0x82)
 class Adafruit_IL0373(Adafruit_EPD):
     """driver class for Adafruit IL0373 ePaper display breakouts"""
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         width: int,

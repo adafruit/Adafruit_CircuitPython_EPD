@@ -6,17 +6,17 @@ import busio
 import digitalio
 from PIL import Image, ImageDraw, ImageFont
 
-from adafruit_epd.ek79686 import Adafruit_EK79686  # pylint: disable=unused-import
+from adafruit_epd.ek79686 import Adafruit_EK79686
 from adafruit_epd.epd import Adafruit_EPD
-from adafruit_epd.il0373 import Adafruit_IL0373  # pylint: disable=unused-import
-from adafruit_epd.il0398 import Adafruit_IL0398  # pylint: disable=unused-import
-from adafruit_epd.il91874 import Adafruit_IL91874  # pylint: disable=unused-import
-from adafruit_epd.ssd1608 import Adafruit_SSD1608  # pylint: disable=unused-import
-from adafruit_epd.ssd1675 import Adafruit_SSD1675  # pylint: disable=unused-import
-from adafruit_epd.ssd1675b import Adafruit_SSD1675B  # pylint: disable=unused-import
-from adafruit_epd.ssd1680 import Adafruit_SSD1680  # pylint: disable=unused-import
-from adafruit_epd.ssd1681 import Adafruit_SSD1681  # pylint: disable=unused-import
-from adafruit_epd.uc8151d import Adafruit_UC8151D  # pylint: disable=unused-import
+from adafruit_epd.il0373 import Adafruit_IL0373
+from adafruit_epd.il0398 import Adafruit_IL0398
+from adafruit_epd.il91874 import Adafruit_IL91874
+from adafruit_epd.ssd1608 import Adafruit_SSD1608
+from adafruit_epd.ssd1675 import Adafruit_SSD1675
+from adafruit_epd.ssd1675b import Adafruit_SSD1675B
+from adafruit_epd.ssd1680 import Adafruit_SSD1680
+from adafruit_epd.ssd1681 import Adafruit_SSD1681
+from adafruit_epd.uc8151d import Adafruit_UC8151D
 
 # create the spi device and pins we will need
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)

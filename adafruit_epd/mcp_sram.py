@@ -61,7 +61,7 @@ class Adafruit_MCP_SRAM:
         self._buf[0] = Adafruit_MCP_SRAM.SRAM_WRSR
         self._buf[1] = 0x43
         with self._spi as spidev:
-            spidev.write(self._buf, end=2)  # pylint: disable=no-member
+            spidev.write(self._buf, end=2)
 
     def get_view(self, offset: int) -> Adafruit_MCP_SRAM_View:
         """Create an object that can be used as a memoryview, with a given offset"""
@@ -74,8 +74,8 @@ class Adafruit_MCP_SRAM:
         self._buf[2] = addr & 0xFF
 
         with self._spi as spi:
-            spi.write(self._buf, end=3)  # pylint: disable=no-member
-            spi.write(bytearray(buf))  # pylint: disable=no-member
+            spi.write(self._buf, end=3)
+            spi.write(bytearray(buf))
 
     def read(self, addr: int, length: int, reg: int = SRAM_READ):
         """read passed number of bytes at the passed address"""
@@ -85,8 +85,8 @@ class Adafruit_MCP_SRAM:
 
         buf = bytearray(length)
         with self._spi as spi:
-            spi.write(self._buf, end=3)  # pylint: disable=no-member
-            spi.readinto(buf)  # pylint: disable=no-member
+            spi.write(self._buf, end=3)
+            spi.readinto(buf)
         return buf
 
     def read8(self, addr: int, reg: int = SRAM_READ):
@@ -113,6 +113,6 @@ class Adafruit_MCP_SRAM:
         self._buf[2] = addr & 0xFF
         fill = bytearray([value])
         with self._spi as spi:
-            spi.write(self._buf, end=3)  # pylint: disable=no-member
+            spi.write(self._buf, end=3)
             for _ in range(length):
-                spi.write(fill)  # pylint: disable=no-member
+                spi.write(fill)

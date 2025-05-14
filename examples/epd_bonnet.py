@@ -9,7 +9,7 @@ from digitalio import DigitalInOut, Direction
 from PIL import Image, ImageDraw, ImageFont
 
 from adafruit_epd.epd import Adafruit_EPD
-from adafruit_epd.ssd1675b import Adafruit_SSD1675B  # pylint: disable=unused-import
+from adafruit_epd.ssd1675b import Adafruit_SSD1675B
 
 # create two buttons
 switch1 = DigitalInOut(board.D6)

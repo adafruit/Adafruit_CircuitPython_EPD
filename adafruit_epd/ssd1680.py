@@ -18,7 +18,7 @@ from adafruit_epd.epd import Adafruit_EPD
 
 try:
     """Needed for type annotations"""
-    import typing  # pylint: disable=unused-import
+    import typing
 
     from busio import SPI
     from digitalio import DigitalInOut
@@ -83,7 +83,6 @@ _SSD1680_NOP = const(0xFF)
 class Adafruit_SSD1680(Adafruit_EPD):
     """driver class for Adafruit SSD1680 ePaper display breakouts"""
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         width: int,
@@ -215,7 +214,6 @@ class Adafruit_SSD1680(Adafruit_EPD):
 class Adafruit_SSD1680Z(Adafruit_SSD1680):
     """Driver for SSD1680Z ePaper display, overriding SSD1680 settings."""
 
-    # pylint: disable=too-many-arguments, useless-parent-delegation
     def __init__(self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin):
         # Call the parent class's __init__() to initialize attributes
         super().__init__(

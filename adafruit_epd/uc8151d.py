@@ -18,7 +18,7 @@ from adafruit_epd.epd import Adafruit_EPD
 
 try:
     """Needed for type annotations"""
-    import typing  # pylint: disable=unused-import
+    import typing
 
     from busio import SPI
     from digitalio import DigitalInOut
@@ -74,7 +74,6 @@ _UC8151D_TSSET = const(0xE5)
 class Adafruit_UC8151D(Adafruit_EPD):
     """driver class for Adafruit UC8151D ePaper display breakouts"""
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         width: int,

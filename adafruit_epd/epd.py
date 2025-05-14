@@ -8,7 +8,6 @@
 CircuitPython driver for Adafruit ePaper display breakouts
 * Author(s): Dean Miller
 """
-# pylint: disable=ungrouped-imports
 
 import time
 
@@ -33,7 +32,7 @@ __version__ = "0.0.0+auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_EPD.git"
 
 
-class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-public-methods, too-many-arguments
+class Adafruit_EPD:
     """Base class for EPD displays"""
 
     BLACK = const(0)
@@ -53,7 +52,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
         sramcs_pin: DigitalInOut,
         rst_pin: DigitalInOut,
         busy_pin: DigitalInOut,
-    ) -> None:  # pylint: disable=too-many-arguments
+    ) -> None:
         self._width = width
         self._height = height
 
@@ -99,7 +98,7 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
         self._black_inverted = self._color_inverted = True
         self.hardware_reset()
 
-    def display(self) -> None:  # pylint: disable=too-many-branches
+    def display(self) -> None:
         """show the contents of the display buffer"""
         self.power_up()
 
@@ -298,15 +297,15 @@ class Adafruit_EPD:  # pylint: disable=too-many-instance-attributes, too-many-pu
             self._blackframebuf.fill(black_fill)
             self._colorframebuf.fill(red_fill)
 
-    def rect(self, x: int, y: int, width: int, height: int, color: int) -> None:  # pylint: disable=too-many-arguments
+    def rect(self, x: int, y: int, width: int, height: int, color: int) -> None:
         """draw a rectangle"""
         self._color_dup("rect", (x, y, width, height), color)
 
-    def fill_rect(self, x: int, y: int, width: int, height: int, color: int) -> None:  # pylint: disable=too-many-arguments
+    def fill_rect(self, x: int, y: int, width: int, height: int, color: int) -> None:
         """fill a rectangle with the passed color"""
         self._color_dup("fill_rect", (x, y, width, height), color)
 
-    def line(self, x_0: int, y_0: int, x_1: int, y_1: int, color: int) -> None:  # pylint: disable=too-many-arguments
+    def line(self, x_0: int, y_0: int, x_1: int, y_1: int, color: int) -> None:
         """Draw a line from (x_0, y_0) to (x_1, y_1) in passed color"""
         self._color_dup("line", (x_0, y_0, x_1, y_1), color)
 

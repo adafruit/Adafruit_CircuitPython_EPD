@@ -17,7 +17,7 @@ from micropython import const
 from adafruit_epd.epd import Adafruit_EPD
 
 try:
-    import typing  # pylint: disable=unused-import
+    import typing
 
     from busio import SPI
     from digitalio import DigitalInOut
@@ -82,7 +82,6 @@ _SSD1681_NOP = const(0xFF)
 class Adafruit_SSD1681(Adafruit_EPD):
     """driver class for Adafruit SSD1681 ePaper display breakouts"""
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         width: int,
