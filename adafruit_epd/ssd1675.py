@@ -10,16 +10,19 @@ CircuitPython driver for Adafruit SSD1675 display breakouts
 """
 
 import time
-from micropython import const
+
 import adafruit_framebuf
+from micropython import const
+
 from adafruit_epd.epd import Adafruit_EPD
 
 try:
     """Needed for type annotations"""
-    import typing  # pylint: disable=unused-import
-    from typing_extensions import Literal
+    import typing
+
     from busio import SPI
     from digitalio import DigitalInOut
+    from typing_extensions import Literal
 
 except ImportError:
     pass
@@ -53,13 +56,12 @@ _SSD1675_SET_RAMXCOUNT = const(0x4E)
 _SSD1675_SET_RAMYCOUNT = const(0x4F)
 _SSD1675_SET_ANALOGBLOCK = const(0x74)
 _SSD1675_SET_DIGITALBLOCK = const(0x7E)
-_LUT_DATA = b"\x80`@\x00\x00\x00\x00\x10` \x00\x00\x00\x00\x80`@\x00\x00\x00\x00\x10` \x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x03\x00\x00\x02\t\t\x00\x00\x02\x03\x03\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x15A\xa820\n"  # pylint: disable=line-too-long
+_LUT_DATA = b"\x80`@\x00\x00\x00\x00\x10` \x00\x00\x00\x00\x80`@\x00\x00\x00\x00\x10` \x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03\x03\x00\x00\x02\t\t\x00\x00\x02\x03\x03\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x15A\xa820\n"  # noqa: E501
 
 
 class Adafruit_SSD1675(Adafruit_EPD):
     """driver class for Adafruit SSD1675 ePaper display breakouts"""
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         width: int,
@@ -70,11 +72,9 @@ class Adafruit_SSD1675(Adafruit_EPD):
         dc_pin: DigitalInOut,
         sramcs_pin: DigitalInOut,
         rst_pin: DigitalInOut,
-        busy_pin: DigitalInOut
+        busy_pin: DigitalInOut,
     ):
-        super().__init__(
-            width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
-        )
+        super().__init__(width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin)
         stride = width
         if stride % 8 != 0:
             stride += 8 - stride % 8
@@ -189,9 +189,7 @@ class Adafruit_SSD1675(Adafruit_EPD):
             return self.command(_SSD1675_WRITE_RAM2, end=False)
         raise RuntimeError("RAM index must be 0 or 1")
 
-    def set_ram_address(
-        self, x: int, y: int
-    ) -> None:  # pylint: disable=unused-argument, no-self-use
+    def set_ram_address(self, x: int, y: int) -> None:  # noqa: PLR6301, F841
         """Set the RAM address location, not used on this chipset but required by
         the superclass"""
         self.command(_SSD1675_SET_RAMXCOUNT, bytearray([x]))

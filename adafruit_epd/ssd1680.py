@@ -10,16 +10,19 @@ CircuitPython driver for Adafruit SSD1680 display breakouts
 """
 
 import time
-from micropython import const
+
 import adafruit_framebuf
+from micropython import const
+
 from adafruit_epd.epd import Adafruit_EPD
 
 try:
     """Needed for type annotations"""
-    import typing  # pylint: disable=unused-import
-    from typing_extensions import Literal
+    import typing
+
     from busio import SPI
     from digitalio import DigitalInOut
+    from typing_extensions import Literal
 
 except ImportError:
     pass
@@ -80,7 +83,6 @@ _SSD1680_NOP = const(0xFF)
 class Adafruit_SSD1680(Adafruit_EPD):
     """driver class for Adafruit SSD1680 ePaper display breakouts"""
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         width: int,
@@ -91,11 +93,9 @@ class Adafruit_SSD1680(Adafruit_EPD):
         dc_pin: DigitalInOut,
         sramcs_pin: DigitalInOut,
         rst_pin: DigitalInOut,
-        busy_pin: DigitalInOut
+        busy_pin: DigitalInOut,
     ) -> None:
-        super().__init__(
-            width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
-        )
+        super().__init__(width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin)
 
         stride = width
         if stride % 8 != 0:
@@ -202,9 +202,7 @@ class Adafruit_SSD1680(Adafruit_EPD):
             return self.command(_SSD1680_WRITE_REDRAM, end=False)
         raise RuntimeError("RAM index must be 0 or 1")
 
-    def set_ram_address(
-        self, x: int, y: int
-    ) -> None:  # pylint: disable=unused-argument, no-self-use
+    def set_ram_address(self, x: int, y: int) -> None:  # noqa: PLR6301, F841
         """Set the RAM address location, not used on this chipset but required by
         the superclass"""
         # Set RAM X address counter
@@ -216,10 +214,7 @@ class Adafruit_SSD1680(Adafruit_EPD):
 class Adafruit_SSD1680Z(Adafruit_SSD1680):
     """Driver for SSD1680Z ePaper display, overriding SSD1680 settings."""
 
-    # pylint: disable=too-many-arguments, useless-parent-delegation
-    def __init__(
-        self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
-    ):
+    def __init__(self, width, height, spi, *, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin):
         # Call the parent class's __init__() to initialize attributes
         super().__init__(
             width,
@@ -276,9 +271,7 @@ class Adafruit_SSD1680Z(Adafruit_SSD1680):
         if not self.busy_pin:
             time.sleep(3)  # Wait for update to complete
 
-    def set_ram_address(
-        self, x: int, y: int
-    ) -> None:  # pylint: disable=unused-argument, no-self-use
+    def set_ram_address(self, x: int, y: int) -> None:  # noqa: PLR6301, F841
         """Set the RAM address location, not used on this chipset but required by
         the superclass"""
         # Set RAM X address counter

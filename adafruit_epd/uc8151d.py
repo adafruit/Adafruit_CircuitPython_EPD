@@ -10,16 +10,19 @@ CircuitPython driver for Adafruit UC8151D display breakouts
 """
 
 import time
-from micropython import const
+
 import adafruit_framebuf
+from micropython import const
+
 from adafruit_epd.epd import Adafruit_EPD
 
 try:
     """Needed for type annotations"""
-    import typing  # pylint: disable=unused-import
-    from typing_extensions import Literal
+    import typing
+
     from busio import SPI
     from digitalio import DigitalInOut
+    from typing_extensions import Literal
 
 except ImportError:
     pass
@@ -71,7 +74,6 @@ _UC8151D_TSSET = const(0xE5)
 class Adafruit_UC8151D(Adafruit_EPD):
     """driver class for Adafruit UC8151D ePaper display breakouts"""
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         width: int,
@@ -82,11 +84,9 @@ class Adafruit_UC8151D(Adafruit_EPD):
         dc_pin: DigitalInOut,
         sramcs_pin: DigitalInOut,
         rst_pin: DigitalInOut,
-        busy_pin: DigitalInOut
+        busy_pin: DigitalInOut,
     ) -> None:
-        super().__init__(
-            width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
-        )
+        super().__init__(width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin)
 
         self._buffer1_size = int(width * height / 8)
         self._buffer2_size = int(width * height / 8)
@@ -163,9 +163,7 @@ class Adafruit_UC8151D(Adafruit_EPD):
             return self.command(_UC8151D_DTM2, end=False)
         raise RuntimeError("RAM index must be 0 or 1")
 
-    def set_ram_address(
-        self, x: int, y: int
-    ) -> None:  # pylint: disable=unused-argument, no-self-use
+    def set_ram_address(self, x: int, y: int) -> None:  # noqa: PLR6301, F841
         """Set the RAM address location, not used on this chipset but required by
         the superclass"""
         return  # on this chip it does nothing

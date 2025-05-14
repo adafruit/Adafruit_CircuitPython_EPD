@@ -2,15 +2,14 @@
 # SPDX-License-Identifier: MIT
 
 import time
-import busio
-import board
-from digitalio import DigitalInOut, Direction
 
-from PIL import Image
-from PIL import ImageDraw
-from PIL import ImageFont
+import board
+import busio
+from digitalio import DigitalInOut, Direction
+from PIL import Image, ImageDraw, ImageFont
+
 from adafruit_epd.epd import Adafruit_EPD
-from adafruit_epd.ssd1675b import Adafruit_SSD1675B  # pylint: disable=unused-import
+from adafruit_epd.ssd1675b import Adafruit_SSD1675B
 
 # create two buttons
 switch1 = DigitalInOut(board.D6)

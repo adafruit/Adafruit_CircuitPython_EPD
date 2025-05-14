@@ -10,16 +10,19 @@ CircuitPython driver for Adafruit IL91874 display breakouts
 """
 
 import time
-from micropython import const
+
 import adafruit_framebuf
+from micropython import const
+
 from adafruit_epd.epd import Adafruit_EPD
 
 try:
     "Needed for type annotations"
-    import typing  # pylint: disable=unused-import
-    from typing_extensions import Literal
+    import typing
+
     from busio import SPI
     from digitalio import DigitalInOut
+    from typing_extensions import Literal
 
 except ImportError:
     pass
@@ -52,19 +55,16 @@ _IL91874_CDI = const(0x50)
 _IL91874_RESOLUTION = const(0x61)
 _IL91874_VCM_DC_SETTING = const(0x82)
 
-# pylint: disable=line-too-long
-_LUT_VCOMDC = b"\x00\x00\x00\x1a\x1a\x00\x00\x01\x00\n\n\x00\x00\x08\x00\x0e\x01\x0e\x01\x10\x00\n\n\x00\x00\x08\x00\x04\x10\x00\x00\x05\x00\x03\x0e\x00\x00\n\x00#\x00\x00\x00\x01"
-_LUT_WW = b"\x90\x1a\x1a\x00\x00\x01@\n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x80\n\n\x00\x00\x08\x00\x04\x10\x00\x00\x05\x00\x03\x0e\x00\x00\n\x00#\x00\x00\x00\x01"
-_LUT_BW = b"\xa0\x1a\x1a\x00\x00\x01\x00\n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x90\n\n\x00\x00\x08\xb0\x04\x10\x00\x00\x05\xb0\x03\x0e\x00\x00\n\xc0#\x00\x00\x00\x01"
-_LUT_BB = b"\x90\x1a\x1a\x00\x00\x01@\n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x80\n\n\x00\x00\x08\x00\x04\x10\x00\x00\x05\x00\x03\x0e\x00\x00\n\x00#\x00\x00\x00\x01"
-_LUT_WB = b"\x90\x1a\x1a\x00\x00\x01 \n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x10\n\n\x00\x00\x08\x00\x04\x10\x00\x00\x05\x00\x03\x0e\x00\x00\n\x00#\x00\x00\x00\x01"
-# pylint: enable=line-too-long
+_LUT_VCOMDC = b"\x00\x00\x00\x1a\x1a\x00\x00\x01\x00\n\n\x00\x00\x08\x00\x0e\x01\x0e\x01\x10\x00\n\n\x00\x00\x08\x00\x04\x10\x00\x00\x05\x00\x03\x0e\x00\x00\n\x00#\x00\x00\x00\x01"  # noqa: E501
+_LUT_WW = b"\x90\x1a\x1a\x00\x00\x01@\n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x80\n\n\x00\x00\x08\x00\x04\x10\x00\x00\x05\x00\x03\x0e\x00\x00\n\x00#\x00\x00\x00\x01"  # noqa: E501
+_LUT_BW = b"\xa0\x1a\x1a\x00\x00\x01\x00\n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x90\n\n\x00\x00\x08\xb0\x04\x10\x00\x00\x05\xb0\x03\x0e\x00\x00\n\xc0#\x00\x00\x00\x01"  # noqa: E501
+_LUT_BB = b"\x90\x1a\x1a\x00\x00\x01@\n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x80\n\n\x00\x00\x08\x00\x04\x10\x00\x00\x05\x00\x03\x0e\x00\x00\n\x00#\x00\x00\x00\x01"  # noqa: E501
+_LUT_WB = b"\x90\x1a\x1a\x00\x00\x01 \n\n\x00\x00\x08\x84\x0e\x01\x0e\x01\x10\x10\n\n\x00\x00\x08\x00\x04\x10\x00\x00\x05\x00\x03\x0e\x00\x00\n\x00#\x00\x00\x00\x01"  # noqa: E501
 
 
 class Adafruit_IL91874(Adafruit_EPD):
     """driver class for Adafruit IL91874 ePaper display breakouts"""
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         width: int,
@@ -75,11 +75,9 @@ class Adafruit_IL91874(Adafruit_EPD):
         dc_pin: DigitalInOut,
         sramcs_pin: DigitalInOut,
         rst_pin: DigitalInOut,
-        busy_pin: DigitalInOut
+        busy_pin: DigitalInOut,
     ) -> None:
-        super().__init__(
-            width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin
-        )
+        super().__init__(width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin)
 
         self._buffer1_size = int(width * height / 8)
         self._buffer2_size = int(width * height / 8)
@@ -178,9 +176,7 @@ class Adafruit_IL91874(Adafruit_EPD):
             return self.command(_IL91874_DTM2, end=False)
         raise RuntimeError("RAM index must be 0 or 1")
 
-    def set_ram_address(
-        self, x: int, y: int
-    ) -> None:  # pylint: disable=unused-argument, no-self-use
+    def set_ram_address(self, x: int, y: int) -> None:  # noqa: PLR6301, F841
         """Set the RAM address location, not used on this chipset but required by
         the superclass"""
         return  # on this chip it does nothing

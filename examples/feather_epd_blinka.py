@@ -2,9 +2,11 @@
 # SPDX-License-Identifier: MIT
 
 import time
-import digitalio
-import busio
+
 import board
+import busio
+import digitalio
+
 from adafruit_epd.epd import Adafruit_EPD
 from adafruit_epd.ssd1680 import Adafruit_SSD1680
 
