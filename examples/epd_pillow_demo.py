@@ -51,7 +51,8 @@ busy = digitalio.DigitalInOut(board.D17)
 # display = Adafruit_EK79686(176, 264,        # 2.7" Tri-color display
 # display = Adafruit_IL0373(152, 152,         # 1.54" Tri-color display
 # display = Adafruit_UC8151D(128, 296,        # 2.9" mono flexible display
-# display = Adafruit_IL0373(128, 296,         # 2.9" Tri-color display
+# display = Adafruit_IL0373(128, 296,         # 2.9" Tri-color display IL0373
+# display = Adafruit_SSD1680(128, 296,        # 2.9" Tri-color display SSD1680
 # display = Adafruit_IL0398(400, 300,         # 4.2" Tri-color display
 display = Adafruit_IL0373(
     104,
