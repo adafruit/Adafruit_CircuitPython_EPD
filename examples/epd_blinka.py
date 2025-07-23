@@ -11,15 +11,13 @@ from adafruit_epd.epd import Adafruit_EPD
 from adafruit_epd.il0373 import Adafruit_IL0373
 from adafruit_epd.il0398 import Adafruit_IL0398
 from adafruit_epd.il91874 import Adafruit_IL91874
+from adafruit_epd.jd79661 import Adafruit_JD79661
 from adafruit_epd.ssd1608 import Adafruit_SSD1608
 from adafruit_epd.ssd1675 import Adafruit_SSD1675
 from adafruit_epd.ssd1675b import Adafruit_SSD1675B
 from adafruit_epd.ssd1680 import Adafruit_SSD1680
 from adafruit_epd.ssd1681 import Adafruit_SSD1681
 from adafruit_epd.uc8151d import Adafruit_UC8151D
-
-# create the spi device and pins we will need
-spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
 
 # create the spi device and pins we will need
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
@@ -32,6 +30,7 @@ busy = digitalio.DigitalInOut(board.D7)  # can be None to not use this pin
 
 # give them all to our driver
 print("Creating display")
+# display = Adafruit_JD79661(122, 150,        # 2.13" Quad-color display
 # display = Adafruit_SSD1608(200, 200,        # 1.54" HD mono display
 # display = Adafruit_SSD1680(122, 250,        # 2.13" HD Tri-color display
 # display = Adafruit_SSD1681(200, 200,        # 1.54" HD Tri-color display
@@ -70,6 +69,7 @@ height = display.height
 image = Image.new("RGB", (width, height))
 
 WHITE = (0xFF, 0xFF, 0xFF)
+YELLOW = (0xFF, 0xFF, 0x00)
 RED = (0xFF, 0x00, 0x00)
 BLACK = (0x00, 0x00, 0x00)
 
@@ -118,9 +118,15 @@ font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 20)
 # Some other nice fonts to try: http://www.dafont.com/bitmap.php
 # font = ImageFont.truetype('Minecraftia.ttf', 8)
 
+if type(display) == Adafruit_JD79661:
+    # for quad color, test yellow
+    fill = YELLOW
+else:
+    # otherwise, text is red
+    fill = RED
 # Write two lines of text.
-draw.text((x, top), "Hello", font=font, fill=RED)
-draw.text((x, top + 20), "World!", font=font, fill=RED)
+draw.text((x, top), "Hello", font=font, fill=fill)
+draw.text((x, top + 20), "World!", font=font, fill=fill)
 
 # Display image.
 display.image(image)

@@ -15,6 +15,7 @@ from adafruit_epd.ek79686 import Adafruit_EK79686
 from adafruit_epd.il0373 import Adafruit_IL0373
 from adafruit_epd.il0398 import Adafruit_IL0398
 from adafruit_epd.il91874 import Adafruit_IL91874
+from adafruit_epd.jd79661 import Adafruit_JD79661
 from adafruit_epd.ssd1608 import Adafruit_SSD1608
 from adafruit_epd.ssd1675 import Adafruit_SSD1675
 from adafruit_epd.ssd1680 import Adafruit_SSD1680, Adafruit_SSD1680Z
@@ -42,6 +43,7 @@ rst = digitalio.DigitalInOut(board.D27)
 busy = digitalio.DigitalInOut(board.D17)
 
 # give them all to our driver
+# display = Adafruit_JD79661(122, 150,        # 2.13" Quad-color display
 # display = Adafruit_SSD1608(200, 200,        # 1.54" HD mono display
 # display = Adafruit_SSD1675(122, 250,        # 2.13" HD mono display
 # display = Adafruit_SSD1680(122, 250,        # 2.13" HD Tri-color or mono display

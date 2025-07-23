@@ -17,6 +17,7 @@ from adafruit_epd.ek79686 import Adafruit_EK79686
 from adafruit_epd.il0373 import Adafruit_IL0373
 from adafruit_epd.il0398 import Adafruit_IL0398
 from adafruit_epd.il91874 import Adafruit_IL91874
+from adafruit_epd.jd79661 import Adafruit_JD79661
 from adafruit_epd.ssd1608 import Adafruit_SSD1608
 from adafruit_epd.ssd1675 import Adafruit_SSD1675
 from adafruit_epd.ssd1680 import Adafruit_SSD1680, Adafruit_SSD1680Z
@@ -32,6 +33,7 @@ rst = digitalio.DigitalInOut(board.D27)
 busy = digitalio.DigitalInOut(board.D17)
 
 # give them all to our driver
+# display = Adafruit_JD79661(122, 150,        # 2.13" Quad-color display
 # display = Adafruit_SSD1608(200, 200,        # 1.54" HD mono display
 # display = Adafruit_SSD1675(122, 250,        # 2.13" HD mono display
 # display = Adafruit_SSD1680(122, 250,        # 2.13" HD Tri-color or mono display
@@ -85,6 +87,38 @@ image = image.crop((x, y, x + display.width, y + display.height)).convert("RGB")
 
 # Convert to Monochrome and Add dithering
 # image = image.convert("1").convert("L")
+
+if type(display) == Adafruit_JD79661:
+    # Create a palette with the 4 colors: Black, White, Red, Yellow
+    # The palette needs 768 values (256 colors × 3 channels)
+    palette = []
+
+    # We'll map the 256 palette indices to our 4 colors
+    # 0-63: Black, 64-127: Red, 128-191: Yellow, 192-255: White
+    for i in range(256):
+        if i < 64:
+            palette.extend([0, 0, 0])  # Black
+        elif i < 128:
+            palette.extend([255, 0, 0])  # Red
+        elif i < 192:
+            palette.extend([255, 255, 0])  # Yellow
+        else:
+            palette.extend([255, 255, 255])  # White
+
+    # Create a palette image
+    palette_img = Image.new("P", (1, 1))
+    palette_img.putpalette(palette)
+
+    # Optional: Enhance colors before dithering for better results
+    # from PIL import ImageEnhance
+    # enhancer = ImageEnhance.Color(image)
+    # image = enhancer.enhance(1.5)  # Increase color saturation
+
+    # Quantize the image using Floyd-Steinberg dithering
+    image = image.quantize(palette=palette_img, dither=Image.FLOYDSTEINBERG)
+
+    # Convert back to RGB for the display driver
+    image = image.convert("RGB")
 
 # Display image.
 display.image(image)
