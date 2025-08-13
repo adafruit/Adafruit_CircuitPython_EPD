@@ -143,7 +143,7 @@ class Adafruit_SSD1681(Adafruit_EPD):
         # driver output control
         self.command(
             _SSD1681_DRIVER_CONTROL,
-            bytearray([self._width - 1, (self._width - 1) >> 8, 0x00]),
+            bytearray([(self._width - 1) & 0xFF, (self._width - 1) >> 8, 0x00]),
         )
         # data entry mode
         self.command(_SSD1681_DATA_MODE, bytearray([0x03]))
@@ -152,7 +152,7 @@ class Adafruit_SSD1681(Adafruit_EPD):
         # Set ram Y start/end postion
         self.command(
             _SSD1681_SET_RAMYPOS,
-            bytearray([0, 0, self._height - 1, (self._height - 1) >> 8]),
+            bytearray([0, 0, (self._height - 1) & 0xFF, (self._height - 1) >> 8]),
         )
         # Set border waveform
         self.command(_SSD1681_WRITE_BORDER, bytearray([0x05]))
@@ -190,4 +190,4 @@ class Adafruit_SSD1681(Adafruit_EPD):
         # Set RAM X address counter
         self.command(_SSD1681_SET_RAMXCOUNT, bytearray([x]))
         # Set RAM Y address counter
-        self.command(_SSD1681_SET_RAMYCOUNT, bytearray([y, y >> 8]))
+        self.command(_SSD1681_SET_RAMYCOUNT, bytearray([y & 0xFF, y >> 8]))
