@@ -153,7 +153,7 @@ class Adafruit_SSD1680(Adafruit_EPD):
         # driver output control
         self.command(
             _SSD1680_DRIVER_CONTROL,
-            bytearray([self._height - 1, (self._height - 1) >> 8, 0x00]),
+            bytearray([(self._height - 1) & 0xFF, (self._height - 1) >> 8, 0x00]),
         )
         # data entry mode
         self.command(_SSD1680_DATA_MODE, bytearray([0x03]))
@@ -163,20 +163,23 @@ class Adafruit_SSD1680(Adafruit_EPD):
         self.command(_SSD1680_GATE_VOLTAGE, bytearray([0x17]))
         self.command(_SSD1680_SOURCE_VOLTAGE, bytearray([0x41, 0x00, 0x32]))
 
+        height = self._width
+        if height % 8 != 0:
+            height += 8 - (height % 8)
         # Set ram X start/end postion
-        self.command(_SSD1680_SET_RAMXPOS, bytearray([0x01, 0x10]))
+        self.command(_SSD1680_SET_RAMXPOS, bytearray([0x00, (height // 8) - 1]))
         # Set ram Y start/end postion
         self.command(
             _SSD1680_SET_RAMYPOS,
-            bytearray([0, 0, self._height - 1, (self._height - 1) >> 8]),
+            bytearray([0x00, 0x00, (self._height - 1) & 0xFF, (self._height - 1) >> 8]),
         )
         # Set border waveform
         self.command(_SSD1680_WRITE_BORDER, bytearray([0x05]))
 
         # Set ram X count
-        self.command(_SSD1680_SET_RAMXCOUNT, bytearray([0x01]))
+        self.command(_SSD1680_SET_RAMXCOUNT, bytearray([0x00]))
         # Set ram Y count
-        self.command(_SSD1680_SET_RAMYCOUNT, bytearray([self._height - 1, 0]))
+        self.command(_SSD1680_SET_RAMYCOUNT, bytearray([0x00, 0x00]))
         self.busy_wait()
 
     def power_down(self) -> None:
@@ -206,9 +209,9 @@ class Adafruit_SSD1680(Adafruit_EPD):
         """Set the RAM address location, not used on this chipset but required by
         the superclass"""
         # Set RAM X address counter
-        self.command(_SSD1680_SET_RAMXCOUNT, bytearray([x + 1]))
+        self.command(_SSD1680_SET_RAMXCOUNT, bytearray([0]))
         # Set RAM Y address counter
-        self.command(_SSD1680_SET_RAMYCOUNT, bytearray([y, y >> 8]))
+        self.command(_SSD1680_SET_RAMYCOUNT, bytearray([0, 0]))
 
 
 class Adafruit_SSD1680Z(Adafruit_SSD1680):
