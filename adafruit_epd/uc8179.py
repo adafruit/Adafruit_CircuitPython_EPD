@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024
+# SPDX-FileCopyrightText: 2025 Liz Clark for Adafruit Industries
 #
 # SPDX-License-Identifier: MIT
 
@@ -6,7 +6,7 @@
 `adafruit_epd.uc8179` - Adafruit UC8179 - ePaper display driver
 ====================================================================================
 CircuitPython driver for Adafruit UC8179 display breakouts
-* Author(s): Your Name Here
+* Author(s): Liz Clark
 """
 
 import time
