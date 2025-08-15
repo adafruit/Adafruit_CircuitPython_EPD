@@ -15,6 +15,7 @@ from adafruit_epd.ssd1608 import Adafruit_SSD1608
 from adafruit_epd.ssd1675 import Adafruit_SSD1675
 from adafruit_epd.ssd1680 import Adafruit_SSD1680, Adafruit_SSD1680Z
 from adafruit_epd.ssd1681 import Adafruit_SSD1681
+from adafruit_epd.ssd1683 import Adafruit_SSD1683
 from adafruit_epd.uc8151d import Adafruit_UC8151D
 from adafruit_epd.uc8179 import Adafruit_UC8179
 
@@ -42,6 +43,7 @@ print("Creating display")
 # display = Adafruit_UC8179(800, 480,         # 7.5" mono 800x480 display
 # display = Adafruit_IL0373(128, 296,         # 2.9" Tri-color display IL0373
 # display = Adafruit_SSD1680(128, 296,        # 2.9" Tri-color display SSD1680
+# display = Adafruit_SSD1683(400, 300,        # 4.2" 300x400 Tri-Color display
 # display = Adafruit_IL0398(400, 300,         # 4.2" Tri-color display
 display = Adafruit_IL0373(
     104,
