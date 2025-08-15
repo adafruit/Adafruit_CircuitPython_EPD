@@ -17,7 +17,6 @@ from adafruit_epd.ssd1675 import Adafruit_SSD1675
 from adafruit_epd.ssd1675b import Adafruit_SSD1675B
 from adafruit_epd.ssd1680 import Adafruit_SSD1680
 from adafruit_epd.ssd1681 import Adafruit_SSD1681
-from adafruit_epd.ssd1683 import Adafruit_SSD1683
 from adafruit_epd.uc8151d import Adafruit_UC8151D
 
 # create the spi device and pins we will need
@@ -36,7 +35,6 @@ print("Creating display")
 # display = Adafruit_SSD1680(122, 250,        # 2.13" HD Tri-color display
 # display = Adafruit_SSD1681(200, 200,        # 1.54" HD Tri-color display
 # display = Adafruit_SSD1675(122, 250,        # 2.13" HD mono display
-# display = Adafruit_SSD1683(400, 300,        # 4.2" 300x400 Tri-Color display
 # display = Adafruit_IL91874(176, 264,        # 2.7" Tri-color display
 # display = Adafruit_EK79686(176, 264,        # 2.7" Tri-color display
 # display = Adafruit_IL0373(152, 152,         # 1.54" Tri-color display
