@@ -102,7 +102,7 @@ class Adafruit_UC8179(Adafruit_EPD):
         self.set_color_buffer(1, False)
 
         # UC8179 uses single byte transactions
-        self._single_byte_tx = True
+        self._single_byte_tx = False
 
         # Default refresh delay (from Adafruit_EPD base class in Arduino)
         self.default_refresh_delay = 15  # seconds
@@ -151,7 +151,7 @@ class Adafruit_UC8179(Adafruit_EPD):
         self.busy_wait()
 
         # Panel setting
-        self.command(_UC8179_PANELSETTING, bytearray([0b010111]))  # BW OTP LUT
+        self.command(_UC8179_PANELSETTING, bytearray([0b011111]))  # BW OTP LUT
 
         # Resolution setting
         self.command(
