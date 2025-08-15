@@ -115,29 +115,32 @@ class Adafruit_SSD1683(Adafruit_EPD):
         )
         self.set_black_buffer(0, True)
         self.set_color_buffer(1, False)
-        
+
         # Set single byte transactions flag
         self._single_byte_tx = True
-        
+
         # Set the display update value
         self._display_update_val = 0xF7
-        
+
         # Default initialization sequence (tri-color mode)
-        self._default_init_code = bytes([
-            _SSD1683_SW_RESET, 0,           # Software reset
-            0xFF, 50,                       # Wait for busy (50ms delay)
-            
-            _SSD1683_WRITE_BORDER, 1,       # Border waveform control
-            0x05,                           # Border color/waveform
-            
-            _SSD1683_TEMP_CONTROL, 1,       # Temperature control
-            0x80,                           # Read temp
-            
-            _SSD1683_DATA_MODE, 1,          # Data entry mode
-            0x03,                           # Y decrement, X increment
-         
-            0xFE                            # End of initialization
-        ])
+        self._default_init_code = bytes(
+            [
+                _SSD1683_SW_RESET,
+                0,  # Software reset
+                0xFF,
+                50,  # Wait for busy (50ms delay)
+                _SSD1683_WRITE_BORDER,
+                1,  # Border waveform control
+                0x05,  # Border color/waveform
+                _SSD1683_TEMP_CONTROL,
+                1,  # Temperature control
+                0x80,  # Read temp
+                _SSD1683_DATA_MODE,
+                1,  # Data entry mode
+                0x03,  # Y decrement, X increment
+                0xFE,  # End of initialization
+            ]
+        )
 
     def begin(self, reset: bool = True) -> None:
         """Begin communication with the display and set basic settings"""
@@ -162,20 +165,20 @@ class Adafruit_SSD1683(Adafruit_EPD):
 
         # Use custom init code if provided, otherwise use default
         init_code = self._default_init_code
-        if hasattr(self, '_epd_init_code') and self._epd_init_code is not None:
+        if hasattr(self, "_epd_init_code") and self._epd_init_code is not None:
             init_code = self._epd_init_code
-        
+
         # Send initialization sequence
         self._send_command_list(init_code)
 
         # Set RAM window
         self.set_ram_window(0, 0, (self._width // 8) - 1, self._height - 1)
-        
+
         # Set RAM address to start position
         self.set_ram_address(0, 0)
 
         # Set LUT if we have one
-        if hasattr(self, '_epd_lut_code') and self._epd_lut_code:
+        if hasattr(self, "_epd_lut_code") and self._epd_lut_code:
             self._send_command_list(self._epd_lut_code)
 
         # Set display size and driver output control
@@ -201,7 +204,7 @@ class Adafruit_SSD1683(Adafruit_EPD):
         self.command(_SSD1683_DISP_CTRL2, bytearray([self._display_update_val]))
         self.command(_SSD1683_MASTER_ACTIVATE)
         self.busy_wait()
-        
+
         if not self._busy:
             time.sleep(1)  # wait 1 second
 
@@ -219,7 +222,7 @@ class Adafruit_SSD1683(Adafruit_EPD):
         """Set the RAM address location"""
         # set RAM x address count
         self.command(_SSD1683_SET_RAMXCOUNT, bytearray([x & 0xFF]))
-        
+
         # set RAM y address count
         self.command(_SSD1683_SET_RAMYCOUNT, bytearray([y & 0xFF, (y >> 8) & 0xFF]))
 
@@ -227,12 +230,12 @@ class Adafruit_SSD1683(Adafruit_EPD):
         """Set the RAM window for partial updates"""
         # Set ram X start/end position
         self.command(_SSD1683_SET_RAMXPOS, bytearray([x1 & 0xFF, x2 & 0xFF]))
-        
+
         # Set ram Y start/end position
-        self.command(_SSD1683_SET_RAMYPOS, bytearray([
-            y1 & 0xFF, (y1 >> 8) & 0xFF,
-            y2 & 0xFF, (y2 >> 8) & 0xFF
-        ]))
+        self.command(
+            _SSD1683_SET_RAMYPOS,
+            bytearray([y1 & 0xFF, (y1 >> 8) & 0xFF, y2 & 0xFF, (y2 >> 8) & 0xFF]),
+        )
 
     def _send_command_list(self, init_sequence: bytes) -> None:
         """Send a sequence of commands from an initialization list"""
@@ -240,7 +243,7 @@ class Adafruit_SSD1683(Adafruit_EPD):
         while i < len(init_sequence):
             cmd = init_sequence[i]
             i += 1
-            
+
             if cmd == 0xFE:  # End marker
                 break
             elif cmd == 0xFF:  # Delay marker
@@ -248,14 +251,12 @@ class Adafruit_SSD1683(Adafruit_EPD):
                     delay_ms = init_sequence[i]
                     i += 1
                     time.sleep(delay_ms / 1000.0)
-            else:
-                # Regular command
-                if i < len(init_sequence):
-                    num_args = init_sequence[i]
-                    i += 1
-                    if num_args > 0 and (i + num_args) <= len(init_sequence):
-                        args = init_sequence[i:i + num_args]
-                        self.command(cmd, bytearray(args))
-                        i += num_args
-                    else:
-                        self.command(cmd)
+            elif i < len(init_sequence):
+                num_args = init_sequence[i]
+                i += 1
+                if num_args > 0 and (i + num_args) <= len(init_sequence):
+                    args = init_sequence[i : i + num_args]
+                    self.command(cmd, bytearray(args))
+                    i += num_args
+                else:
+                    self.command(cmd)
