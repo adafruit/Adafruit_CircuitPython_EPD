@@ -24,6 +24,7 @@ from adafruit_epd.ssd1680 import Adafruit_SSD1680, Adafruit_SSD1680Z
 from adafruit_epd.ssd1681 import Adafruit_SSD1681
 from adafruit_epd.ssd1683 import Adafruit_SSD1683
 from adafruit_epd.uc8151d import Adafruit_UC8151D
+from adafruit_epd.uc8179 import Adafruit_UC8179
 
 # create the spi device and pins we will need
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
@@ -40,13 +41,15 @@ busy = digitalio.DigitalInOut(board.D17)
 # display = Adafruit_SSD1680(122, 250,        # 2.13" HD Tri-color or mono display
 # display = Adafruit_SSD1680Z(122, 250,       # Newer 2.13" mono display
 # display = Adafruit_SSD1681(200, 200,        # 1.54" HD Tri-color display
-# display = Adafruit_SSD1683(400, 300,        # 4.2" 300x400 Tri-Color display
 # display = Adafruit_IL91874(176, 264,        # 2.7" Tri-color display
 # display = Adafruit_EK79686(176, 264,        # 2.7" Tri-color display
 # display = Adafruit_IL0373(152, 152,         # 1.54" Tri-color display
 # display = Adafruit_UC8151D(128, 296,        # 2.9" mono flexible display
+# display = Adafruit_UC8179(648, 480,         # 5.83" mono 648x480 display
+# display = Adafruit_UC8179(800, 480,         # 7.5" mono 800x480 display
 # display = Adafruit_IL0373(128, 296,         # 2.9" Tri-color display IL0373
 # display = Adafruit_SSD1680(128, 296,        # 2.9" Tri-color display SSD1680
+# display = Adafruit_SSD1683(400, 300,        # 4.2" 300x400 Tri-Color display
 # display = Adafruit_IL0398(400, 300,         # 4.2" Tri-color display
 display = Adafruit_IL0373(
     104,
@@ -59,7 +62,9 @@ display = Adafruit_IL0373(
     busy_pin=busy,
 )
 
-# IF YOU HAVE A 2.13" FLEXIBLE DISPLAY uncomment these lines!
+# IF YOU HAVE A 2.13" FLEXIBLE DISPLAY OR!
+# UC8179 5.83" or 7.5" displays
+# uncomment these lines!
 # display.set_black_buffer(1, False)
 # display.set_color_buffer(1, False)
 
