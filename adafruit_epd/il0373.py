@@ -70,8 +70,10 @@ class Adafruit_IL0373(Adafruit_EPD):
         sramcs_pin: DigitalInOut,
         rst_pin: DigitalInOut,
         busy_pin: DigitalInOut,
+        pid: int = 0,  # Product ID, defaults to 0
     ) -> None:
         super().__init__(width, height, spi, cs_pin, dc_pin, sramcs_pin, rst_pin, busy_pin)
+        self.pid = pid
 
         self._buffer1_size = int(width * height / 8)
         self._buffer2_size = int(width * height / 8)
@@ -114,22 +116,29 @@ class Adafruit_IL0373(Adafruit_EPD):
         self.hardware_reset()
         self.busy_wait()
 
-        self.command(_IL0373_POWER_SETTING, bytearray([0x03, 0x00, 0x2B, 0x2B, 0x09]))
-        self.command(_IL0373_BOOSTER_SOFT_START, bytearray([0x17, 0x17, 0x17]))
-        self.command(_IL0373_POWER_ON)
-
-        self.busy_wait()
-        time.sleep(0.2)
-
-        self.command(_IL0373_PANEL_SETTING, bytearray([0xCF]))
-        self.command(_IL0373_CDI, bytearray([0x37]))
-        self.command(_IL0373_PLL, bytearray([0x29]))
-        _b1 = self._width & 0xFF
-        _b2 = (self._height >> 8) & 0xFF
-        _b3 = self._height & 0xFF
-        self.command(_IL0373_RESOLUTION, bytearray([_b1, _b2, _b3]))
-        self.command(_IL0373_VCM_DC_SETTING, bytearray([0x0A]))
-        time.sleep(0.05)
+        if self.pid == 4243:  # Adafruit 2.13" HD Monochrome eInk Display - 212x104
+            self.command(_IL0373_BOOSTER_SOFT_START, bytearray([0x17, 0x17, 0x17]))
+            self.command(_IL0373_POWER_ON)
+            self.busy_wait()
+            time.sleep(0.2)
+            self.command(_IL0373_PANEL_SETTING, bytearray([0x1F, 0x0D]))
+            self.command(_IL0373_CDI, bytearray([0x97]))
+        else:
+            # Default IL0373 init sequence
+            self.command(_IL0373_POWER_SETTING, bytearray([0x03, 0x00, 0x2B, 0x2B, 0x09]))
+            self.command(_IL0373_BOOSTER_SOFT_START, bytearray([0x17, 0x17, 0x17]))
+            self.command(_IL0373_POWER_ON)
+            self.busy_wait()
+            time.sleep(0.2)
+            self.command(_IL0373_PANEL_SETTING, bytearray([0xCF]))
+            self.command(_IL0373_CDI, bytearray([0x37]))
+            self.command(_IL0373_PLL, bytearray([0x29]))
+            _b1 = self._width & 0xFF
+            _b2 = (self._height >> 8) & 0xFF
+            _b3 = self._height & 0xFF
+            self.command(_IL0373_RESOLUTION, bytearray([_b1, _b2, _b3]))
+            self.command(_IL0373_VCM_DC_SETTING, bytearray([0x0A]))
+            time.sleep(0.05)
 
     def power_down(self) -> None:
         """Power down the display - required when not actively displaying!"""
