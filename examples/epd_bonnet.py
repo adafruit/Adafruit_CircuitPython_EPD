@@ -10,7 +10,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 from adafruit_epd.epd import Adafruit_EPD
 from adafruit_epd.ssd1675b import Adafruit_SSD1675B
-from adafruit_epd.ssd1680 import Adafruit_SSD1680, Adafruit_SSD1680Z
+from adafruit_epd.ssd1680 import Adafruit_SSD1680
+from adafruit_epd.ssd1680b import Adafruit_SSD1680B
 
 # create two buttons
 switch1 = DigitalInOut(board.D6)
@@ -28,7 +29,7 @@ busy = DigitalInOut(board.D17)
 # give them all to our driver
 # display = Adafruit_SSD1675B(   # Oldest 2.13" Bonnet
 # display = Adafruit_SSD1680(    # Old 2.13" Bonnet
-display = Adafruit_SSD1680Z(  # Newer 2.13" mono display
+display = Adafruit_SSD1680B(  # Newer 2.13" HD (Tri-color or mono) with GDEY0213B74
     122,
     250,
     spi,  # 2.13" HD mono display (rev B)
