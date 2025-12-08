@@ -117,10 +117,8 @@ class Adafruit_IL0373(Adafruit_EPD):
         self.command(_IL0373_POWER_SETTING, bytearray([0x03, 0x00, 0x2B, 0x2B, 0x09]))
         self.command(_IL0373_BOOSTER_SOFT_START, bytearray([0x17, 0x17, 0x17]))
         self.command(_IL0373_POWER_ON)
-
         self.busy_wait()
         time.sleep(0.2)
-
         self.command(_IL0373_PANEL_SETTING, bytearray([0xCF]))
         self.command(_IL0373_CDI, bytearray([0x37]))
         self.command(_IL0373_PLL, bytearray([0x29]))
@@ -159,3 +157,47 @@ class Adafruit_IL0373(Adafruit_EPD):
         """Set the RAM address location, not used on this chipset but required by
         the superclass"""
         return  # on this chip it does nothing
+
+
+class Adafruit_IL0373_213_Flex_Mono(Adafruit_IL0373):
+    """Driver for Adafruit 2.13" Flexible Monochrome 212x104"""
+
+    def __init__(
+        self,
+        width: int,
+        height: int,
+        spi: SPI,
+        *,
+        cs_pin: DigitalInOut,
+        dc_pin: DigitalInOut,
+        sramcs_pin: DigitalInOut,
+        rst_pin: DigitalInOut,
+        busy_pin: DigitalInOut,
+    ) -> None:
+        super().__init__(
+            width,
+            height,
+            spi,
+            cs_pin=cs_pin,
+            dc_pin=dc_pin,
+            sramcs_pin=sramcs_pin,
+            rst_pin=rst_pin,
+            busy_pin=busy_pin,
+        )
+
+        self.set_black_buffer(1, True)
+        self.set_color_buffer(0, True)
+
+    def power_up(self) -> None:
+        """Power up the display in preparation for writing RAM and updating"""
+        self.hardware_reset()
+        self.busy_wait()
+
+        self.command(_IL0373_BOOSTER_SOFT_START, bytearray([0x17, 0x17, 0x17]))
+        self.command(_IL0373_POWER_ON)
+
+        self.busy_wait()
+        time.sleep(0.2)
+
+        self.command(_IL0373_PANEL_SETTING, bytearray([0x1F, 0x0D]))
+        self.command(_IL0373_CDI, bytearray([0x97]))
