@@ -7,7 +7,7 @@ import digitalio
 
 from adafruit_epd.ek79686 import Adafruit_EK79686
 from adafruit_epd.epd import Adafruit_EPD
-from adafruit_epd.il0373 import Adafruit_IL0373
+from adafruit_epd.il0373 import Adafruit_IL0373, Adafruit_IL0373_213_Flex_Mono
 from adafruit_epd.il0398 import Adafruit_IL0398
 from adafruit_epd.il91874 import Adafruit_IL91874
 from adafruit_epd.jd79661 import Adafruit_JD79661
@@ -44,6 +44,7 @@ print("Creating display")
 # display = Adafruit_UC8179(648, 480,         # 5.83" mono 648x480 display
 # display = Adafruit_UC8179(800, 480,         # 7.5" mono 800x480 display
 # display = Adafruit_IL0373(128, 296,         # 2.9" Tri-color display IL0373
+# display = Adafruit_IL0373_213_Flex_Mono(104, 212,# 2.13" mono flex display
 # display = Adafruit_SSD1680(128, 296,        # 2.9" Tri-color display SSD1680
 # display = Adafruit_SSD1683(400, 300,        # 4.2" 300x400 Tri-Color display
 # display = Adafruit_IL0398(400, 300,         # 4.2" Tri-color display
