@@ -16,6 +16,7 @@ from adafruit_epd.ssd1608 import Adafruit_SSD1608
 from adafruit_epd.ssd1675 import Adafruit_SSD1675
 from adafruit_epd.ssd1675b import Adafruit_SSD1675B
 from adafruit_epd.ssd1680 import Adafruit_SSD1680
+from adafruit_epd.ssd1680_legacy import Adafruit_SSD1680_Legacy
 from adafruit_epd.ssd1680b import Adafruit_SSD1680B
 from adafruit_epd.ssd1681 import Adafruit_SSD1681
 from adafruit_epd.ssd1683 import Adafruit_SSD1683
@@ -37,6 +38,7 @@ print("Creating display")
 # display = Adafruit_SSD1608(200, 200,        # 1.54" HD mono display
 # display = Adafruit_SSD1680(122, 250,        # 2.13" HD Tri-color display
 # display = Adafruit_SSD1680B(122, 250        # Newer 2.13" HD (Tri-color or mono) with GDEY0213B74
+# display = Adafruit_SSD1680_Legacy(122, 250, # pre-2024 SSD1680 Bonnet
 # display = Adafruit_SSD1681(200, 200,        # 1.54" HD Tri-color display
 # display = Adafruit_SSD1675(122, 250,        # 2.13" HD mono display
 # display = Adafruit_SSD1683(400, 300,        # 4.2" 300x400 Tri-Color display
