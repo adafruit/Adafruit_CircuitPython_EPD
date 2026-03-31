@@ -10,19 +10,21 @@ ex: pre-2024 2.13" Monochrome E-Ink Bonnet
 * Author(s): Melissa LeBlanc-Williams
 """
 
+from micropython import const
+
 from adafruit_epd.ssd1680 import Adafruit_SSD1680
 
-_SSD1680_DRIVER_CONTROL = 0x01
-_SSD1680_SET_RAMXPOS = 0x44
-_SSD1680_SET_RAMYPOS = 0x45
-_SSD1680_SET_RAMXCOUNT = 0x4E
-_SSD1680_SET_RAMYCOUNT = 0x4F
-_SSD1680_WRITE_VCOM_REG = 0x2C
-_SSD1680_GATE_VOLTAGE = 0x03
-_SSD1680_SOURCE_VOLTAGE = 0x04
-_SSD1680_DATA_MODE = 0x11
-_SSD1680_WRITE_BORDER = 0x3C
-_SSD1680_SW_RESET = 0x12
+_SSD1680_DRIVER_CONTROL = const(0x01)
+_SSD1680_SET_RAMXPOS = const(0x44)
+_SSD1680_SET_RAMYPOS = const(0x45)
+_SSD1680_SET_RAMXCOUNT = const(0x4E)
+_SSD1680_SET_RAMYCOUNT = const(0x4F)
+_SSD1680_WRITE_VCOM_REG = const(0x2C)
+_SSD1680_GATE_VOLTAGE = const(0x03)
+_SSD1680_SOURCE_VOLTAGE = const(0x04)
+_SSD1680_DATA_MODE = const(0x11)
+_SSD1680_WRITE_BORDER = const(0x3C)
+_SSD1680_SW_RESET = const(0x12)
 
 
 class Adafruit_SSD1680_Legacy(Adafruit_SSD1680):
@@ -64,8 +66,7 @@ class Adafruit_SSD1680_Legacy(Adafruit_SSD1680):
         self.busy_wait()
 
     def set_ram_address(self, x: int, y: int) -> None:
-        """Set the RAM address location, not used on this chipset but required by
-        the superclass"""
+        """Set the RAM address location"""
         # Set RAM X address counter
         self.command(_SSD1680_SET_RAMXCOUNT, bytearray([x + 1]))
         # Set RAM Y address counter
