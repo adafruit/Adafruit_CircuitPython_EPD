@@ -52,7 +52,7 @@ while True:
     button = read_buttons()
     if not button:
         continue
-    print("Button #%d pressed" % button)
+    print(f"Button #{button} pressed")
     if button == 1:
         print("Clear buffer")
         display.fill(Adafruit_EPD.WHITE)

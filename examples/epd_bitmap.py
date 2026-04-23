@@ -116,16 +116,13 @@ def display_bitmap(epd, filename):
         bmpHeight = read_le(f.read(4))
         flip = True
 
-        print(
-            "Size: %d\nImage offset: %d\nHeader size: %d"
-            % (bmpFileSize, bmpImageoffset, headerSize)
-        )
-        print("Width: %d\nHeight: %d" % (bmpWidth, bmpHeight))
+        print(f"Size: {bmpFileSize}\nImage offset: {bmpImageoffset}\nHeader size: {headerSize}")
+        print(f"Width: {bmpWidth}\nHeight: {bmpHeight}")
 
         if read_le(f.read(2)) != 1:
             raise BMPError("Not singleplane")
         bmpDepth = read_le(f.read(2))  # bits per pixel
-        print("Bit depth: %d" % (bmpDepth))
+        print(f"Bit depth: {bmpDepth}")
         if bmpDepth != 24:
             raise BMPError("Not 24-bit")
         if read_le(f.read(2)) != 0:
