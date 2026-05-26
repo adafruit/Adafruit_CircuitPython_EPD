@@ -216,3 +216,205 @@ class Adafruit_SSD1680(Adafruit_EPD):
         self.command(_SSD1680_SET_RAMXCOUNT, bytearray([0]))
         # Set RAM Y address counter
         self.command(_SSD1680_SET_RAMYCOUNT, bytearray([0, 0]))
+
+
+# 4-gray waveform LUT for GDEY0213B74 (SSD1680, FPC-A002).
+# Source: GxEPD2_4G lut_4G[] adapted for CircuitPython polarity convention:
+#   - L0↔L3 VS rows swapped  (GxEPD2: L0=white, L3=black; CP: luma 0→L0=black)
+#   - L1↔L2 VS rows also swapped  (required for correct grey ordering on this panel)
+# DC balance byte 0x48 (alternating VSH1/GND/VSL/GND) eliminates speckle.
+_SSD1680_GRAY4_LUT = bytes(
+    [
+        # VS rows (5 × 12 = 60 bytes)
+        0x20, 0x48, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  # L0 black
+        0x02, 0x48, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  # L1 light grey
+        0x08, 0x48, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  # L2 dark grey
+        0x40, 0x48, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  # L3 white
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  # L4 VCOM
+        # TP timing groups (12 × 7 = 84 bytes)
+        0x0A, 0x19, 0x00, 0x03, 0x08, 0x00, 0x00,
+        0x14, 0x01, 0x00, 0x14, 0x01, 0x00, 0x03,
+        0x0A, 0x03, 0x00, 0x08, 0x19, 0x00, 0x00,
+        0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        # XON/FR (9 bytes)
+        0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x00, 0x00, 0x00,
+    ]
+)
+
+
+class Adafruit_SSD1680_Grayscale4(Adafruit_SSD1680):
+    """4-gray (2-bit grayscale) driver for GDEY0213B74 on SSD1680 (FPC-A002).
+
+    Uses the GxEPD2 _Init_4G waveform with L0↔L3 and L1↔L2 VS row swaps for
+    CircuitPython polarity (luma 0 → L0=black, luma 255 → L3=white).
+
+    Supports Adafruit_EPD color constants BLACK, DARK, LIGHT, WHITE for drawing,
+    and accepts mode-L PIL images via image().
+
+    RAM encoding (BW RAM × RED RAM → gray level):
+        BW=0, RED=0 → L0 (black)
+        BW=1, RED=0 → L2 (dark grey)
+        BW=0, RED=1 → L1 (light grey)
+        BW=1, RED=1 → L3 (white)
+    """
+
+    # pylint: disable=too-many-arguments
+    def __init__(
+        self,
+        width: int,
+        height: int,
+        spi: "SPI",
+        *,
+        cs_pin: "DigitalInOut",
+        dc_pin: "DigitalInOut",
+        sramcs_pin: "DigitalInOut",
+        rst_pin: "DigitalInOut",
+        busy_pin: "DigitalInOut",
+        vcom: int = 0x1C,
+    ) -> None:
+        super().__init__(
+            width,
+            height,
+            spi,
+            cs_pin=cs_pin,
+            dc_pin=dc_pin,
+            sramcs_pin=sramcs_pin,
+            rst_pin=rst_pin,
+            busy_pin=busy_pin,
+        )
+        self._vcom = vcom
+        # pylint: enable=too-many-arguments
+
+    def power_up(self) -> None:
+        """Power up with GxEPD2 _Init_4G() sequence and write the 4-gray LUT."""
+        self.hardware_reset()
+        self.busy_wait()
+        self.command(_SSD1680_SW_RESET)
+        self.busy_wait()
+
+        self.command(0x74, bytearray([0x54]))  # analog block control
+        self.command(0x7E, bytearray([0x3B]))  # digital block control
+        # Gate driver MUX=295 required for 4G waveform on GDEY0213B74
+        self.command(_SSD1680_DRIVER_CONTROL, bytearray([0x27, 0x01, 0x00]))
+        self.command(_SSD1680_DATA_MODE, bytearray([0x03]))  # X-inc, Y-inc
+
+        # RAM window: X bytes 0–(stride-1), Y rows 0–(height-1)
+        x_end = (self._width + 7) // 8 - 1
+        self.command(_SSD1680_SET_RAMXPOS, bytearray([0x00, x_end]))
+        self.command(
+            _SSD1680_SET_RAMYPOS,
+            bytearray([0x00, 0x00, (self._height - 1) & 0xFF, (self._height - 1) >> 8]),
+        )
+
+        self.command(_SSD1680_WRITE_BORDER, bytearray([0x00]))
+        self.command(_SSD1680_WRITE_VCOM_REG, bytearray([self._vcom]))
+        self.command(_SSD1680_END_OPTION, bytearray([0x22]))  # EOPQ
+        self.command(_SSD1680_GATE_VOLTAGE, bytearray([0x17]))
+        self.command(_SSD1680_SOURCE_VOLTAGE, bytearray([0x41, 0x00, 0x32]))
+        # Enable RED RAM as second source for 4-gray
+        self.command(_SSD1680_DISP_CTRL1, bytearray([0x00, 0x80]))
+        self.command(_SSD1680_WRITE_LUT, bytearray(_SSD1680_GRAY4_LUT))
+
+        # Reset RAM address counters to (0, 0) — colstart=0
+        self.command(_SSD1680_SET_RAMXCOUNT, bytearray([0x00]))
+        self.command(_SSD1680_SET_RAMYCOUNT, bytearray([0x00, 0x00]))
+
+    def set_ram_address(self, x: int, y: int) -> None:
+        """Reset RAM address counters. Uses colstart=0 for GDEY0213B74 4-gray."""
+        self.command(_SSD1680_SET_RAMXCOUNT, bytearray([x]))
+        self.command(_SSD1680_SET_RAMYCOUNT, bytearray([y, y >> 8]))
+
+    def update(self) -> None:
+        """Trigger display refresh using the custom LUT loaded in power_up."""
+        self.command(_SSD1680_DISP_CTRL2, bytearray([0xC7]))  # custom LUT full refresh
+        self.command(_SSD1680_MASTER_ACTIVATE)
+        self.busy_wait()
+        if not self._busy:
+            time.sleep(6)
+
+    def _color_dup(self, func: str, args: tuple, color: int) -> None:
+        """Write to both BW and RED framebufs for 4-gray level mapping."""
+        bw_draw = getattr(self._blackframebuf, func)
+        red_draw = getattr(self._colorframebuf, func)
+        # BW RAM bit: 1 for DARK (L2) and WHITE (L3), 0 otherwise
+        bw_draw(*args, color=color in (Adafruit_EPD.DARK, Adafruit_EPD.WHITE))
+        # RED RAM bit: 1 for LIGHT (L1) and WHITE (L3), 0 otherwise
+        red_draw(*args, color=color in (Adafruit_EPD.LIGHT, Adafruit_EPD.WHITE))
+
+    def fill(self, color: int) -> None:
+        """Fill entire display buffer with one of the 4 gray levels."""
+        bw_fill = 0xFF if color in (Adafruit_EPD.DARK, Adafruit_EPD.WHITE) else 0x00
+        red_fill = 0xFF if color in (Adafruit_EPD.LIGHT, Adafruit_EPD.WHITE) else 0x00
+        if self.sram:
+            self.sram.erase(0x00, self._buffer1_size, bw_fill)
+            self.sram.erase(self._buffer1_size, self._buffer2_size, red_fill)
+        else:
+            self._blackframebuf.fill(bw_fill)
+            self._colorframebuf.fill(red_fill)
+
+    def text(
+        self,
+        string: str,
+        x: int,
+        y: int,
+        color: int,
+        *,
+        font_name: str = "font5x8.bin",
+        size: int = 1,
+    ) -> None:
+        """Draw text string using 4-gray level colors."""
+        self._blackframebuf.text(
+            string,
+            x,
+            y,
+            font_name=font_name,
+            size=size,
+            color=color in (Adafruit_EPD.DARK, Adafruit_EPD.WHITE),
+        )
+        self._colorframebuf.text(
+            string,
+            x,
+            y,
+            font_name=font_name,
+            size=size,
+            color=color in (Adafruit_EPD.LIGHT, Adafruit_EPD.WHITE),
+        )
+
+    def image(self, image: "Image") -> None:
+        """Render a grayscale PIL image using 4 gray levels.
+
+        Image must be mode 'L' (grayscale) sized to match the display dimensions.
+        Luma thresholds:
+            < 64  → BLACK (L0)
+            64–127 → DARK grey (L2)
+            128–191 → LIGHT grey (L1)
+            ≥ 192  → WHITE (L3)
+        """
+        if image.mode != "L":
+            image = image.convert("L")
+        imwidth, imheight = image.size
+        if imwidth != self.width or imheight != self.height:
+            raise ValueError(
+                f"Image must be same dimensions as display ({self.width}x{self.height})."
+            )
+        if self.sram:
+            raise RuntimeError("PIL image is not supported with SRAM assist")
+        pix = image.load()
+        self.fill(Adafruit_EPD.BLACK)
+        for iy in range(imheight):
+            for ix in range(imwidth):
+                luma = pix[ix, iy]
+                if luma >= 192:
+                    self.pixel(ix, iy, Adafruit_EPD.WHITE)
+                elif luma >= 128:
+                    self.pixel(ix, iy, Adafruit_EPD.LIGHT)
+                elif luma >= 64:
+                    self.pixel(ix, iy, Adafruit_EPD.DARK)
