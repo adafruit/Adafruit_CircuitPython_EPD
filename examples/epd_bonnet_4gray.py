@@ -15,6 +15,7 @@ Usage:
     python3 epd_bonnet_4gray.py [image.bmp]
 If an image path is given it must be a grayscale (mode 'L') BMP at 250x122.
 """
+
 import sys
 import time
 
