@@ -447,7 +447,8 @@ class Adafruit_SSD1680_Grayscale4(Adafruit_SSD1680):
         self.command(_SSD1680_DRIVER_CONTROL, bytearray([0x27, 0x01, 0x00]))
         self.command(_SSD1680_DATA_MODE, bytearray([0x03]))  # X-inc, Y-inc
 
-        # RAM window accounting for colstart byte offset
+        # RAM window: colstart-based so panel alignment is preserved for all
+        # existing FPC variants. colstart=0 panels are completely unaffected.
         x_start = self._colstart // 8
         x_end = (self._colstart + self._width + 7) // 8 - 1
         self.command(_SSD1680_SET_RAMXPOS, bytearray([x_start, x_end]))
@@ -465,13 +466,40 @@ class Adafruit_SSD1680_Grayscale4(Adafruit_SSD1680):
         self.command(_SSD1680_DISP_CTRL1, bytearray([0x00, 0x80]))
         self.command(_SSD1680_WRITE_LUT, bytearray(_SSD1680_GRAY4_LUT))
 
-        # Reset RAM address counters to (colstart_byte, 0)
-        self.command(_SSD1680_SET_RAMXCOUNT, bytearray([self._colstart // 8]))
+        # For panels with colstart > 0, write dead-zone bytes (RAM bytes 0 to
+        # x_start-1) from the current framebuf content so those physically-
+        # visible source channels match what the user drew, rather than
+        # retaining stale charge from previous refresh cycles.
+        # colstart=0 panels skip this block entirely — no behaviour change.
+        if x_start > 0 and not self.sram and self._blackframebuf is not None:
+            stride = (self._width + 7) // 8  # bytes per gate line in framebuf
+            self.command(_SSD1680_SET_RAMXPOS, bytearray([0x00, x_start - 1]))
+            self.command(_SSD1680_SET_RAMXCOUNT, bytearray([0x00]))
+            self.command(_SSD1680_SET_RAMYCOUNT, bytearray([0x00, 0x00]))
+            bw_dead = bytearray(
+                self._blackframebuf.buf[row * stride + i]
+                for row in range(self._height)
+                for i in range(x_start)
+            )
+            self.command(_SSD1680_WRITE_BWRAM, bw_dead)
+            self.command(_SSD1680_SET_RAMXCOUNT, bytearray([0x00]))
+            self.command(_SSD1680_SET_RAMYCOUNT, bytearray([0x00, 0x00]))
+            color_dead = bytearray(
+                self._colorframebuf.buf[row * stride + i]
+                for row in range(self._height)
+                for i in range(x_start)
+            )
+            self.command(_SSD1680_WRITE_REDRAM, color_dead)
+            # Restore main content window
+            self.command(_SSD1680_SET_RAMXPOS, bytearray([x_start, x_end]))
+
+        # Reset RAM address counters to main window start
+        self.command(_SSD1680_SET_RAMXCOUNT, bytearray([x_start]))
         self.command(_SSD1680_SET_RAMYCOUNT, bytearray([0x00, 0x00]))
 
     def set_ram_address(self, x: int, y: int) -> None:
-        """Reset RAM address counters respecting colstart."""
-        self.command(_SSD1680_SET_RAMXCOUNT, bytearray([x]))
+        """Reset RAM address counters. Always starts at colstart byte."""
+        self.command(_SSD1680_SET_RAMXCOUNT, bytearray([self._colstart // 8]))
         self.command(_SSD1680_SET_RAMYCOUNT, bytearray([y, y >> 8]))
 
     def update(self) -> None:
