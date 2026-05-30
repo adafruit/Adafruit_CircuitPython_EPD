@@ -9,7 +9,7 @@ adafruit_epd is the framebuf path (with optional external SRAM offload). On a
 Feather you can alternatively use the displayio driver adafruit_ssd1680; reach
 for adafruit_epd when you want SRAM offload or direct framebuffer access.
 
-For Raspberry Pi + Blinka, use rpi_epd_grayscale4_2in13_breakout.py instead.
+For Raspberry Pi + Blinka, use rpi_epd_grayscale_2in13_breakout.py instead.
 
 Wiring for Feather RP2040/RP2350 + EYESPI Breakout → #4197 EYESPI:
   TCS  → D9   (use TCS pad, not ECS/SDCS/TSCS)
@@ -35,9 +35,9 @@ dc = digitalio.DigitalInOut(board.D10)
 rst = digitalio.DigitalInOut(board.D11)
 busy = digitalio.DigitalInOut(board.D12)
 
-# ── Uncomment ONE constructor below ─────────────────────────────────────────
-
-# 2.13" Mono Breakout #4197 — FPC-7528B panel (newer, shipped 2024+)
+# 2.13" Mono Breakout #4197 — both FPC-7528B (2024+) and FPC-A002/GDEY0213B74
+# (legacy) panels use colstart=0. colstart is only nonzero on panels with a
+# physical left dead-zone (e.g. MagTag FPC-7519, colstart=8).
 display = Adafruit_SSD1680_Grayscale4(
     122,
     250,
@@ -48,28 +48,34 @@ display = Adafruit_SSD1680_Grayscale4(
     rst_pin=rst,
     busy_pin=busy,
     vcom=0x1C,
-    colstart=8,
+    colstart=0,
 )
 
-# 2.13" Mono Breakout #4197 — FPC-A002 / GDEY0213B74 panel (legacy)
-# display = Adafruit_SSD1680_Grayscale4(
-#     122, 250, spi,
-#     cs_pin=cs, dc_pin=dc, sramcs_pin=None, rst_pin=rst, busy_pin=busy,
-#     vcom=0x1C, colstart=0,
-# )
-
-# ─────────────────────────────────────────────────────────────────────────────
-
-display.rotation = 1
+# rotation=3 (landscape, USB at right) matches the displayio driver's 270.
+display.rotation = 3
 
 W, H = display.width, display.height
-BAR = W // 4
 
-print("Drawing 4-bar test pattern...")
+print("Drawing 4-gray info card...")
 display.fill(Adafruit_EPD.WHITE)
-display.fill_rect(BAR, 0, BAR, H, Adafruit_EPD.LIGHT)
-display.fill_rect(BAR * 2, 0, BAR, H, Adafruit_EPD.DARK)
-display.fill_rect(BAR * 3, 0, W - BAR * 3, H, Adafruit_EPD.BLACK)
+
+# Product text (top-left); the DARK line shows mid-gray text renders cleanly
+display.text("Adafruit ThinkInk", 6, 6, Adafruit_EPD.BLACK, size=2)
+display.text('2.13" 250x122', 6, 28, Adafruit_EPD.BLACK, size=2)
+display.text("4-Gray E-Ink", 6, 50, Adafruit_EPD.DARK, size=2)
+display.text("SSD1680 Driver", 6, 74, Adafruit_EPD.BLACK, size=1)
+
+# 4-level gray ramp across the bottom: black | dark | light | white
+RAMP_TOP, RAMP_H = 94, 24
+SEG = W // 4
+ramp = (Adafruit_EPD.BLACK, Adafruit_EPD.DARK, Adafruit_EPD.LIGHT, Adafruit_EPD.WHITE)
+for i, color in enumerate(ramp):
+    x = i * SEG
+    display.fill_rect(x, RAMP_TOP, SEG if i < 3 else W - x, RAMP_H, color)
+# 1px black border + dividers so every block (incl. white) reads distinctly
+display.rect(0, RAMP_TOP, W, RAMP_H, Adafruit_EPD.BLACK)
+for i in range(1, 4):
+    display.vline(i * SEG, RAMP_TOP, RAMP_H, Adafruit_EPD.BLACK)
 
 print("Refreshing...")
 t0 = time.monotonic()
