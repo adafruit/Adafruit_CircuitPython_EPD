@@ -258,11 +258,12 @@ class Adafruit_SSD1680_Grayscale4(Adafruit_SSD1680):
         BW=0, RED=1 → L1 (light grey)
         BW=1, RED=1 → L3 (white)
 
-    :param colstart: RAM column byte offset for panel alignment. Defaults to 0,
-        which is correct for the 2.13" SSD1680 panels this driver targets
-        (FPC-7528B #4197 breakout, FPC-A002/GDEY0213B74 #4687 bonnet). Only set
-        a nonzero value for a panel with a physical left dead-zone (e.g. MagTag
-        FPC-7519, colstart=8).
+    :param colstart: Left column offset in pixels for panel alignment. Must be a
+        non-negative multiple of 8 (the SSD1680 addresses X RAM in 8-pixel
+        bytes). Defaults to 0, which is correct for the 2.13" SSD1680 panels this
+        driver targets (FPC-7528B #4197 breakout, FPC-A002/GDEY0213B74 #4687
+        bonnet). Only set a nonzero value for a panel with a physical left
+        dead-zone (e.g. MagTag FPC-7519, colstart=8).
     """
 
     # pylint: disable=too-many-arguments
