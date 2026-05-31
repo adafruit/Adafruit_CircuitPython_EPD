@@ -291,6 +291,8 @@ class Adafruit_SSD1680_Grayscale4(Adafruit_SSD1680):
             busy_pin=busy_pin,
         )
         self._vcom = vcom
+        if colstart < 0 or (colstart % 8) != 0:
+            raise ValueError("colstart must be a non-negative multiple of 8 pixels")
         self._colstart = colstart
         # pylint: enable=too-many-arguments
 
