@@ -54,7 +54,7 @@ display = Adafruit_SSD1680_Grayscale4(
 # rotation=3 (landscape, USB at right) matches the displayio driver's 270.
 display.rotation = 3
 
-W, H = display.width, display.height
+W = display.width
 
 print("Drawing 4-gray info card...")
 display.fill(Adafruit_EPD.WHITE)

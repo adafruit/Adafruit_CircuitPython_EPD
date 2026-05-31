@@ -64,7 +64,7 @@ display = Adafruit_SSD1680_Grayscale4(
 # this reads upright with the board's "adafruit 2.13" eink bonnet" label at top.
 display.rotation = 1
 
-W, H = display.width, display.height
+W = display.width
 
 print("Drawing 4-gray info card...")
 display.fill(Adafruit_EPD.WHITE)
