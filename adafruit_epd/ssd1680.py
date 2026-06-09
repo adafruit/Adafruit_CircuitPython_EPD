@@ -223,170 +223,28 @@ class Adafruit_SSD1680(Adafruit_EPD):
 #   - L0↔L3 VS rows swapped  (GxEPD2: L0=white, L3=black; CP: luma 0→L0=black)
 #   - L1↔L2 VS rows also swapped  (required for correct grey ordering on this panel)
 # DC balance byte 0x48 (alternating VSH1/GND/VSL/GND) eliminates speckle.
-_SSD1680_GRAY4_LUT = bytes(
-    [
-        # VS rows (5 × 12 = 60 bytes)
-        0x20,
-        0x48,
-        0x01,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,  # L0 black
-        0x02,
-        0x48,
-        0x04,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,  # L1 light grey
-        0x08,
-        0x48,
-        0x10,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,  # L2 dark grey
-        0x40,
-        0x48,
-        0x80,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,  # L3 white
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,  # L4 VCOM
-        # TP timing groups (12 × 7 = 84 bytes)
-        0x0A,
-        0x19,
-        0x00,
-        0x03,
-        0x08,
-        0x00,
-        0x00,
-        0x14,
-        0x01,
-        0x00,
-        0x14,
-        0x01,
-        0x00,
-        0x03,
-        0x0A,
-        0x03,
-        0x00,
-        0x08,
-        0x19,
-        0x00,
-        0x00,
-        0x01,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x01,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        0x00,
-        # XON/FR (9 bytes)
-        0x22,
-        0x22,
-        0x22,
-        0x22,
-        0x22,
-        0x22,
-        0x00,
-        0x00,
-        0x00,
-    ]
+_SSD1680_GRAY4_LUT = bytes.fromhex(
+    # VS rows (5 x 12 B): VSH1 / 0x48 DC-balance / level bit, rest idle
+    "204801000000000000000000"  # L0 black
+    "024804000000000000000000"  # L1 light grey
+    "084810000000000000000000"  # L2 dark grey
+    "404880000000000000000000"  # L3 white
+    "000000000000000000000000"  # L4 VCOM
+    # TP timing groups (12 x 7 B)
+    "0A190003080000"  # TP0
+    "14010014010003"  # TP1
+    "0A030008190000"  # TP2
+    "01000000000001"  # TP3
+    "0000000000000000000000000000"  # TP4-5   (unused)
+    "0000000000000000000000000000"  # TP6-7   (unused)
+    "0000000000000000000000000000"  # TP8-9   (unused)
+    "0000000000000000000000000000"  # TP10-11 (unused)
+    "222222222222000000"  # XON x6 / FR x3
 )
 
 
 class Adafruit_SSD1680_Grayscale4(Adafruit_SSD1680):
-    """4-gray (2-bit grayscale) driver for GDEY0213B74 on SSD1680 (FPC-A002).
+    """4-gray (2-bit grayscale) driver for SSD1680-based 2.13" eInk panels.
 
     Uses the GxEPD2 _Init_4G waveform with L0↔L3 and L1↔L2 VS row swaps for
     CircuitPython polarity (luma 0 → L0=black, luma 255 → L3=white).
@@ -399,6 +257,13 @@ class Adafruit_SSD1680_Grayscale4(Adafruit_SSD1680):
         BW=1, RED=0 → L2 (dark grey)
         BW=0, RED=1 → L1 (light grey)
         BW=1, RED=1 → L3 (white)
+
+    :param colstart: Left column offset in pixels for panel alignment. Must be a
+        non-negative multiple of 8 (the SSD1680 addresses X RAM in 8-pixel
+        bytes). Defaults to 0, which is correct for the 2.13" SSD1680 panels this
+        driver targets (FPC-7528B #4197 breakout, FPC-A002/GDEY0213B74 #4687
+        bonnet). Only set a nonzero value for a panel with a physical left
+        dead-zone (e.g. MagTag FPC-7519, colstart=8).
     """
 
     # pylint: disable=too-many-arguments
@@ -414,6 +279,7 @@ class Adafruit_SSD1680_Grayscale4(Adafruit_SSD1680):
         rst_pin: "DigitalInOut",
         busy_pin: "DigitalInOut",
         vcom: int = 0x1C,
+        colstart: int = 0,
     ) -> None:
         super().__init__(
             width,
@@ -426,6 +292,9 @@ class Adafruit_SSD1680_Grayscale4(Adafruit_SSD1680):
             busy_pin=busy_pin,
         )
         self._vcom = vcom
+        if colstart < 0 or (colstart % 8) != 0:
+            raise ValueError("colstart must be a non-negative multiple of 8 pixels")
+        self._colstart = colstart
         # pylint: enable=too-many-arguments
 
     def power_up(self) -> None:
@@ -437,13 +306,15 @@ class Adafruit_SSD1680_Grayscale4(Adafruit_SSD1680):
 
         self.command(0x74, bytearray([0x54]))  # analog block control
         self.command(0x7E, bytearray([0x3B]))  # digital block control
-        # Gate driver MUX=295 required for 4G waveform on GDEY0213B74
+        # Gate driver MUX=295 required for 4G waveform on 2.13" panels
         self.command(_SSD1680_DRIVER_CONTROL, bytearray([0x27, 0x01, 0x00]))
         self.command(_SSD1680_DATA_MODE, bytearray([0x03]))  # X-inc, Y-inc
 
-        # RAM window: X bytes 0–(stride-1), Y rows 0–(height-1)
-        x_end = (self._width + 7) // 8 - 1
-        self.command(_SSD1680_SET_RAMXPOS, bytearray([0x00, x_end]))
+        # RAM window: colstart-based so panel alignment is preserved for all
+        # existing FPC variants. colstart=0 panels are completely unaffected.
+        x_start = self._colstart // 8
+        x_end = (self._colstart + self._width + 7) // 8 - 1
+        self.command(_SSD1680_SET_RAMXPOS, bytearray([x_start, x_end]))
         self.command(
             _SSD1680_SET_RAMYPOS,
             bytearray([0x00, 0x00, (self._height - 1) & 0xFF, (self._height - 1) >> 8]),
@@ -458,13 +329,13 @@ class Adafruit_SSD1680_Grayscale4(Adafruit_SSD1680):
         self.command(_SSD1680_DISP_CTRL1, bytearray([0x00, 0x80]))
         self.command(_SSD1680_WRITE_LUT, bytearray(_SSD1680_GRAY4_LUT))
 
-        # Reset RAM address counters to (0, 0) — colstart=0
-        self.command(_SSD1680_SET_RAMXCOUNT, bytearray([0x00]))
+        # Reset RAM address counters to main window start
+        self.command(_SSD1680_SET_RAMXCOUNT, bytearray([x_start]))
         self.command(_SSD1680_SET_RAMYCOUNT, bytearray([0x00, 0x00]))
 
     def set_ram_address(self, x: int, y: int) -> None:
-        """Reset RAM address counters. Uses colstart=0 for GDEY0213B74 4-gray."""
-        self.command(_SSD1680_SET_RAMXCOUNT, bytearray([x]))
+        """Reset RAM address counters. Always starts at colstart byte."""
+        self.command(_SSD1680_SET_RAMXCOUNT, bytearray([self._colstart // 8]))
         self.command(_SSD1680_SET_RAMYCOUNT, bytearray([y, y >> 8]))
 
     def update(self) -> None:
