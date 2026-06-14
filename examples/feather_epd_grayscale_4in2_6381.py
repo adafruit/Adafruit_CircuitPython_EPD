@@ -41,13 +41,15 @@ H = display.height
 print(f"Init OK — {W}x{H}, drawing 4-gray info card...")
 
 display.fill(Adafruit_EPD.WHITE)
-display.text("Adafruit ThinkInk", 6, 6, Adafruit_EPD.BLACK, size=2)
-display.text('4.2" 400x300', 6, 28, Adafruit_EPD.BLACK, size=2)
-display.text("4-Gray E-Ink", 6, 50, Adafruit_EPD.DARK, size=2)
-display.text("SSD1683  #6381", 6, 74, Adafruit_EPD.BLACK, size=1)
+# Built-in font is 6x8 px per char, scaled by `size`. Sized to fill the 400px width.
+display.text("Adafruit ThinkInk", 6, 10, Adafruit_EPD.BLACK, size=3)
+display.text('4.2" 400x300', 6, 50, Adafruit_EPD.BLACK, size=4)
+display.text("4-Gray E-Ink", 6, 95, Adafruit_EPD.DARK, size=4)
+display.text("SSD1683  #6381", 6, 140, Adafruit_EPD.BLACK, size=3)
 
-# 4-level gray ramp across the bottom
-RAMP_TOP, RAMP_H = 260, 34
+# 4-level gray ramp: a tall band filling the bottom of the display
+RAMP_TOP = 180
+RAMP_H = H - RAMP_TOP
 SEG = W // 4
 ramp = (Adafruit_EPD.BLACK, Adafruit_EPD.DARK, Adafruit_EPD.LIGHT, Adafruit_EPD.WHITE)
 for i, color in enumerate(ramp):
