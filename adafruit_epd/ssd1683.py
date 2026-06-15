@@ -260,3 +260,142 @@ class Adafruit_SSD1683(Adafruit_EPD):
                     i += num_args
                 else:
                     self.command(cmd)
+
+
+_SSD1683_GRAY4_LUT = bytes.fromhex(
+    # 5 waveform groups x 6 phase-rows (7 B each); GxEPD2 GDEY042T81 lut_4G[0:210]
+    # --- group 0 ---
+    "010A1B0F030101"
+    "050A010A010101"
+    "05080302040101"
+    "01040402000101"
+    "01000000000101"
+    "01000000000101"
+    # --- group 1 ---
+    "010A1B0F030101"
+    "054A018A010101"
+    "05480382840101"
+    "01848482000101"
+    "01000000000101"
+    "01000000000101"
+    # --- group 2 ---
+    "010A1B8F030101"
+    "054A018A010101"
+    "05488382040101"
+    "01040402000101"
+    "01000000000101"
+    "01000000000101"
+    # --- group 3 ---
+    "018A1B8F030101"
+    "054A018A010101"
+    "05488302040101"
+    "01040402000101"
+    "01000000000101"
+    "01000000000101"
+    # --- group 4 ---
+    "018A9B8F030101"
+    "054A018A010101"
+    "05480342040101"
+    "01040442000101"
+    "01000000000101"
+    "01000000000101"
+    # 2 reserved phase-rows (unused)
+    "00000000000000"
+    "00000000000000"
+    "020000"  # frame-rate / repeat tail
+)  # 227 bytes -- GDEY042T81 / FPC-190 waveform (GxEPD2 + ThinkInk verified)
+
+
+class Adafruit_SSD1683_Grayscale4(Adafruit_SSD1683):
+    """4-gray grayscale driver for SSD1683, e.g. GDEY042T81 4.2" (#6381).
+
+    RAM encoding (BW RAM × Color RAM → gray level):
+        BW=0, Color=0 → WHITE
+        BW=1, Color=0 → LIGHT grey
+        BW=0, Color=1 → DARK grey
+        BW=1, Color=1 → BLACK
+    """
+
+    def power_up(self) -> None:
+        """Power up with 4-gray init sequence and LUT (GxEPD2 / ThinkInk reference)."""
+        self.hardware_reset()
+        self.busy_wait()
+        self.command(_SSD1683_SW_RESET)
+        self.busy_wait()
+
+        self.command(_SSD1683_BOOST_SOFTSTART, bytearray([0x8B, 0x9C, 0xA4, 0x0F]))
+        self.command(_SSD1683_DISP_CTRL1, bytearray([0x00, 0x00]))
+        self.command(_SSD1683_WRITE_BORDER, bytearray([0x03]))
+        self.command(_SSD1683_DATA_MODE, bytearray([0x03]))
+
+        self.set_ram_window(0, 0, (self._width // 8) - 1, self._height - 1)
+        self.set_ram_address(0, 0)
+
+        self.command(_SSD1683_WRITE_LUT, bytearray(_SSD1683_GRAY4_LUT))
+        self.command(_SSD1683_END_OPTION, bytearray([0x07]))
+        self.command(_SSD1683_GATE_VOLTAGE, bytearray([0x17]))
+        self.command(_SSD1683_SOURCE_VOLTAGE, bytearray([0x41, 0xA8, 0x32]))
+        self.command(_SSD1683_WRITE_VCOM, bytearray([0x30]))
+
+        _b0 = (self._height - 1) & 0xFF
+        _b1 = ((self._height - 1) >> 8) & 0xFF
+        self.command(_SSD1683_DRIVER_CONTROL, bytearray([_b0, _b1, 0x00]))
+
+    def update(self) -> None:
+        """Trigger 4-gray refresh."""
+        self.command(_SSD1683_DISP_CTRL2, bytearray([0xCF]))
+        self.command(_SSD1683_MASTER_ACTIVATE)
+        self.busy_wait()
+        if not self._busy:
+            time.sleep(6)
+
+    def _dup(self, func: str, args: tuple, color: int, **kwargs) -> None:
+        """Write color-encoded pixel op to both BW and Color framebufs.
+
+        Python display() sends buffers raw (no inversion), so we write the
+        exact RAM values the LUT expects (empirically verified on FPC-190):
+          BW_RAM=1, Color_RAM=1 → WHITE
+          BW_RAM=1, Color_RAM=0 → DARK
+          BW_RAM=0, Color_RAM=1 → LIGHT
+          BW_RAM=0, Color_RAM=0 → BLACK
+        """
+        bw = int(color in {Adafruit_EPD.WHITE, Adafruit_EPD.DARK})
+        co = int(color in {Adafruit_EPD.WHITE, Adafruit_EPD.LIGHT})
+        getattr(self._framebuf1, func)(*args, bw, **kwargs)
+        getattr(self._framebuf2, func)(*args, co, **kwargs)
+
+    def fill(self, color: int) -> None:
+        bw = int(color in {Adafruit_EPD.WHITE, Adafruit_EPD.DARK})
+        co = int(color in {Adafruit_EPD.WHITE, Adafruit_EPD.LIGHT})
+        self._framebuf1.fill(bw)
+        self._framebuf2.fill(co)
+
+    def pixel(self, x: int, y: int, color: int) -> None:
+        self._dup("pixel", (x, y), color)
+
+    def fill_rect(self, x: int, y: int, width: int, height: int, color: int) -> None:
+        self._dup("fill_rect", (x, y, width, height), color)
+
+    def rect(self, x: int, y: int, width: int, height: int, color: int) -> None:
+        self._dup("rect", (x, y, width, height), color)
+
+    def hline(self, x: int, y: int, width: int, color: int) -> None:
+        self._dup("hline", (x, y, width), color)
+
+    def vline(self, x: int, y: int, height: int, color: int) -> None:
+        self._dup("vline", (x, y, height), color)
+
+    def line(self, x0: int, y0: int, x1: int, y1: int, color: int) -> None:
+        self._dup("line", (x0, y0, x1, y1), color)
+
+    def text(
+        self,
+        string: str,
+        x: int,
+        y: int,
+        color: int,
+        *,
+        font_name: str = "font5x8.bin",
+        size: int = 1,
+    ) -> None:
+        self._dup("text", (string, x, y), color, font_name=font_name, size=size)
